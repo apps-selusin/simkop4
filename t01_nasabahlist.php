@@ -2137,6 +2137,11 @@ class ct01_nasabah_list extends ct01_nasabah {
 	function Page_Render() {
 
 		//echo "Page Render";
+		// sembunyikan button tambah data master nasabah
+		// hanya boleh tambah data pada link add master/detail
+
+		$this->OtherOptions['addedit'] = new cListOptions();
+		$this->OtherOptions['addedit']->Body = "";
 	}
 
 	// Page Data Rendering event

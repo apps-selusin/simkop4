@@ -1,0 +1,7 @@
+.LOG
+
+10:08 PM 10/26/2018
+- master/detail nasabah/jaminan:
+  - sembunyikan tombol add nasabah
+  - biarkan tampil tombol add master/detail nasabah/jaminan
+
