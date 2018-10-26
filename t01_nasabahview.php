@@ -685,7 +685,7 @@ class ct01_nasabah_view extends ct01_nasabah {
 		$option = &$options["action"];
 		$option->DropDownButtonPhrase = $Language->Phrase("ButtonActions");
 		$option->UseImageAndText = TRUE;
-		$option->UseDropDownButton = TRUE;
+		$option->UseDropDownButton = FALSE;
 		$option->UseButtonGroup = TRUE;
 		$item = &$option->Add($option->GroupOptionName);
 		$item->Body = "";
@@ -1258,6 +1258,12 @@ class ct01_nasabah_view extends ct01_nasabah {
 	function Page_Render() {
 
 		//echo "Page Render";
+		// sembunyikan add, delete di halaman view master/detail
+
+		$this->OtherOptions["action"]->Items["add"]->Visible = FALSE;
+		$this->OtherOptions["action"]->Items["edit"]->Visible = FALSE;
+		$this->OtherOptions["action"]->Items["copy"]->Visible = FALSE;
+		$this->OtherOptions["action"]->Items["delete"]->Visible = FALSE;
 	}
 
 	// Page Data Rendering event

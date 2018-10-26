@@ -289,8 +289,6 @@ class ct02_jaminan_edit extends ct02_jaminan {
 		// Create form object
 		$objForm = new cFormObj();
 		$this->CurrentAction = (@$_GET["a"] <> "") ? $_GET["a"] : @$_POST["a_list"]; // Set up current action
-		$this->id->SetVisibility();
-		$this->id->Visible = !$this->IsAdd() && !$this->IsCopy() && !$this->IsGridAdd();
 		$this->nasabah_id->SetVisibility();
 		$this->Merk_Type->SetVisibility();
 		$this->No_Rangka->SetVisibility();
@@ -553,8 +551,6 @@ class ct02_jaminan_edit extends ct02_jaminan {
 
 		// Load from form
 		global $objForm;
-		if (!$this->id->FldIsDetailKey)
-			$this->id->setFormValue($objForm->GetValue("x_id"));
 		if (!$this->nasabah_id->FldIsDetailKey) {
 			$this->nasabah_id->setFormValue($objForm->GetValue("x_nasabah_id"));
 		}
@@ -579,6 +575,8 @@ class ct02_jaminan_edit extends ct02_jaminan {
 		if (!$this->Atas_Nama->FldIsDetailKey) {
 			$this->Atas_Nama->setFormValue($objForm->GetValue("x_Atas_Nama"));
 		}
+		if (!$this->id->FldIsDetailKey)
+			$this->id->setFormValue($objForm->GetValue("x_id"));
 	}
 
 	// Restore form values
@@ -755,11 +753,6 @@ class ct02_jaminan_edit extends ct02_jaminan {
 		$this->Atas_Nama->ViewValue = $this->Atas_Nama->CurrentValue;
 		$this->Atas_Nama->ViewCustomAttributes = "";
 
-			// id
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-			$this->id->TooltipValue = "";
-
 			// nasabah_id
 			$this->nasabah_id->LinkCustomAttributes = "";
 			$this->nasabah_id->HrefValue = "";
@@ -800,12 +793,6 @@ class ct02_jaminan_edit extends ct02_jaminan {
 			$this->Atas_Nama->HrefValue = "";
 			$this->Atas_Nama->TooltipValue = "";
 		} elseif ($this->RowType == EW_ROWTYPE_EDIT) { // Edit row
-
-			// id
-			$this->id->EditAttrs["class"] = "form-control";
-			$this->id->EditCustomAttributes = "";
-			$this->id->EditValue = $this->id->CurrentValue;
-			$this->id->ViewCustomAttributes = "";
 
 			// nasabah_id
 			$this->nasabah_id->EditAttrs["class"] = "form-control";
@@ -902,12 +889,8 @@ class ct02_jaminan_edit extends ct02_jaminan {
 			$this->Atas_Nama->PlaceHolder = ew_RemoveHtml($this->Atas_Nama->FldCaption());
 
 			// Edit refer script
-			// id
-
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-
 			// nasabah_id
+
 			$this->nasabah_id->LinkCustomAttributes = "";
 			$this->nasabah_id->HrefValue = "";
 
@@ -1401,18 +1384,6 @@ $t02_jaminan_edit->ShowMessage();
 <input type="hidden" name="fk_id" value="<?php echo $t02_jaminan->nasabah_id->getSessionValue() ?>">
 <?php } ?>
 <div>
-<?php if ($t02_jaminan->id->Visible) { // id ?>
-	<div id="r_id" class="form-group">
-		<label id="elh_t02_jaminan_id" class="col-sm-2 control-label ewLabel"><?php echo $t02_jaminan->id->FldCaption() ?></label>
-		<div class="col-sm-10"><div<?php echo $t02_jaminan->id->CellAttributes() ?>>
-<span id="el_t02_jaminan_id">
-<span<?php echo $t02_jaminan->id->ViewAttributes() ?>>
-<p class="form-control-static"><?php echo $t02_jaminan->id->EditValue ?></p></span>
-</span>
-<input type="hidden" data-table="t02_jaminan" data-field="x_id" name="x_id" id="x_id" value="<?php echo ew_HtmlEncode($t02_jaminan->id->CurrentValue) ?>">
-<?php echo $t02_jaminan->id->CustomMsg ?></div></div>
-	</div>
-<?php } ?>
 <?php if ($t02_jaminan->nasabah_id->Visible) { // nasabah_id ?>
 	<div id="r_nasabah_id" class="form-group">
 		<label id="elh_t02_jaminan_nasabah_id" class="col-sm-2 control-label ewLabel"><?php echo $t02_jaminan->nasabah_id->FldCaption() ?><?php echo $Language->Phrase("FieldRequiredIndicator") ?></label>
@@ -1514,6 +1485,7 @@ ft02_jaminanedit.CreateAutoSuggest({"id":"x_nasabah_id","forceSelect":false});
 	</div>
 <?php } ?>
 </div>
+<input type="hidden" data-table="t02_jaminan" data-field="x_id" name="x_id" id="x_id" value="<?php echo ew_HtmlEncode($t02_jaminan->id->CurrentValue) ?>">
 <?php if (!$t02_jaminan_edit->IsModal) { ?>
 <div class="form-group">
 	<div class="col-sm-offset-2 col-sm-10">

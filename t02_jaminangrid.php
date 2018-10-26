@@ -172,15 +172,6 @@ $t02_jaminan_grid->RenderListOptions();
 // Render list options (header, left)
 $t02_jaminan_grid->ListOptions->Render("header", "left");
 ?>
-<?php if ($t02_jaminan->id->Visible) { // id ?>
-	<?php if ($t02_jaminan->SortUrl($t02_jaminan->id) == "") { ?>
-		<th data-name="id"><div id="elh_t02_jaminan_id" class="t02_jaminan_id"><div class="ewTableHeaderCaption"><?php echo $t02_jaminan->id->FldCaption() ?></div></div></th>
-	<?php } else { ?>
-		<th data-name="id"><div><div id="elh_t02_jaminan_id" class="t02_jaminan_id">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_jaminan->id->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_jaminan->id->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_jaminan->id->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
-        </div></div></th>
-	<?php } ?>
-<?php } ?>		
 <?php if ($t02_jaminan->nasabah_id->Visible) { // nasabah_id ?>
 	<?php if ($t02_jaminan->SortUrl($t02_jaminan->nasabah_id) == "") { ?>
 		<th data-name="nasabah_id"><div id="elh_t02_jaminan_nasabah_id" class="t02_jaminan_nasabah_id"><div class="ewTableHeaderCaption"><?php echo $t02_jaminan->nasabah_id->FldCaption() ?></div></div></th>
@@ -362,33 +353,6 @@ while ($t02_jaminan_grid->RecCnt < $t02_jaminan_grid->StopRec) {
 // Render list options (body, left)
 $t02_jaminan_grid->ListOptions->Render("body", "left", $t02_jaminan_grid->RowCnt);
 ?>
-	<?php if ($t02_jaminan->id->Visible) { // id ?>
-		<td data-name="id"<?php echo $t02_jaminan->id->CellAttributes() ?>>
-<?php if ($t02_jaminan->RowType == EW_ROWTYPE_ADD) { // Add record ?>
-<input type="hidden" data-table="t02_jaminan" data-field="x_id" name="o<?php echo $t02_jaminan_grid->RowIndex ?>_id" id="o<?php echo $t02_jaminan_grid->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_jaminan->id->OldValue) ?>">
-<?php } ?>
-<?php if ($t02_jaminan->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
-<span id="el<?php echo $t02_jaminan_grid->RowCnt ?>_t02_jaminan_id" class="form-group t02_jaminan_id">
-<span<?php echo $t02_jaminan->id->ViewAttributes() ?>>
-<p class="form-control-static"><?php echo $t02_jaminan->id->EditValue ?></p></span>
-</span>
-<input type="hidden" data-table="t02_jaminan" data-field="x_id" name="x<?php echo $t02_jaminan_grid->RowIndex ?>_id" id="x<?php echo $t02_jaminan_grid->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_jaminan->id->CurrentValue) ?>">
-<?php } ?>
-<?php if ($t02_jaminan->RowType == EW_ROWTYPE_VIEW) { // View record ?>
-<span id="el<?php echo $t02_jaminan_grid->RowCnt ?>_t02_jaminan_id" class="t02_jaminan_id">
-<span<?php echo $t02_jaminan->id->ViewAttributes() ?>>
-<?php echo $t02_jaminan->id->ListViewValue() ?></span>
-</span>
-<?php if ($t02_jaminan->CurrentAction <> "F") { ?>
-<input type="hidden" data-table="t02_jaminan" data-field="x_id" name="x<?php echo $t02_jaminan_grid->RowIndex ?>_id" id="x<?php echo $t02_jaminan_grid->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_jaminan->id->FormValue) ?>">
-<input type="hidden" data-table="t02_jaminan" data-field="x_id" name="o<?php echo $t02_jaminan_grid->RowIndex ?>_id" id="o<?php echo $t02_jaminan_grid->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_jaminan->id->OldValue) ?>">
-<?php } else { ?>
-<input type="hidden" data-table="t02_jaminan" data-field="x_id" name="ft02_jaminangrid$x<?php echo $t02_jaminan_grid->RowIndex ?>_id" id="ft02_jaminangrid$x<?php echo $t02_jaminan_grid->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_jaminan->id->FormValue) ?>">
-<input type="hidden" data-table="t02_jaminan" data-field="x_id" name="ft02_jaminangrid$o<?php echo $t02_jaminan_grid->RowIndex ?>_id" id="ft02_jaminangrid$o<?php echo $t02_jaminan_grid->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_jaminan->id->OldValue) ?>">
-<?php } ?>
-<?php } ?>
-<a id="<?php echo $t02_jaminan_grid->PageObjName . "_row_" . $t02_jaminan_grid->RowCnt ?>"></a></td>
-	<?php } ?>
 	<?php if ($t02_jaminan->nasabah_id->Visible) { // nasabah_id ?>
 		<td data-name="nasabah_id"<?php echo $t02_jaminan->nasabah_id->CellAttributes() ?>>
 <?php if ($t02_jaminan->RowType == EW_ROWTYPE_ADD) { // Add record ?>
@@ -455,8 +419,15 @@ ft02_jaminangrid.CreateAutoSuggest({"id":"x<?php echo $t02_jaminan_grid->RowInde
 <input type="hidden" data-table="t02_jaminan" data-field="x_nasabah_id" name="ft02_jaminangrid$o<?php echo $t02_jaminan_grid->RowIndex ?>_nasabah_id" id="ft02_jaminangrid$o<?php echo $t02_jaminan_grid->RowIndex ?>_nasabah_id" value="<?php echo ew_HtmlEncode($t02_jaminan->nasabah_id->OldValue) ?>">
 <?php } ?>
 <?php } ?>
-</td>
+<a id="<?php echo $t02_jaminan_grid->PageObjName . "_row_" . $t02_jaminan_grid->RowCnt ?>"></a></td>
 	<?php } ?>
+<?php if ($t02_jaminan->RowType == EW_ROWTYPE_ADD) { // Add record ?>
+<input type="hidden" data-table="t02_jaminan" data-field="x_id" name="x<?php echo $t02_jaminan_grid->RowIndex ?>_id" id="x<?php echo $t02_jaminan_grid->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_jaminan->id->CurrentValue) ?>">
+<input type="hidden" data-table="t02_jaminan" data-field="x_id" name="o<?php echo $t02_jaminan_grid->RowIndex ?>_id" id="o<?php echo $t02_jaminan_grid->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_jaminan->id->OldValue) ?>">
+<?php } ?>
+<?php if ($t02_jaminan->RowType == EW_ROWTYPE_EDIT || $t02_jaminan->CurrentMode == "edit") { ?>
+<input type="hidden" data-table="t02_jaminan" data-field="x_id" name="x<?php echo $t02_jaminan_grid->RowIndex ?>_id" id="x<?php echo $t02_jaminan_grid->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_jaminan->id->CurrentValue) ?>">
+<?php } ?>
 	<?php if ($t02_jaminan->Merk_Type->Visible) { // Merk_Type ?>
 		<td data-name="Merk_Type"<?php echo $t02_jaminan->Merk_Type->CellAttributes() ?>>
 <?php if ($t02_jaminan->RowType == EW_ROWTYPE_ADD) { // Add record ?>
@@ -695,19 +666,6 @@ ft02_jaminangrid.UpdateOpts(<?php echo $t02_jaminan_grid->RowIndex ?>);
 // Render list options (body, left)
 $t02_jaminan_grid->ListOptions->Render("body", "left", $t02_jaminan_grid->RowIndex);
 ?>
-	<?php if ($t02_jaminan->id->Visible) { // id ?>
-		<td data-name="id">
-<?php if ($t02_jaminan->CurrentAction <> "F") { ?>
-<?php } else { ?>
-<span id="el$rowindex$_t02_jaminan_id" class="form-group t02_jaminan_id">
-<span<?php echo $t02_jaminan->id->ViewAttributes() ?>>
-<p class="form-control-static"><?php echo $t02_jaminan->id->ViewValue ?></p></span>
-</span>
-<input type="hidden" data-table="t02_jaminan" data-field="x_id" name="x<?php echo $t02_jaminan_grid->RowIndex ?>_id" id="x<?php echo $t02_jaminan_grid->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_jaminan->id->FormValue) ?>">
-<?php } ?>
-<input type="hidden" data-table="t02_jaminan" data-field="x_id" name="o<?php echo $t02_jaminan_grid->RowIndex ?>_id" id="o<?php echo $t02_jaminan_grid->RowIndex ?>_id" value="<?php echo ew_HtmlEncode($t02_jaminan->id->OldValue) ?>">
-</td>
-	<?php } ?>
 	<?php if ($t02_jaminan->nasabah_id->Visible) { // nasabah_id ?>
 		<td data-name="nasabah_id">
 <?php if ($t02_jaminan->CurrentAction <> "F") { ?>

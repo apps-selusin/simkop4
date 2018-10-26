@@ -910,7 +910,6 @@ class ct02_jaminan extends cTable {
 			if ($Doc->Horizontal) { // Horizontal format, write header
 				$Doc->BeginExportRow();
 				if ($ExportPageType == "view") {
-					if ($this->id->Exportable) $Doc->ExportCaption($this->id);
 					if ($this->nasabah_id->Exportable) $Doc->ExportCaption($this->nasabah_id);
 					if ($this->Merk_Type->Exportable) $Doc->ExportCaption($this->Merk_Type);
 					if ($this->No_Rangka->Exportable) $Doc->ExportCaption($this->No_Rangka);
@@ -960,7 +959,6 @@ class ct02_jaminan extends cTable {
 				if (!$Doc->ExportCustom) {
 					$Doc->BeginExportRow($RowCnt); // Allow CSS styles if enabled
 					if ($ExportPageType == "view") {
-						if ($this->id->Exportable) $Doc->ExportField($this->id);
 						if ($this->nasabah_id->Exportable) $Doc->ExportField($this->nasabah_id);
 						if ($this->Merk_Type->Exportable) $Doc->ExportField($this->Merk_Type);
 						if ($this->No_Rangka->Exportable) $Doc->ExportField($this->No_Rangka);

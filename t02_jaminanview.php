@@ -387,8 +387,6 @@ class ct02_jaminan_view extends ct02_jaminan {
 
 		// Setup export options
 		$this->SetupExportOptions();
-		$this->id->SetVisibility();
-		$this->id->Visible = !$this->IsAdd() && !$this->IsCopy() && !$this->IsGridAdd();
 		$this->nasabah_id->SetVisibility();
 		$this->Merk_Type->SetVisibility();
 		$this->No_Rangka->SetVisibility();
@@ -617,7 +615,7 @@ class ct02_jaminan_view extends ct02_jaminan {
 		$option = &$options["action"];
 		$option->DropDownButtonPhrase = $Language->Phrase("ButtonActions");
 		$option->UseImageAndText = TRUE;
-		$option->UseDropDownButton = TRUE;
+		$option->UseDropDownButton = FALSE;
 		$option->UseButtonGroup = TRUE;
 		$item = &$option->Add($option->GroupOptionName);
 		$item->Body = "";
@@ -825,11 +823,6 @@ class ct02_jaminan_view extends ct02_jaminan {
 		// Atas_Nama
 		$this->Atas_Nama->ViewValue = $this->Atas_Nama->CurrentValue;
 		$this->Atas_Nama->ViewCustomAttributes = "";
-
-			// id
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-			$this->id->TooltipValue = "";
 
 			// nasabah_id
 			$this->nasabah_id->LinkCustomAttributes = "";
@@ -1429,17 +1422,6 @@ $t02_jaminan_view->ShowMessage();
 <input type="hidden" name="modal" value="1">
 <?php } ?>
 <table class="table table-bordered table-striped ewViewTable">
-<?php if ($t02_jaminan->id->Visible) { // id ?>
-	<tr id="r_id">
-		<td><span id="elh_t02_jaminan_id"><?php echo $t02_jaminan->id->FldCaption() ?></span></td>
-		<td data-name="id"<?php echo $t02_jaminan->id->CellAttributes() ?>>
-<span id="el_t02_jaminan_id">
-<span<?php echo $t02_jaminan->id->ViewAttributes() ?>>
-<?php echo $t02_jaminan->id->ViewValue ?></span>
-</span>
-</td>
-	</tr>
-<?php } ?>
 <?php if ($t02_jaminan->nasabah_id->Visible) { // nasabah_id ?>
 	<tr id="r_nasabah_id">
 		<td><span id="elh_t02_jaminan_nasabah_id"><?php echo $t02_jaminan->nasabah_id->FldCaption() ?></span></td>

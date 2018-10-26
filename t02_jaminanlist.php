@@ -414,8 +414,6 @@ class ct02_jaminan_list extends ct02_jaminan {
 
 		// Setup export options
 		$this->SetupExportOptions();
-		$this->id->SetVisibility();
-		$this->id->Visible = !$this->IsAdd() && !$this->IsCopy() && !$this->IsGridAdd();
 		$this->nasabah_id->SetVisibility();
 		$this->Merk_Type->SetVisibility();
 		$this->No_Rangka->SetVisibility();
@@ -1102,7 +1100,6 @@ class ct02_jaminan_list extends ct02_jaminan {
 		if (@$_GET["order"] <> "") {
 			$this->CurrentOrder = ew_StripSlashes(@$_GET["order"]);
 			$this->CurrentOrderType = @$_GET["ordertype"];
-			$this->UpdateSort($this->id, $bCtrl); // id
 			$this->UpdateSort($this->nasabah_id, $bCtrl); // nasabah_id
 			$this->UpdateSort($this->Merk_Type, $bCtrl); // Merk_Type
 			$this->UpdateSort($this->No_Rangka, $bCtrl); // No_Rangka
@@ -1151,7 +1148,6 @@ class ct02_jaminan_list extends ct02_jaminan {
 			if ($this->Command == "resetsort") {
 				$sOrderBy = "";
 				$this->setSessionOrderBy($sOrderBy);
-				$this->id->setSort("");
 				$this->nasabah_id->setSort("");
 				$this->Merk_Type->setSort("");
 				$this->No_Rangka->setSort("");
@@ -1223,9 +1219,9 @@ class ct02_jaminan_list extends ct02_jaminan {
 
 		// Drop down button for ListOptions
 		$this->ListOptions->UseImageAndText = TRUE;
-		$this->ListOptions->UseDropDownButton = TRUE;
+		$this->ListOptions->UseDropDownButton = FALSE;
 		$this->ListOptions->DropDownButtonPhrase = $Language->Phrase("ButtonListOptions");
-		$this->ListOptions->UseButtonGroup = FALSE;
+		$this->ListOptions->UseButtonGroup = TRUE;
 		if ($this->ListOptions->UseButtonGroup && ew_IsMobile())
 			$this->ListOptions->UseDropDownButton = TRUE;
 		$this->ListOptions->ButtonClass = "btn-sm"; // Class for button group
@@ -1743,11 +1739,6 @@ class ct02_jaminan_list extends ct02_jaminan {
 		// Atas_Nama
 		$this->Atas_Nama->ViewValue = $this->Atas_Nama->CurrentValue;
 		$this->Atas_Nama->ViewCustomAttributes = "";
-
-			// id
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-			$this->id->TooltipValue = "";
 
 			// nasabah_id
 			$this->nasabah_id->LinkCustomAttributes = "";
@@ -2550,15 +2541,6 @@ $t02_jaminan_list->RenderListOptions();
 // Render list options (header, left)
 $t02_jaminan_list->ListOptions->Render("header", "left");
 ?>
-<?php if ($t02_jaminan->id->Visible) { // id ?>
-	<?php if ($t02_jaminan->SortUrl($t02_jaminan->id) == "") { ?>
-		<th data-name="id"><div id="elh_t02_jaminan_id" class="t02_jaminan_id"><div class="ewTableHeaderCaption"><?php echo $t02_jaminan->id->FldCaption() ?></div></div></th>
-	<?php } else { ?>
-		<th data-name="id"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t02_jaminan->SortUrl($t02_jaminan->id) ?>',2);"><div id="elh_t02_jaminan_id" class="t02_jaminan_id">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t02_jaminan->id->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t02_jaminan->id->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t02_jaminan->id->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
-        </div></div></th>
-	<?php } ?>
-<?php } ?>		
 <?php if ($t02_jaminan->nasabah_id->Visible) { // nasabah_id ?>
 	<?php if ($t02_jaminan->SortUrl($t02_jaminan->nasabah_id) == "") { ?>
 		<th data-name="nasabah_id"><div id="elh_t02_jaminan_nasabah_id" class="t02_jaminan_nasabah_id"><div class="ewTableHeaderCaption"><?php echo $t02_jaminan->nasabah_id->FldCaption() ?></div></div></th>
@@ -2696,21 +2678,13 @@ while ($t02_jaminan_list->RecCnt < $t02_jaminan_list->StopRec) {
 // Render list options (body, left)
 $t02_jaminan_list->ListOptions->Render("body", "left", $t02_jaminan_list->RowCnt);
 ?>
-	<?php if ($t02_jaminan->id->Visible) { // id ?>
-		<td data-name="id"<?php echo $t02_jaminan->id->CellAttributes() ?>>
-<span id="el<?php echo $t02_jaminan_list->RowCnt ?>_t02_jaminan_id" class="t02_jaminan_id">
-<span<?php echo $t02_jaminan->id->ViewAttributes() ?>>
-<?php echo $t02_jaminan->id->ListViewValue() ?></span>
-</span>
-<a id="<?php echo $t02_jaminan_list->PageObjName . "_row_" . $t02_jaminan_list->RowCnt ?>"></a></td>
-	<?php } ?>
 	<?php if ($t02_jaminan->nasabah_id->Visible) { // nasabah_id ?>
 		<td data-name="nasabah_id"<?php echo $t02_jaminan->nasabah_id->CellAttributes() ?>>
 <span id="el<?php echo $t02_jaminan_list->RowCnt ?>_t02_jaminan_nasabah_id" class="t02_jaminan_nasabah_id">
 <span<?php echo $t02_jaminan->nasabah_id->ViewAttributes() ?>>
 <?php echo $t02_jaminan->nasabah_id->ListViewValue() ?></span>
 </span>
-</td>
+<a id="<?php echo $t02_jaminan_list->PageObjName . "_row_" . $t02_jaminan_list->RowCnt ?>"></a></td>
 	<?php } ?>
 	<?php if ($t02_jaminan->Merk_Type->Visible) { // Merk_Type ?>
 		<td data-name="Merk_Type"<?php echo $t02_jaminan->Merk_Type->CellAttributes() ?>>

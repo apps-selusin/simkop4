@@ -286,8 +286,6 @@ class ct02_jaminan_delete extends ct02_jaminan {
 			$Security->UserID_Loaded();
 		}
 		$this->CurrentAction = (@$_GET["a"] <> "") ? $_GET["a"] : @$_POST["a_list"]; // Set up current action
-		$this->id->SetVisibility();
-		$this->id->Visible = !$this->IsAdd() && !$this->IsCopy() && !$this->IsGridAdd();
 		$this->nasabah_id->SetVisibility();
 		$this->Merk_Type->SetVisibility();
 		$this->No_Rangka->SetVisibility();
@@ -576,11 +574,6 @@ class ct02_jaminan_delete extends ct02_jaminan {
 		// Atas_Nama
 		$this->Atas_Nama->ViewValue = $this->Atas_Nama->CurrentValue;
 		$this->Atas_Nama->ViewCustomAttributes = "";
-
-			// id
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-			$this->id->TooltipValue = "";
 
 			// nasabah_id
 			$this->nasabah_id->LinkCustomAttributes = "";
@@ -935,9 +928,6 @@ $t02_jaminan_delete->ShowMessage();
 <?php echo $t02_jaminan->TableCustomInnerHtml ?>
 	<thead>
 	<tr class="ewTableHeader">
-<?php if ($t02_jaminan->id->Visible) { // id ?>
-		<th><span id="elh_t02_jaminan_id" class="t02_jaminan_id"><?php echo $t02_jaminan->id->FldCaption() ?></span></th>
-<?php } ?>
 <?php if ($t02_jaminan->nasabah_id->Visible) { // nasabah_id ?>
 		<th><span id="elh_t02_jaminan_nasabah_id" class="t02_jaminan_nasabah_id"><?php echo $t02_jaminan->nasabah_id->FldCaption() ?></span></th>
 <?php } ?>
@@ -983,14 +973,6 @@ while (!$t02_jaminan_delete->Recordset->EOF) {
 	$t02_jaminan_delete->RenderRow();
 ?>
 	<tr<?php echo $t02_jaminan->RowAttributes() ?>>
-<?php if ($t02_jaminan->id->Visible) { // id ?>
-		<td<?php echo $t02_jaminan->id->CellAttributes() ?>>
-<span id="el<?php echo $t02_jaminan_delete->RowCnt ?>_t02_jaminan_id" class="t02_jaminan_id">
-<span<?php echo $t02_jaminan->id->ViewAttributes() ?>>
-<?php echo $t02_jaminan->id->ListViewValue() ?></span>
-</span>
-</td>
-<?php } ?>
 <?php if ($t02_jaminan->nasabah_id->Visible) { // nasabah_id ?>
 		<td<?php echo $t02_jaminan->nasabah_id->CellAttributes() ?>>
 <span id="el<?php echo $t02_jaminan_delete->RowCnt ?>_t02_jaminan_nasabah_id" class="t02_jaminan_nasabah_id">

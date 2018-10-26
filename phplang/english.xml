@@ -655,7 +655,7 @@
         <phrase id="fldcaption" value="id" />
       </field>
       <field id="nasabah_id">
-        <phrase id="fldcaption" value="nasabah id" />
+        <phrase id="fldcaption" value="Nasabah" />
       </field>
       <field id="merk_type">
         <phrase id="fldcaption" value="Merk Type" />

@@ -312,8 +312,6 @@ class ct02_jaminan_grid extends ct02_jaminan {
 
 		// Set up list options
 		$this->SetupListOptions();
-		$this->id->SetVisibility();
-		$this->id->Visible = !$this->IsAdd() && !$this->IsCopy() && !$this->IsGridAdd();
 		$this->nasabah_id->SetVisibility();
 		$this->Merk_Type->SetVisibility();
 		$this->No_Rangka->SetVisibility();
@@ -992,7 +990,7 @@ class ct02_jaminan_grid extends ct02_jaminan {
 
 		// Drop down button for ListOptions
 		$this->ListOptions->UseImageAndText = TRUE;
-		$this->ListOptions->UseDropDownButton = TRUE;
+		$this->ListOptions->UseDropDownButton = FALSE;
 		$this->ListOptions->DropDownButtonPhrase = $Language->Phrase("ButtonListOptions");
 		$this->ListOptions->UseButtonGroup = FALSE;
 		if ($this->ListOptions->UseButtonGroup && ew_IsMobile())
@@ -1180,8 +1178,6 @@ class ct02_jaminan_grid extends ct02_jaminan {
 
 	// Load default values
 	function LoadDefaultValues() {
-		$this->id->CurrentValue = NULL;
-		$this->id->OldValue = $this->id->CurrentValue;
 		$this->nasabah_id->CurrentValue = NULL;
 		$this->nasabah_id->OldValue = $this->nasabah_id->CurrentValue;
 		$this->Merk_Type->CurrentValue = NULL;
@@ -1206,8 +1202,6 @@ class ct02_jaminan_grid extends ct02_jaminan {
 		// Load from form
 		global $objForm;
 		$objForm->FormName = $this->FormName;
-		if (!$this->id->FldIsDetailKey && $this->CurrentAction <> "gridadd" && $this->CurrentAction <> "add")
-			$this->id->setFormValue($objForm->GetValue("x_id"));
 		if (!$this->nasabah_id->FldIsDetailKey) {
 			$this->nasabah_id->setFormValue($objForm->GetValue("x_nasabah_id"));
 		}
@@ -1240,6 +1234,8 @@ class ct02_jaminan_grid extends ct02_jaminan {
 			$this->Atas_Nama->setFormValue($objForm->GetValue("x_Atas_Nama"));
 		}
 		$this->Atas_Nama->setOldValue($objForm->GetValue("o_Atas_Nama"));
+		if (!$this->id->FldIsDetailKey && $this->CurrentAction <> "gridadd" && $this->CurrentAction <> "add")
+			$this->id->setFormValue($objForm->GetValue("x_id"));
 	}
 
 	// Restore form values
@@ -1449,11 +1445,6 @@ class ct02_jaminan_grid extends ct02_jaminan {
 		$this->Atas_Nama->ViewValue = $this->Atas_Nama->CurrentValue;
 		$this->Atas_Nama->ViewCustomAttributes = "";
 
-			// id
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-			$this->id->TooltipValue = "";
-
 			// nasabah_id
 			$this->nasabah_id->LinkCustomAttributes = "";
 			$this->nasabah_id->HrefValue = "";
@@ -1495,9 +1486,7 @@ class ct02_jaminan_grid extends ct02_jaminan {
 			$this->Atas_Nama->TooltipValue = "";
 		} elseif ($this->RowType == EW_ROWTYPE_ADD) { // Add row
 
-			// id
 			// nasabah_id
-
 			$this->nasabah_id->EditAttrs["class"] = "form-control";
 			$this->nasabah_id->EditCustomAttributes = "";
 			if ($this->nasabah_id->getSessionValue() <> "") {
@@ -1593,12 +1582,8 @@ class ct02_jaminan_grid extends ct02_jaminan {
 			$this->Atas_Nama->PlaceHolder = ew_RemoveHtml($this->Atas_Nama->FldCaption());
 
 			// Add refer script
-			// id
-
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-
 			// nasabah_id
+
 			$this->nasabah_id->LinkCustomAttributes = "";
 			$this->nasabah_id->HrefValue = "";
 
@@ -1630,12 +1615,6 @@ class ct02_jaminan_grid extends ct02_jaminan {
 			$this->Atas_Nama->LinkCustomAttributes = "";
 			$this->Atas_Nama->HrefValue = "";
 		} elseif ($this->RowType == EW_ROWTYPE_EDIT) { // Edit row
-
-			// id
-			$this->id->EditAttrs["class"] = "form-control";
-			$this->id->EditCustomAttributes = "";
-			$this->id->EditValue = $this->id->CurrentValue;
-			$this->id->ViewCustomAttributes = "";
 
 			// nasabah_id
 			$this->nasabah_id->EditAttrs["class"] = "form-control";
@@ -1733,12 +1712,8 @@ class ct02_jaminan_grid extends ct02_jaminan {
 			$this->Atas_Nama->PlaceHolder = ew_RemoveHtml($this->Atas_Nama->FldCaption());
 
 			// Edit refer script
-			// id
-
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-
 			// nasabah_id
+
 			$this->nasabah_id->LinkCustomAttributes = "";
 			$this->nasabah_id->HrefValue = "";
 

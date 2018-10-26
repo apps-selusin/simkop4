@@ -1190,9 +1190,9 @@ class ct01_nasabah_list extends ct01_nasabah {
 
 		// Drop down button for ListOptions
 		$this->ListOptions->UseImageAndText = TRUE;
-		$this->ListOptions->UseDropDownButton = TRUE;
+		$this->ListOptions->UseDropDownButton = FALSE;
 		$this->ListOptions->DropDownButtonPhrase = $Language->Phrase("ButtonListOptions");
-		$this->ListOptions->UseButtonGroup = FALSE;
+		$this->ListOptions->UseButtonGroup = TRUE;
 		if ($this->ListOptions->UseButtonGroup && ew_IsMobile())
 			$this->ListOptions->UseDropDownButton = TRUE;
 		$this->ListOptions->ButtonClass = "btn-sm"; // Class for button group
@@ -2183,7 +2183,11 @@ class ct01_nasabah_list extends ct01_nasabah {
 
 		// Example: 
 		//$this->ListOptions->Items["new"]->Body = "xxx";
+		// sembunyikan button edit dan view data master nasabah
+		// hanya boleh edit dan view pada link master/detail
 
+		$this->ListOptions->Items["edit"]->Body = "";
+		$this->ListOptions->Items["view"]->Body = "";
 	}
 
 	// Row Custom Action event
