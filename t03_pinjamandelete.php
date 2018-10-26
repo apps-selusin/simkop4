@@ -282,8 +282,6 @@ class ct03_pinjaman_delete extends ct03_pinjaman {
 			$Security->UserID_Loaded();
 		}
 		$this->CurrentAction = (@$_GET["a"] <> "") ? $_GET["a"] : @$_POST["a_list"]; // Set up current action
-		$this->id->SetVisibility();
-		$this->id->Visible = !$this->IsAdd() && !$this->IsCopy() && !$this->IsGridAdd();
 		$this->Kontrak_No->SetVisibility();
 		$this->Kontrak_Tgl->SetVisibility();
 		$this->nasabah_id->SetVisibility();
@@ -564,15 +562,36 @@ class ct03_pinjaman_delete extends ct03_pinjaman {
 
 		// Kontrak_Tgl
 		$this->Kontrak_Tgl->ViewValue = $this->Kontrak_Tgl->CurrentValue;
-		$this->Kontrak_Tgl->ViewValue = ew_FormatDateTime($this->Kontrak_Tgl->ViewValue, 0);
+		$this->Kontrak_Tgl->ViewValue = ew_FormatDateTime($this->Kontrak_Tgl->ViewValue, 7);
 		$this->Kontrak_Tgl->ViewCustomAttributes = "";
 
 		// nasabah_id
-		$this->nasabah_id->ViewValue = $this->nasabah_id->CurrentValue;
+		if (strval($this->nasabah_id->CurrentValue) <> "") {
+			$sFilterWrk = "`id`" . ew_SearchString("=", $this->nasabah_id->CurrentValue, EW_DATATYPE_NUMBER, "");
+		$sSqlWrk = "SELECT `id`, `Nama` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `t01_nasabah`";
+		$sWhereWrk = "";
+		$this->nasabah_id->LookupFilters = array();
+		ew_AddFilter($sWhereWrk, $sFilterWrk);
+		$this->Lookup_Selecting($this->nasabah_id, $sWhereWrk); // Call Lookup selecting
+		if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
+			$rswrk = Conn()->Execute($sSqlWrk);
+			if ($rswrk && !$rswrk->EOF) { // Lookup values found
+				$arwrk = array();
+				$arwrk[1] = $rswrk->fields('DispFld');
+				$this->nasabah_id->ViewValue = $this->nasabah_id->DisplayValue($arwrk);
+				$rswrk->Close();
+			} else {
+				$this->nasabah_id->ViewValue = $this->nasabah_id->CurrentValue;
+			}
+		} else {
+			$this->nasabah_id->ViewValue = NULL;
+		}
 		$this->nasabah_id->ViewCustomAttributes = "";
 
 		// Pinjaman
 		$this->Pinjaman->ViewValue = $this->Pinjaman->CurrentValue;
+		$this->Pinjaman->ViewValue = ew_FormatNumber($this->Pinjaman->ViewValue, 2, -2, -2, -2);
+		$this->Pinjaman->CellCssStyle .= "text-align: right;";
 		$this->Pinjaman->ViewCustomAttributes = "";
 
 		// Angsuran_Lama
@@ -593,24 +612,25 @@ class ct03_pinjaman_delete extends ct03_pinjaman {
 
 		// Angsuran_Pokok
 		$this->Angsuran_Pokok->ViewValue = $this->Angsuran_Pokok->CurrentValue;
+		$this->Angsuran_Pokok->ViewValue = ew_FormatNumber($this->Angsuran_Pokok->ViewValue, 2, -2, -2, -2);
+		$this->Angsuran_Pokok->CellCssStyle .= "text-align: right;";
 		$this->Angsuran_Pokok->ViewCustomAttributes = "";
 
 		// Angsuran_Bunga
 		$this->Angsuran_Bunga->ViewValue = $this->Angsuran_Bunga->CurrentValue;
+		$this->Angsuran_Bunga->ViewValue = ew_FormatNumber($this->Angsuran_Bunga->ViewValue, 2, -2, -2, -2);
+		$this->Angsuran_Bunga->CellCssStyle .= "text-align: right;";
 		$this->Angsuran_Bunga->ViewCustomAttributes = "";
 
 		// Angsuran_Total
 		$this->Angsuran_Total->ViewValue = $this->Angsuran_Total->CurrentValue;
+		$this->Angsuran_Total->ViewValue = ew_FormatNumber($this->Angsuran_Total->ViewValue, 2, -2, -2, -2);
+		$this->Angsuran_Total->CellCssStyle .= "text-align: right;";
 		$this->Angsuran_Total->ViewCustomAttributes = "";
 
 		// No_Ref
 		$this->No_Ref->ViewValue = $this->No_Ref->CurrentValue;
 		$this->No_Ref->ViewCustomAttributes = "";
-
-			// id
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-			$this->id->TooltipValue = "";
 
 			// Kontrak_No
 			$this->Kontrak_No->LinkCustomAttributes = "";
@@ -892,8 +912,9 @@ ft03_pinjamandelete.ValidateRequired = false;
 <?php } ?>
 
 // Dynamic selection lists
-// Form object for search
+ft03_pinjamandelete.Lists["x_nasabah_id"] = {"LinkField":"x_id","Ajax":true,"AutoFill":false,"DisplayFields":["x_Nama","","",""],"ParentFields":[],"ChildFields":[],"FilterFields":[],"Options":[],"Template":"","LinkTable":"t01_nasabah"};
 
+// Form object for search
 </script>
 <script type="text/javascript">
 
@@ -924,9 +945,6 @@ $t03_pinjaman_delete->ShowMessage();
 <?php echo $t03_pinjaman->TableCustomInnerHtml ?>
 	<thead>
 	<tr class="ewTableHeader">
-<?php if ($t03_pinjaman->id->Visible) { // id ?>
-		<th><span id="elh_t03_pinjaman_id" class="t03_pinjaman_id"><?php echo $t03_pinjaman->id->FldCaption() ?></span></th>
-<?php } ?>
 <?php if ($t03_pinjaman->Kontrak_No->Visible) { // Kontrak_No ?>
 		<th><span id="elh_t03_pinjaman_Kontrak_No" class="t03_pinjaman_Kontrak_No"><?php echo $t03_pinjaman->Kontrak_No->FldCaption() ?></span></th>
 <?php } ?>
@@ -984,14 +1002,6 @@ while (!$t03_pinjaman_delete->Recordset->EOF) {
 	$t03_pinjaman_delete->RenderRow();
 ?>
 	<tr<?php echo $t03_pinjaman->RowAttributes() ?>>
-<?php if ($t03_pinjaman->id->Visible) { // id ?>
-		<td<?php echo $t03_pinjaman->id->CellAttributes() ?>>
-<span id="el<?php echo $t03_pinjaman_delete->RowCnt ?>_t03_pinjaman_id" class="t03_pinjaman_id">
-<span<?php echo $t03_pinjaman->id->ViewAttributes() ?>>
-<?php echo $t03_pinjaman->id->ListViewValue() ?></span>
-</span>
-</td>
-<?php } ?>
 <?php if ($t03_pinjaman->Kontrak_No->Visible) { // Kontrak_No ?>
 		<td<?php echo $t03_pinjaman->Kontrak_No->CellAttributes() ?>>
 <span id="el<?php echo $t03_pinjaman_delete->RowCnt ?>_t03_pinjaman_Kontrak_No" class="t03_pinjaman_Kontrak_No">

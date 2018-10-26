@@ -6,6 +6,7 @@ ob_start(); // Turn on output buffering
 <?php include_once ((EW_USE_ADODB) ? "adodb5/adodb.inc.php" : "ewmysql13.php") ?>
 <?php include_once "phpfn13.php" ?>
 <?php include_once "t04_pinjamanangsuraninfo.php" ?>
+<?php include_once "t03_pinjamaninfo.php" ?>
 <?php include_once "t96_employeesinfo.php" ?>
 <?php include_once "userfn13.php" ?>
 <?php
@@ -287,6 +288,9 @@ class ct04_pinjamanangsuran_list extends ct04_pinjamanangsuran {
 		$this->MultiDeleteUrl = "t04_pinjamanangsurandelete.php";
 		$this->MultiUpdateUrl = "t04_pinjamanangsuranupdate.php";
 
+		// Table object (t03_pinjaman)
+		if (!isset($GLOBALS['t03_pinjaman'])) $GLOBALS['t03_pinjaman'] = new ct03_pinjaman();
+
 		// Table object (t96_employees)
 		if (!isset($GLOBALS['t96_employees'])) $GLOBALS['t96_employees'] = new ct96_employees();
 
@@ -410,8 +414,6 @@ class ct04_pinjamanangsuran_list extends ct04_pinjamanangsuran {
 
 		// Setup export options
 		$this->SetupExportOptions();
-		$this->id->SetVisibility();
-		$this->id->Visible = !$this->IsAdd() && !$this->IsCopy() && !$this->IsGridAdd();
 		$this->pinjaman_id->SetVisibility();
 		$this->Angsuran_Ke->SetVisibility();
 		$this->Angsuran_Tanggal->SetVisibility();
@@ -456,6 +458,9 @@ class ct04_pinjamanangsuran_list extends ct04_pinjamanangsuran {
 
 		// Create Token
 		$this->CreateToken();
+
+		// Set up master detail parameters
+		$this->SetUpMasterParms();
 
 		// Setup other options
 		$this->SetupOtherOptions();
@@ -629,8 +634,28 @@ class ct04_pinjamanangsuran_list extends ct04_pinjamanangsuran {
 		$sFilter = "";
 		if (!$Security->CanList())
 			$sFilter = "(0=1)"; // Filter all records
+
+		// Restore master/detail filter
+		$this->DbMasterFilter = $this->GetMasterFilter(); // Restore master filter
+		$this->DbDetailFilter = $this->GetDetailFilter(); // Restore detail filter
 		ew_AddFilter($sFilter, $this->DbDetailFilter);
 		ew_AddFilter($sFilter, $this->SearchWhere);
+
+		// Load master record
+		if ($this->CurrentMode <> "add" && $this->GetMasterFilter() <> "" && $this->getCurrentMasterTable() == "t03_pinjaman") {
+			global $t03_pinjaman;
+			$rsmaster = $t03_pinjaman->LoadRs($this->DbMasterFilter);
+			$this->MasterRecordExists = ($rsmaster && !$rsmaster->EOF);
+			if (!$this->MasterRecordExists) {
+				$this->setFailureMessage($Language->Phrase("NoRecord")); // Set no record found
+				$this->Page_Terminate("t03_pinjamanlist.php"); // Return to master page
+			} else {
+				$t03_pinjaman->LoadListRowValues($rsmaster);
+				$t03_pinjaman->RowType = EW_ROWTYPE_MASTER; // Master row
+				$t03_pinjaman->RenderListRow();
+				$rsmaster->Close();
+			}
+		}
 
 		// Set up filter in session
 		$this->setSessionWhere($sFilter);
@@ -727,7 +752,6 @@ class ct04_pinjamanangsuran_list extends ct04_pinjamanangsuran {
 		if (@$_GET["order"] <> "") {
 			$this->CurrentOrder = ew_StripSlashes(@$_GET["order"]);
 			$this->CurrentOrderType = @$_GET["ordertype"];
-			$this->UpdateSort($this->id, $bCtrl); // id
 			$this->UpdateSort($this->pinjaman_id, $bCtrl); // pinjaman_id
 			$this->UpdateSort($this->Angsuran_Ke, $bCtrl); // Angsuran_Ke
 			$this->UpdateSort($this->Angsuran_Tanggal, $bCtrl); // Angsuran_Tanggal
@@ -766,11 +790,18 @@ class ct04_pinjamanangsuran_list extends ct04_pinjamanangsuran {
 		// Check if reset command
 		if (substr($this->Command,0,5) == "reset") {
 
+			// Reset master/detail keys
+			if ($this->Command == "resetall") {
+				$this->setCurrentMasterTable(""); // Clear master table
+				$this->DbMasterFilter = "";
+				$this->DbDetailFilter = "";
+				$this->pinjaman_id->setSessionValue("");
+			}
+
 			// Reset sorting order
 			if ($this->Command == "resetsort") {
 				$sOrderBy = "";
 				$this->setSessionOrderBy($sOrderBy);
-				$this->id->setSort("");
 				$this->pinjaman_id->setSort("");
 				$this->Angsuran_Ke->setSort("");
 				$this->Angsuran_Tanggal->setSort("");
@@ -838,11 +869,19 @@ class ct04_pinjamanangsuran_list extends ct04_pinjamanangsuran {
 		$item->ShowInDropDown = FALSE;
 		$item->ShowInButtonGroup = FALSE;
 
+		// "sequence"
+		$item = &$this->ListOptions->Add("sequence");
+		$item->CssStyle = "white-space: nowrap;";
+		$item->Visible = TRUE;
+		$item->OnLeft = TRUE; // Always on left
+		$item->ShowInDropDown = FALSE;
+		$item->ShowInButtonGroup = FALSE;
+
 		// Drop down button for ListOptions
 		$this->ListOptions->UseImageAndText = TRUE;
-		$this->ListOptions->UseDropDownButton = TRUE;
+		$this->ListOptions->UseDropDownButton = FALSE;
 		$this->ListOptions->DropDownButtonPhrase = $Language->Phrase("ButtonListOptions");
-		$this->ListOptions->UseButtonGroup = FALSE;
+		$this->ListOptions->UseButtonGroup = TRUE;
 		if ($this->ListOptions->UseButtonGroup && ew_IsMobile())
 			$this->ListOptions->UseDropDownButton = TRUE;
 		$this->ListOptions->ButtonClass = "btn-sm"; // Class for button group
@@ -858,6 +897,10 @@ class ct04_pinjamanangsuran_list extends ct04_pinjamanangsuran {
 	function RenderListOptions() {
 		global $Security, $Language, $objForm;
 		$this->ListOptions->LoadDefault();
+
+		// "sequence"
+		$oListOpt = &$this->ListOptions->Items["sequence"];
+		$oListOpt->Body = ew_FormatSeqNo($this->RecCnt);
 
 		// "view"
 		$oListOpt = &$this->ListOptions->Items["view"];
@@ -1398,11 +1441,6 @@ class ct04_pinjamanangsuran_list extends ct04_pinjamanangsuran {
 		$this->pinjamantitipan_id->ViewValue = $this->pinjamantitipan_id->CurrentValue;
 		$this->pinjamantitipan_id->ViewCustomAttributes = "";
 
-			// id
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-			$this->id->TooltipValue = "";
-
 			// pinjaman_id
 			$this->pinjaman_id->LinkCustomAttributes = "";
 			$this->pinjaman_id->HrefValue = "";
@@ -1593,6 +1631,25 @@ class ct04_pinjamanangsuran_list extends ct04_pinjamanangsuran {
 		// Call Page Exporting server event
 		$this->ExportDoc->ExportCustom = !$this->Page_Exporting();
 		$ParentTable = "";
+
+		// Export master record
+		if (EW_EXPORT_MASTER_RECORD && $this->GetMasterFilter() <> "" && $this->getCurrentMasterTable() == "t03_pinjaman") {
+			global $t03_pinjaman;
+			if (!isset($t03_pinjaman)) $t03_pinjaman = new ct03_pinjaman;
+			$rsmaster = $t03_pinjaman->LoadRs($this->DbMasterFilter); // Load master record
+			if ($rsmaster && !$rsmaster->EOF) {
+				$ExportStyle = $Doc->Style;
+				$Doc->SetStyle("v"); // Change to vertical
+				if ($this->Export <> "csv" || EW_EXPORT_MASTER_RECORD_FOR_CSV) {
+					$Doc->Table = &$t03_pinjaman;
+					$t03_pinjaman->ExportDocument($Doc, $rsmaster, 1, 1);
+					$Doc->ExportEmptyRow();
+					$Doc->Table = &$this;
+				}
+				$Doc->SetStyle($ExportStyle); // Restore
+				$rsmaster->Close();
+			}
+		}
 		$sHeader = $this->PageHeader;
 		$this->Page_DataRendering($sHeader);
 		$Doc->Text .= $sHeader;
@@ -1748,6 +1805,72 @@ class ct04_pinjamanangsuran_list extends ct04_pinjamanangsuran {
 				"&y_" . $FldParm . "=" . urlencode($FldSearchValue2) .
 				"&w_" . $FldParm . "=" . urlencode($Fld->AdvancedSearch->getValue("w"));
 		}
+	}
+
+	// Set up master/detail based on QueryString
+	function SetUpMasterParms() {
+		$bValidMaster = FALSE;
+
+		// Get the keys for master table
+		if (isset($_GET[EW_TABLE_SHOW_MASTER])) {
+			$sMasterTblVar = $_GET[EW_TABLE_SHOW_MASTER];
+			if ($sMasterTblVar == "") {
+				$bValidMaster = TRUE;
+				$this->DbMasterFilter = "";
+				$this->DbDetailFilter = "";
+			}
+			if ($sMasterTblVar == "t03_pinjaman") {
+				$bValidMaster = TRUE;
+				if (@$_GET["fk_id"] <> "") {
+					$GLOBALS["t03_pinjaman"]->id->setQueryStringValue($_GET["fk_id"]);
+					$this->pinjaman_id->setQueryStringValue($GLOBALS["t03_pinjaman"]->id->QueryStringValue);
+					$this->pinjaman_id->setSessionValue($this->pinjaman_id->QueryStringValue);
+					if (!is_numeric($GLOBALS["t03_pinjaman"]->id->QueryStringValue)) $bValidMaster = FALSE;
+				} else {
+					$bValidMaster = FALSE;
+				}
+			}
+		} elseif (isset($_POST[EW_TABLE_SHOW_MASTER])) {
+			$sMasterTblVar = $_POST[EW_TABLE_SHOW_MASTER];
+			if ($sMasterTblVar == "") {
+				$bValidMaster = TRUE;
+				$this->DbMasterFilter = "";
+				$this->DbDetailFilter = "";
+			}
+			if ($sMasterTblVar == "t03_pinjaman") {
+				$bValidMaster = TRUE;
+				if (@$_POST["fk_id"] <> "") {
+					$GLOBALS["t03_pinjaman"]->id->setFormValue($_POST["fk_id"]);
+					$this->pinjaman_id->setFormValue($GLOBALS["t03_pinjaman"]->id->FormValue);
+					$this->pinjaman_id->setSessionValue($this->pinjaman_id->FormValue);
+					if (!is_numeric($GLOBALS["t03_pinjaman"]->id->FormValue)) $bValidMaster = FALSE;
+				} else {
+					$bValidMaster = FALSE;
+				}
+			}
+		}
+		if ($bValidMaster) {
+
+			// Update URL
+			$this->AddUrl = $this->AddMasterUrl($this->AddUrl);
+			$this->InlineAddUrl = $this->AddMasterUrl($this->InlineAddUrl);
+			$this->GridAddUrl = $this->AddMasterUrl($this->GridAddUrl);
+			$this->GridEditUrl = $this->AddMasterUrl($this->GridEditUrl);
+
+			// Save current master table
+			$this->setCurrentMasterTable($sMasterTblVar);
+
+			// Reset start record counter (new master key)
+			$this->StartRec = 1;
+			$this->setStartRecordNumber($this->StartRec);
+
+			// Clear previous master key from Session
+			if ($sMasterTblVar <> "t03_pinjaman") {
+				if ($this->pinjaman_id->CurrentValue == "") $this->pinjaman_id->setSessionValue("");
+			}
+		}
+		$this->DbMasterFilter = $this->GetMasterFilter(); // Get master filter
+		$this->DbDetailFilter = $this->GetDetailFilter(); // Get detail filter
 	}
 
 	// Set up Breadcrumb
@@ -1960,6 +2083,17 @@ ft04_pinjamanangsuranlist.ValidateRequired = false;
 <div class="clearfix"></div>
 </div>
 <?php } ?>
+<?php if (($t04_pinjamanangsuran->Export == "") || (EW_EXPORT_MASTER_RECORD && $t04_pinjamanangsuran->Export == "print")) { ?>
+<?php
+if ($t04_pinjamanangsuran_list->DbMasterFilter <> "" && $t04_pinjamanangsuran->getCurrentMasterTable() == "t03_pinjaman") {
+	if ($t04_pinjamanangsuran_list->MasterRecordExists) {
+?>
+<?php include_once "t03_pinjamanmaster.php" ?>
+<?php
+	}
+}
+?>
+<?php } ?>
 <?php
 	$bSelectLimit = $t04_pinjamanangsuran_list->UseSelectLimit;
 	if ($bSelectLimit) {
@@ -2070,6 +2204,10 @@ $t04_pinjamanangsuran_list->ShowMessage();
 <input type="hidden" name="<?php echo EW_TOKEN_NAME ?>" value="<?php echo $t04_pinjamanangsuran_list->Token ?>">
 <?php } ?>
 <input type="hidden" name="t" value="t04_pinjamanangsuran">
+<?php if ($t04_pinjamanangsuran->getCurrentMasterTable() == "t03_pinjaman" && $t04_pinjamanangsuran->CurrentAction <> "") { ?>
+<input type="hidden" name="<?php echo EW_TABLE_SHOW_MASTER ?>" value="t03_pinjaman">
+<input type="hidden" name="fk_id" value="<?php echo $t04_pinjamanangsuran->pinjaman_id->getSessionValue() ?>">
+<?php } ?>
 <div id="gmp_t04_pinjamanangsuran" class="<?php if (ew_IsResponsiveLayout()) { echo "table-responsive "; } ?>ewGridMiddlePanel">
 <?php if ($t04_pinjamanangsuran_list->TotalRecs > 0 || $t04_pinjamanangsuran->CurrentAction == "gridedit") { ?>
 <table id="tbl_t04_pinjamanangsuranlist" class="table ewTable">
@@ -2087,15 +2225,6 @@ $t04_pinjamanangsuran_list->RenderListOptions();
 // Render list options (header, left)
 $t04_pinjamanangsuran_list->ListOptions->Render("header", "left");
 ?>
-<?php if ($t04_pinjamanangsuran->id->Visible) { // id ?>
-	<?php if ($t04_pinjamanangsuran->SortUrl($t04_pinjamanangsuran->id) == "") { ?>
-		<th data-name="id"><div id="elh_t04_pinjamanangsuran_id" class="t04_pinjamanangsuran_id"><div class="ewTableHeaderCaption"><?php echo $t04_pinjamanangsuran->id->FldCaption() ?></div></div></th>
-	<?php } else { ?>
-		<th data-name="id"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t04_pinjamanangsuran->SortUrl($t04_pinjamanangsuran->id) ?>',2);"><div id="elh_t04_pinjamanangsuran_id" class="t04_pinjamanangsuran_id">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t04_pinjamanangsuran->id->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t04_pinjamanangsuran->id->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t04_pinjamanangsuran->id->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
-        </div></div></th>
-	<?php } ?>
-<?php } ?>		
 <?php if ($t04_pinjamanangsuran->pinjaman_id->Visible) { // pinjaman_id ?>
 	<?php if ($t04_pinjamanangsuran->SortUrl($t04_pinjamanangsuran->pinjaman_id) == "") { ?>
 		<th data-name="pinjaman_id"><div id="elh_t04_pinjamanangsuran_pinjaman_id" class="t04_pinjamanangsuran_pinjaman_id"><div class="ewTableHeaderCaption"><?php echo $t04_pinjamanangsuran->pinjaman_id->FldCaption() ?></div></div></th>
@@ -2287,21 +2416,13 @@ while ($t04_pinjamanangsuran_list->RecCnt < $t04_pinjamanangsuran_list->StopRec)
 // Render list options (body, left)
 $t04_pinjamanangsuran_list->ListOptions->Render("body", "left", $t04_pinjamanangsuran_list->RowCnt);
 ?>
-	<?php if ($t04_pinjamanangsuran->id->Visible) { // id ?>
-		<td data-name="id"<?php echo $t04_pinjamanangsuran->id->CellAttributes() ?>>
-<span id="el<?php echo $t04_pinjamanangsuran_list->RowCnt ?>_t04_pinjamanangsuran_id" class="t04_pinjamanangsuran_id">
-<span<?php echo $t04_pinjamanangsuran->id->ViewAttributes() ?>>
-<?php echo $t04_pinjamanangsuran->id->ListViewValue() ?></span>
-</span>
-<a id="<?php echo $t04_pinjamanangsuran_list->PageObjName . "_row_" . $t04_pinjamanangsuran_list->RowCnt ?>"></a></td>
-	<?php } ?>
 	<?php if ($t04_pinjamanangsuran->pinjaman_id->Visible) { // pinjaman_id ?>
 		<td data-name="pinjaman_id"<?php echo $t04_pinjamanangsuran->pinjaman_id->CellAttributes() ?>>
 <span id="el<?php echo $t04_pinjamanangsuran_list->RowCnt ?>_t04_pinjamanangsuran_pinjaman_id" class="t04_pinjamanangsuran_pinjaman_id">
 <span<?php echo $t04_pinjamanangsuran->pinjaman_id->ViewAttributes() ?>>
 <?php echo $t04_pinjamanangsuran->pinjaman_id->ListViewValue() ?></span>
 </span>
-</td>
+<a id="<?php echo $t04_pinjamanangsuran_list->PageObjName . "_row_" . $t04_pinjamanangsuran_list->RowCnt ?>"></a></td>
 	<?php } ?>
 	<?php if ($t04_pinjamanangsuran->Angsuran_Ke->Visible) { // Angsuran_Ke ?>
 		<td data-name="Angsuran_Ke"<?php echo $t04_pinjamanangsuran->Angsuran_Ke->CellAttributes() ?>>

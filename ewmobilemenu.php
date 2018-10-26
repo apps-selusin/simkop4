@@ -7,9 +7,6 @@ $RootMenu->AddMenuItem(12, "mmi_cf01_home_php", $Language->MenuPhrase("12", "Men
 $RootMenu->AddMenuItem(14, "mmci_Setup", $Language->MenuPhrase("14", "MenuText"), "", -1, "", IsLoggedIn(), FALSE, TRUE);
 $RootMenu->AddMenuItem(1, "mmi_t01_nasabah", $Language->MenuPhrase("1", "MenuText"), "t01_nasabahlist.php", 14, "", AllowListMenu('{1F4EE816-E057-4A7E-9024-5EA4446B7598}t01_nasabah'), FALSE, FALSE);
 $RootMenu->AddMenuItem(3, "mmi_t03_pinjaman", $Language->MenuPhrase("3", "MenuText"), "t03_pinjamanlist.php", -1, "", AllowListMenu('{1F4EE816-E057-4A7E-9024-5EA4446B7598}t03_pinjaman'), FALSE, FALSE);
-$RootMenu->AddMenuItem(4, "mmi_t04_pinjamanangsuran", $Language->MenuPhrase("4", "MenuText"), "t04_pinjamanangsuranlist.php", -1, "", AllowListMenu('{1F4EE816-E057-4A7E-9024-5EA4446B7598}t04_pinjamanangsuran'), FALSE, FALSE);
-$RootMenu->AddMenuItem(5, "mmi_t05_pinjamanjaminan", $Language->MenuPhrase("5", "MenuText"), "t05_pinjamanjaminanlist.php", -1, "", AllowListMenu('{1F4EE816-E057-4A7E-9024-5EA4446B7598}t05_pinjamanjaminan'), FALSE, FALSE);
-$RootMenu->AddMenuItem(6, "mmi_t06_pinjamantitipan", $Language->MenuPhrase("6", "MenuText"), "t06_pinjamantitipanlist.php", -1, "", AllowListMenu('{1F4EE816-E057-4A7E-9024-5EA4446B7598}t06_pinjamantitipan'), FALSE, FALSE);
 $RootMenu->AddMenuItem(7, "mmi_t94_log", $Language->MenuPhrase("7", "MenuText"), "t94_loglist.php", -1, "", AllowListMenu('{1F4EE816-E057-4A7E-9024-5EA4446B7598}t94_log'), FALSE, FALSE);
 $RootMenu->AddMenuItem(8, "mmi_t95_logdesc", $Language->MenuPhrase("8", "MenuText"), "t95_logdesclist.php", -1, "", AllowListMenu('{1F4EE816-E057-4A7E-9024-5EA4446B7598}t95_logdesc'), FALSE, FALSE);
 $RootMenu->AddMenuItem(9, "mmi_t96_employees", $Language->MenuPhrase("9", "MenuText"), "t96_employeeslist.php", -1, "", AllowListMenu('{1F4EE816-E057-4A7E-9024-5EA4446B7598}t96_employees'), FALSE, FALSE);

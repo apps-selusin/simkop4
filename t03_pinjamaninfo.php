@@ -69,14 +69,16 @@ class ct03_pinjaman extends cTable {
 		$this->fields['Kontrak_No'] = &$this->Kontrak_No;
 
 		// Kontrak_Tgl
-		$this->Kontrak_Tgl = new cField('t03_pinjaman', 't03_pinjaman', 'x_Kontrak_Tgl', 'Kontrak_Tgl', '`Kontrak_Tgl`', ew_CastDateFieldForLike('`Kontrak_Tgl`', 0, "DB"), 133, 0, FALSE, '`Kontrak_Tgl`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
+		$this->Kontrak_Tgl = new cField('t03_pinjaman', 't03_pinjaman', 'x_Kontrak_Tgl', 'Kontrak_Tgl', '`Kontrak_Tgl`', ew_CastDateFieldForLike('`Kontrak_Tgl`', 7, "DB"), 133, 7, FALSE, '`Kontrak_Tgl`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
 		$this->Kontrak_Tgl->Sortable = TRUE; // Allow sort
-		$this->Kontrak_Tgl->FldDefaultErrMsg = str_replace("%s", $GLOBALS["EW_DATE_FORMAT"], $Language->Phrase("IncorrectDate"));
+		$this->Kontrak_Tgl->FldDefaultErrMsg = str_replace("%s", $GLOBALS["EW_DATE_SEPARATOR"], $Language->Phrase("IncorrectDateDMY"));
 		$this->fields['Kontrak_Tgl'] = &$this->Kontrak_Tgl;
 
 		// nasabah_id
-		$this->nasabah_id = new cField('t03_pinjaman', 't03_pinjaman', 'x_nasabah_id', 'nasabah_id', '`nasabah_id`', '`nasabah_id`', 3, -1, FALSE, '`nasabah_id`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
+		$this->nasabah_id = new cField('t03_pinjaman', 't03_pinjaman', 'x_nasabah_id', 'nasabah_id', '`nasabah_id`', '`nasabah_id`', 3, -1, FALSE, '`nasabah_id`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'SELECT');
 		$this->nasabah_id->Sortable = TRUE; // Allow sort
+		$this->nasabah_id->UsePleaseSelect = TRUE; // Use PleaseSelect by default
+		$this->nasabah_id->PleaseSelectText = $Language->Phrase("PleaseSelect"); // PleaseSelect text
 		$this->nasabah_id->FldDefaultErrMsg = $Language->Phrase("IncorrectInteger");
 		$this->fields['nasabah_id'] = &$this->nasabah_id;
 
@@ -166,6 +168,38 @@ class ct03_pinjaman extends cTable {
 		} else {
 			if (!$ctrl) $ofld->setSort("");
 		}
+	}
+
+	// Current detail table name
+	function getCurrentDetailTable() {
+		return @$_SESSION[EW_PROJECT_NAME . "_" . $this->TableVar . "_" . EW_TABLE_DETAIL_TABLE];
+	}
+
+	function setCurrentDetailTable($v) {
+		$_SESSION[EW_PROJECT_NAME . "_" . $this->TableVar . "_" . EW_TABLE_DETAIL_TABLE] = $v;
+	}
+
+	// Get detail url
+	function GetDetailUrl() {
+
+		// Detail url
+		$sDetailUrl = "";
+		if ($this->getCurrentDetailTable() == "t04_pinjamanangsuran") {
+			$sDetailUrl = $GLOBALS["t04_pinjamanangsuran"]->GetListUrl() . "?" . EW_TABLE_SHOW_MASTER . "=" . $this->TableVar;
+			$sDetailUrl .= "&fk_id=" . urlencode($this->id->CurrentValue);
+		}
+		if ($this->getCurrentDetailTable() == "t05_pinjamanjaminan") {
+			$sDetailUrl = $GLOBALS["t05_pinjamanjaminan"]->GetListUrl() . "?" . EW_TABLE_SHOW_MASTER . "=" . $this->TableVar;
+			$sDetailUrl .= "&fk_id=" . urlencode($this->id->CurrentValue);
+		}
+		if ($this->getCurrentDetailTable() == "t06_pinjamantitipan") {
+			$sDetailUrl = $GLOBALS["t06_pinjamantitipan"]->GetListUrl() . "?" . EW_TABLE_SHOW_MASTER . "=" . $this->TableVar;
+			$sDetailUrl .= "&fk_id=" . urlencode($this->id->CurrentValue);
+		}
+		if ($sDetailUrl == "") {
+			$sDetailUrl = "t03_pinjamanlist.php";
+		}
+		return $sDetailUrl;
 	}
 
 	// Table level SQL
@@ -425,6 +459,66 @@ class ct03_pinjaman extends cTable {
 	// Update
 	function Update(&$rs, $where = "", $rsold = NULL, $curfilter = TRUE) {
 		$conn = &$this->Connection();
+
+		// Cascade Update detail table 't04_pinjamanangsuran'
+		$bCascadeUpdate = FALSE;
+		$rscascade = array();
+		if (!is_null($rsold) && (isset($rs['id']) && $rsold['id'] <> $rs['id'])) { // Update detail field 'pinjaman_id'
+			$bCascadeUpdate = TRUE;
+			$rscascade['pinjaman_id'] = $rs['id']; 
+		}
+		if ($bCascadeUpdate) {
+			if (!isset($GLOBALS["t04_pinjamanangsuran"])) $GLOBALS["t04_pinjamanangsuran"] = new ct04_pinjamanangsuran();
+			$rswrk = $GLOBALS["t04_pinjamanangsuran"]->LoadRs("`pinjaman_id` = " . ew_QuotedValue($rsold['id'], EW_DATATYPE_NUMBER, 'DB')); 
+			while ($rswrk && !$rswrk->EOF) {
+				$rskey = array();
+				$fldname = 'id';
+				$rskey[$fldname] = $rswrk->fields[$fldname];
+				$bUpdate = $GLOBALS["t04_pinjamanangsuran"]->Update($rscascade, $rskey, $rswrk->fields);
+				if (!$bUpdate) return FALSE;
+				$rswrk->MoveNext();
+			}
+		}
+
+		// Cascade Update detail table 't05_pinjamanjaminan'
+		$bCascadeUpdate = FALSE;
+		$rscascade = array();
+		if (!is_null($rsold) && (isset($rs['id']) && $rsold['id'] <> $rs['id'])) { // Update detail field 'pinjaman_id'
+			$bCascadeUpdate = TRUE;
+			$rscascade['pinjaman_id'] = $rs['id']; 
+		}
+		if ($bCascadeUpdate) {
+			if (!isset($GLOBALS["t05_pinjamanjaminan"])) $GLOBALS["t05_pinjamanjaminan"] = new ct05_pinjamanjaminan();
+			$rswrk = $GLOBALS["t05_pinjamanjaminan"]->LoadRs("`pinjaman_id` = " . ew_QuotedValue($rsold['id'], EW_DATATYPE_NUMBER, 'DB')); 
+			while ($rswrk && !$rswrk->EOF) {
+				$rskey = array();
+				$fldname = 'id';
+				$rskey[$fldname] = $rswrk->fields[$fldname];
+				$bUpdate = $GLOBALS["t05_pinjamanjaminan"]->Update($rscascade, $rskey, $rswrk->fields);
+				if (!$bUpdate) return FALSE;
+				$rswrk->MoveNext();
+			}
+		}
+
+		// Cascade Update detail table 't06_pinjamantitipan'
+		$bCascadeUpdate = FALSE;
+		$rscascade = array();
+		if (!is_null($rsold) && (isset($rs['id']) && $rsold['id'] <> $rs['id'])) { // Update detail field 'pinjaman_id'
+			$bCascadeUpdate = TRUE;
+			$rscascade['pinjaman_id'] = $rs['id']; 
+		}
+		if ($bCascadeUpdate) {
+			if (!isset($GLOBALS["t06_pinjamantitipan"])) $GLOBALS["t06_pinjamantitipan"] = new ct06_pinjamantitipan();
+			$rswrk = $GLOBALS["t06_pinjamantitipan"]->LoadRs("`pinjaman_id` = " . ew_QuotedValue($rsold['id'], EW_DATATYPE_NUMBER, 'DB')); 
+			while ($rswrk && !$rswrk->EOF) {
+				$rskey = array();
+				$fldname = 'id';
+				$rskey[$fldname] = $rswrk->fields[$fldname];
+				$bUpdate = $GLOBALS["t06_pinjamantitipan"]->Update($rscascade, $rskey, $rswrk->fields);
+				if (!$bUpdate) return FALSE;
+				$rswrk->MoveNext();
+			}
+		}
 		$bUpdate = $conn->Execute($this->UpdateSQL($rs, $where, $curfilter));
 		if ($bUpdate && $this->AuditTrailOnEdit) {
 			$rsaudit = $rs;
@@ -456,6 +550,30 @@ class ct03_pinjaman extends cTable {
 	// Delete
 	function Delete(&$rs, $where = "", $curfilter = TRUE) {
 		$conn = &$this->Connection();
+
+		// Cascade delete detail table 't04_pinjamanangsuran'
+		if (!isset($GLOBALS["t04_pinjamanangsuran"])) $GLOBALS["t04_pinjamanangsuran"] = new ct04_pinjamanangsuran();
+		$rscascade = $GLOBALS["t04_pinjamanangsuran"]->LoadRs("`pinjaman_id` = " . ew_QuotedValue($rs['id'], EW_DATATYPE_NUMBER, "DB")); 
+		while ($rscascade && !$rscascade->EOF) {
+			$GLOBALS["t04_pinjamanangsuran"]->Delete($rscascade->fields);
+			$rscascade->MoveNext();
+		}
+
+		// Cascade delete detail table 't05_pinjamanjaminan'
+		if (!isset($GLOBALS["t05_pinjamanjaminan"])) $GLOBALS["t05_pinjamanjaminan"] = new ct05_pinjamanjaminan();
+		$rscascade = $GLOBALS["t05_pinjamanjaminan"]->LoadRs("`pinjaman_id` = " . ew_QuotedValue($rs['id'], EW_DATATYPE_NUMBER, "DB")); 
+		while ($rscascade && !$rscascade->EOF) {
+			$GLOBALS["t05_pinjamanjaminan"]->Delete($rscascade->fields);
+			$rscascade->MoveNext();
+		}
+
+		// Cascade delete detail table 't06_pinjamantitipan'
+		if (!isset($GLOBALS["t06_pinjamantitipan"])) $GLOBALS["t06_pinjamantitipan"] = new ct06_pinjamantitipan();
+		$rscascade = $GLOBALS["t06_pinjamantitipan"]->LoadRs("`pinjaman_id` = " . ew_QuotedValue($rs['id'], EW_DATATYPE_NUMBER, "DB")); 
+		while ($rscascade && !$rscascade->EOF) {
+			$GLOBALS["t06_pinjamantitipan"]->Delete($rscascade->fields);
+			$rscascade->MoveNext();
+		}
 		$bDelete = $conn->Execute($this->DeleteSQL($rs, $where, $curfilter));
 		if ($bDelete && $this->AuditTrailOnDelete)
 			$this->WriteAuditTrailOnDelete($rs);
@@ -519,7 +637,10 @@ class ct03_pinjaman extends cTable {
 
 	// Edit URL
 	function GetEditUrl($parm = "") {
-		$url = $this->KeyUrl("t03_pinjamanedit.php", $this->UrlParm($parm));
+		if ($parm <> "")
+			$url = $this->KeyUrl("t03_pinjamanedit.php", $this->UrlParm($parm));
+		else
+			$url = $this->KeyUrl("t03_pinjamanedit.php", $this->UrlParm(EW_TABLE_SHOW_DETAIL . "="));
 		return $this->AddMasterUrl($url);
 	}
 
@@ -531,7 +652,10 @@ class ct03_pinjaman extends cTable {
 
 	// Copy URL
 	function GetCopyUrl($parm = "") {
-		$url = $this->KeyUrl("t03_pinjamanadd.php", $this->UrlParm($parm));
+		if ($parm <> "")
+			$url = $this->KeyUrl("t03_pinjamanadd.php", $this->UrlParm($parm));
+		else
+			$url = $this->KeyUrl("t03_pinjamanadd.php", $this->UrlParm(EW_TABLE_SHOW_DETAIL . "="));
 		return $this->AddMasterUrl($url);
 	}
 
@@ -691,15 +815,36 @@ class ct03_pinjaman extends cTable {
 
 		// Kontrak_Tgl
 		$this->Kontrak_Tgl->ViewValue = $this->Kontrak_Tgl->CurrentValue;
-		$this->Kontrak_Tgl->ViewValue = ew_FormatDateTime($this->Kontrak_Tgl->ViewValue, 0);
+		$this->Kontrak_Tgl->ViewValue = ew_FormatDateTime($this->Kontrak_Tgl->ViewValue, 7);
 		$this->Kontrak_Tgl->ViewCustomAttributes = "";
 
 		// nasabah_id
-		$this->nasabah_id->ViewValue = $this->nasabah_id->CurrentValue;
+		if (strval($this->nasabah_id->CurrentValue) <> "") {
+			$sFilterWrk = "`id`" . ew_SearchString("=", $this->nasabah_id->CurrentValue, EW_DATATYPE_NUMBER, "");
+		$sSqlWrk = "SELECT `id`, `Nama` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `t01_nasabah`";
+		$sWhereWrk = "";
+		$this->nasabah_id->LookupFilters = array();
+		ew_AddFilter($sWhereWrk, $sFilterWrk);
+		$this->Lookup_Selecting($this->nasabah_id, $sWhereWrk); // Call Lookup selecting
+		if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
+			$rswrk = Conn()->Execute($sSqlWrk);
+			if ($rswrk && !$rswrk->EOF) { // Lookup values found
+				$arwrk = array();
+				$arwrk[1] = $rswrk->fields('DispFld');
+				$this->nasabah_id->ViewValue = $this->nasabah_id->DisplayValue($arwrk);
+				$rswrk->Close();
+			} else {
+				$this->nasabah_id->ViewValue = $this->nasabah_id->CurrentValue;
+			}
+		} else {
+			$this->nasabah_id->ViewValue = NULL;
+		}
 		$this->nasabah_id->ViewCustomAttributes = "";
 
 		// Pinjaman
 		$this->Pinjaman->ViewValue = $this->Pinjaman->CurrentValue;
+		$this->Pinjaman->ViewValue = ew_FormatNumber($this->Pinjaman->ViewValue, 2, -2, -2, -2);
+		$this->Pinjaman->CellCssStyle .= "text-align: right;";
 		$this->Pinjaman->ViewCustomAttributes = "";
 
 		// Angsuran_Lama
@@ -720,14 +865,20 @@ class ct03_pinjaman extends cTable {
 
 		// Angsuran_Pokok
 		$this->Angsuran_Pokok->ViewValue = $this->Angsuran_Pokok->CurrentValue;
+		$this->Angsuran_Pokok->ViewValue = ew_FormatNumber($this->Angsuran_Pokok->ViewValue, 2, -2, -2, -2);
+		$this->Angsuran_Pokok->CellCssStyle .= "text-align: right;";
 		$this->Angsuran_Pokok->ViewCustomAttributes = "";
 
 		// Angsuran_Bunga
 		$this->Angsuran_Bunga->ViewValue = $this->Angsuran_Bunga->CurrentValue;
+		$this->Angsuran_Bunga->ViewValue = ew_FormatNumber($this->Angsuran_Bunga->ViewValue, 2, -2, -2, -2);
+		$this->Angsuran_Bunga->CellCssStyle .= "text-align: right;";
 		$this->Angsuran_Bunga->ViewCustomAttributes = "";
 
 		// Angsuran_Total
 		$this->Angsuran_Total->ViewValue = $this->Angsuran_Total->CurrentValue;
+		$this->Angsuran_Total->ViewValue = ew_FormatNumber($this->Angsuran_Total->ViewValue, 2, -2, -2, -2);
+		$this->Angsuran_Total->CellCssStyle .= "text-align: right;";
 		$this->Angsuran_Total->ViewCustomAttributes = "";
 
 		// No_Ref
@@ -825,21 +976,19 @@ class ct03_pinjaman extends cTable {
 		// Kontrak_Tgl
 		$this->Kontrak_Tgl->EditAttrs["class"] = "form-control";
 		$this->Kontrak_Tgl->EditCustomAttributes = "";
-		$this->Kontrak_Tgl->EditValue = ew_FormatDateTime($this->Kontrak_Tgl->CurrentValue, 8);
+		$this->Kontrak_Tgl->EditValue = ew_FormatDateTime($this->Kontrak_Tgl->CurrentValue, 7);
 		$this->Kontrak_Tgl->PlaceHolder = ew_RemoveHtml($this->Kontrak_Tgl->FldCaption());
 
 		// nasabah_id
 		$this->nasabah_id->EditAttrs["class"] = "form-control";
 		$this->nasabah_id->EditCustomAttributes = "";
-		$this->nasabah_id->EditValue = $this->nasabah_id->CurrentValue;
-		$this->nasabah_id->PlaceHolder = ew_RemoveHtml($this->nasabah_id->FldCaption());
 
 		// Pinjaman
 		$this->Pinjaman->EditAttrs["class"] = "form-control";
 		$this->Pinjaman->EditCustomAttributes = "";
 		$this->Pinjaman->EditValue = $this->Pinjaman->CurrentValue;
 		$this->Pinjaman->PlaceHolder = ew_RemoveHtml($this->Pinjaman->FldCaption());
-		if (strval($this->Pinjaman->EditValue) <> "" && is_numeric($this->Pinjaman->EditValue)) $this->Pinjaman->EditValue = ew_FormatNumber($this->Pinjaman->EditValue, -2, -1, -2, 0);
+		if (strval($this->Pinjaman->EditValue) <> "" && is_numeric($this->Pinjaman->EditValue)) $this->Pinjaman->EditValue = ew_FormatNumber($this->Pinjaman->EditValue, -2, -2, -2, -2);
 
 		// Angsuran_Lama
 		$this->Angsuran_Lama->EditAttrs["class"] = "form-control";
@@ -872,21 +1021,21 @@ class ct03_pinjaman extends cTable {
 		$this->Angsuran_Pokok->EditCustomAttributes = "";
 		$this->Angsuran_Pokok->EditValue = $this->Angsuran_Pokok->CurrentValue;
 		$this->Angsuran_Pokok->PlaceHolder = ew_RemoveHtml($this->Angsuran_Pokok->FldCaption());
-		if (strval($this->Angsuran_Pokok->EditValue) <> "" && is_numeric($this->Angsuran_Pokok->EditValue)) $this->Angsuran_Pokok->EditValue = ew_FormatNumber($this->Angsuran_Pokok->EditValue, -2, -1, -2, 0);
+		if (strval($this->Angsuran_Pokok->EditValue) <> "" && is_numeric($this->Angsuran_Pokok->EditValue)) $this->Angsuran_Pokok->EditValue = ew_FormatNumber($this->Angsuran_Pokok->EditValue, -2, -2, -2, -2);
 
 		// Angsuran_Bunga
 		$this->Angsuran_Bunga->EditAttrs["class"] = "form-control";
 		$this->Angsuran_Bunga->EditCustomAttributes = "";
 		$this->Angsuran_Bunga->EditValue = $this->Angsuran_Bunga->CurrentValue;
 		$this->Angsuran_Bunga->PlaceHolder = ew_RemoveHtml($this->Angsuran_Bunga->FldCaption());
-		if (strval($this->Angsuran_Bunga->EditValue) <> "" && is_numeric($this->Angsuran_Bunga->EditValue)) $this->Angsuran_Bunga->EditValue = ew_FormatNumber($this->Angsuran_Bunga->EditValue, -2, -1, -2, 0);
+		if (strval($this->Angsuran_Bunga->EditValue) <> "" && is_numeric($this->Angsuran_Bunga->EditValue)) $this->Angsuran_Bunga->EditValue = ew_FormatNumber($this->Angsuran_Bunga->EditValue, -2, -2, -2, -2);
 
 		// Angsuran_Total
 		$this->Angsuran_Total->EditAttrs["class"] = "form-control";
 		$this->Angsuran_Total->EditCustomAttributes = "";
 		$this->Angsuran_Total->EditValue = $this->Angsuran_Total->CurrentValue;
 		$this->Angsuran_Total->PlaceHolder = ew_RemoveHtml($this->Angsuran_Total->FldCaption());
-		if (strval($this->Angsuran_Total->EditValue) <> "" && is_numeric($this->Angsuran_Total->EditValue)) $this->Angsuran_Total->EditValue = ew_FormatNumber($this->Angsuran_Total->EditValue, -2, -1, -2, 0);
+		if (strval($this->Angsuran_Total->EditValue) <> "" && is_numeric($this->Angsuran_Total->EditValue)) $this->Angsuran_Total->EditValue = ew_FormatNumber($this->Angsuran_Total->EditValue, -2, -2, -2, -2);
 
 		// No_Ref
 		$this->No_Ref->EditAttrs["class"] = "form-control";
@@ -921,7 +1070,6 @@ class ct03_pinjaman extends cTable {
 			if ($Doc->Horizontal) { // Horizontal format, write header
 				$Doc->BeginExportRow();
 				if ($ExportPageType == "view") {
-					if ($this->id->Exportable) $Doc->ExportCaption($this->id);
 					if ($this->Kontrak_No->Exportable) $Doc->ExportCaption($this->Kontrak_No);
 					if ($this->Kontrak_Tgl->Exportable) $Doc->ExportCaption($this->Kontrak_Tgl);
 					if ($this->nasabah_id->Exportable) $Doc->ExportCaption($this->nasabah_id);
@@ -979,7 +1127,6 @@ class ct03_pinjaman extends cTable {
 				if (!$Doc->ExportCustom) {
 					$Doc->BeginExportRow($RowCnt); // Allow CSS styles if enabled
 					if ($ExportPageType == "view") {
-						if ($this->id->Exportable) $Doc->ExportField($this->id);
 						if ($this->Kontrak_No->Exportable) $Doc->ExportField($this->Kontrak_No);
 						if ($this->Kontrak_Tgl->Exportable) $Doc->ExportField($this->Kontrak_Tgl);
 						if ($this->nasabah_id->Exportable) $Doc->ExportField($this->nasabah_id);

@@ -596,16 +596,16 @@
       <phrase id="menutext" value="Jaminan" />
     </menu>
     <menu id="3">
-      <phrase id="menutext" value="t 03 pinjaman" />
+      <phrase id="menutext" value="Pinjaman" />
     </menu>
     <menu id="4">
-      <phrase id="menutext" value="t 04 pinjamanangsuran" />
+      <phrase id="menutext" value="Angsuran" />
     </menu>
     <menu id="5">
-      <phrase id="menutext" value="t 05 pinjamanjaminan" />
+      <phrase id="menutext" value="Jaminan" />
     </menu>
     <menu id="6">
-      <phrase id="menutext" value="t 06 pinjamantitipan" />
+      <phrase id="menutext" value="Titipan" />
     </menu>
     <menu id="7">
       <phrase id="menutext" value="t 94 log" />
@@ -680,7 +680,7 @@
       </field>
     </table>
     <table id="t03_pinjaman">
-      <phrase id="tblcaption" value="t 03 pinjaman" />
+      <phrase id="tblcaption" value="Pinjaman" />
       <field id="id">
         <phrase id="fldcaption" value="id" />
       </field>
@@ -691,7 +691,7 @@
         <phrase id="fldcaption" value="Kontrak Tgl" />
       </field>
       <field id="nasabah_id">
-        <phrase id="fldcaption" value="nasabah id" />
+        <phrase id="fldcaption" value="Nasabah" />
       </field>
       <field id="pinjaman">
         <phrase id="fldcaption" value="Pinjaman" />
@@ -722,7 +722,7 @@
       </field>
     </table>
     <table id="t04_pinjamanangsuran">
-      <phrase id="tblcaption" value="t 04 pinjamanangsuran" />
+      <phrase id="tblcaption" value="Angsuran" />
       <field id="id">
         <phrase id="fldcaption" value="id" />
       </field>
@@ -773,7 +773,7 @@
       </field>
     </table>
     <table id="t05_pinjamanjaminan">
-      <phrase id="tblcaption" value="t 05 pinjamanjaminan" />
+      <phrase id="tblcaption" value="Jaminan" />
       <field id="id">
         <phrase id="fldcaption" value="id" />
       </field>
@@ -785,7 +785,7 @@
       </field>
     </table>
     <table id="t06_pinjamantitipan">
-      <phrase id="tblcaption" value="t 06 pinjamantitipan" />
+      <phrase id="tblcaption" value="Titipan" />
       <field id="id">
         <phrase id="fldcaption" value="id" />
       </field>

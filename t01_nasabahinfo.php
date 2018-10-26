@@ -403,6 +403,26 @@ class ct01_nasabah extends cTable {
 	// Update
 	function Update(&$rs, $where = "", $rsold = NULL, $curfilter = TRUE) {
 		$conn = &$this->Connection();
+
+		// Cascade Update detail table 't02_jaminan'
+		$bCascadeUpdate = FALSE;
+		$rscascade = array();
+		if (!is_null($rsold) && (isset($rs['id']) && $rsold['id'] <> $rs['id'])) { // Update detail field 'nasabah_id'
+			$bCascadeUpdate = TRUE;
+			$rscascade['nasabah_id'] = $rs['id']; 
+		}
+		if ($bCascadeUpdate) {
+			if (!isset($GLOBALS["t02_jaminan"])) $GLOBALS["t02_jaminan"] = new ct02_jaminan();
+			$rswrk = $GLOBALS["t02_jaminan"]->LoadRs("`nasabah_id` = " . ew_QuotedValue($rsold['id'], EW_DATATYPE_NUMBER, 'DB')); 
+			while ($rswrk && !$rswrk->EOF) {
+				$rskey = array();
+				$fldname = 'id';
+				$rskey[$fldname] = $rswrk->fields[$fldname];
+				$bUpdate = $GLOBALS["t02_jaminan"]->Update($rscascade, $rskey, $rswrk->fields);
+				if (!$bUpdate) return FALSE;
+				$rswrk->MoveNext();
+			}
+		}
 		$bUpdate = $conn->Execute($this->UpdateSQL($rs, $where, $curfilter));
 		if ($bUpdate && $this->AuditTrailOnEdit) {
 			$rsaudit = $rs;
@@ -434,6 +454,14 @@ class ct01_nasabah extends cTable {
 	// Delete
 	function Delete(&$rs, $where = "", $curfilter = TRUE) {
 		$conn = &$this->Connection();
+
+		// Cascade delete detail table 't02_jaminan'
+		if (!isset($GLOBALS["t02_jaminan"])) $GLOBALS["t02_jaminan"] = new ct02_jaminan();
+		$rscascade = $GLOBALS["t02_jaminan"]->LoadRs("`nasabah_id` = " . ew_QuotedValue($rs['id'], EW_DATATYPE_NUMBER, "DB")); 
+		while ($rscascade && !$rscascade->EOF) {
+			$GLOBALS["t02_jaminan"]->Delete($rscascade->fields);
+			$rscascade->MoveNext();
+		}
 		$bDelete = $conn->Execute($this->DeleteSQL($rs, $where, $curfilter));
 		if ($bDelete && $this->AuditTrailOnDelete)
 			$this->WriteAuditTrailOnDelete($rs);

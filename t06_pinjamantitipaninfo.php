@@ -127,6 +127,53 @@ class ct06_pinjamantitipan extends cTable {
 		}
 	}
 
+	// Current master table name
+	function getCurrentMasterTable() {
+		return @$_SESSION[EW_PROJECT_NAME . "_" . $this->TableVar . "_" . EW_TABLE_MASTER_TABLE];
+	}
+
+	function setCurrentMasterTable($v) {
+		$_SESSION[EW_PROJECT_NAME . "_" . $this->TableVar . "_" . EW_TABLE_MASTER_TABLE] = $v;
+	}
+
+	// Session master WHERE clause
+	function GetMasterFilter() {
+
+		// Master filter
+		$sMasterFilter = "";
+		if ($this->getCurrentMasterTable() == "t03_pinjaman") {
+			if ($this->pinjaman_id->getSessionValue() <> "")
+				$sMasterFilter .= "`id`=" . ew_QuotedValue($this->pinjaman_id->getSessionValue(), EW_DATATYPE_NUMBER, "DB");
+			else
+				return "";
+		}
+		return $sMasterFilter;
+	}
+
+	// Session detail WHERE clause
+	function GetDetailFilter() {
+
+		// Detail filter
+		$sDetailFilter = "";
+		if ($this->getCurrentMasterTable() == "t03_pinjaman") {
+			if ($this->pinjaman_id->getSessionValue() <> "")
+				$sDetailFilter .= "`pinjaman_id`=" . ew_QuotedValue($this->pinjaman_id->getSessionValue(), EW_DATATYPE_NUMBER, "DB");
+			else
+				return "";
+		}
+		return $sDetailFilter;
+	}
+
+	// Master filter
+	function SqlMasterFilter_t03_pinjaman() {
+		return "`id`=@id@";
+	}
+
+	// Detail filter
+	function SqlDetailFilter_t03_pinjaman() {
+		return "`pinjaman_id`=@pinjaman_id@";
+	}
+
 	// Table level SQL
 	var $_SqlFrom = "";
 
@@ -507,6 +554,10 @@ class ct06_pinjamantitipan extends cTable {
 
 	// Add master url
 	function AddMasterUrl($url) {
+		if ($this->getCurrentMasterTable() == "t03_pinjaman" && strpos($url, EW_TABLE_SHOW_MASTER . "=") === FALSE) {
+			$url .= (strpos($url, "?") !== FALSE ? "&" : "?") . EW_TABLE_SHOW_MASTER . "=" . $this->getCurrentMasterTable();
+			$url .= "&fk_id=" . urlencode($this->pinjaman_id->CurrentValue);
+		}
 		return $url;
 	}
 
@@ -712,8 +763,14 @@ class ct06_pinjamantitipan extends cTable {
 		// pinjaman_id
 		$this->pinjaman_id->EditAttrs["class"] = "form-control";
 		$this->pinjaman_id->EditCustomAttributes = "";
+		if ($this->pinjaman_id->getSessionValue() <> "") {
+			$this->pinjaman_id->CurrentValue = $this->pinjaman_id->getSessionValue();
+		$this->pinjaman_id->ViewValue = $this->pinjaman_id->CurrentValue;
+		$this->pinjaman_id->ViewCustomAttributes = "";
+		} else {
 		$this->pinjaman_id->EditValue = $this->pinjaman_id->CurrentValue;
 		$this->pinjaman_id->PlaceHolder = ew_RemoveHtml($this->pinjaman_id->FldCaption());
+		}
 
 		// Tanggal
 		$this->Tanggal->EditAttrs["class"] = "form-control";
@@ -775,7 +832,6 @@ class ct06_pinjamantitipan extends cTable {
 			if ($Doc->Horizontal) { // Horizontal format, write header
 				$Doc->BeginExportRow();
 				if ($ExportPageType == "view") {
-					if ($this->id->Exportable) $Doc->ExportCaption($this->id);
 					if ($this->pinjaman_id->Exportable) $Doc->ExportCaption($this->pinjaman_id);
 					if ($this->Tanggal->Exportable) $Doc->ExportCaption($this->Tanggal);
 					if ($this->Keterangan->Exportable) $Doc->ExportCaption($this->Keterangan);
@@ -786,6 +842,7 @@ class ct06_pinjamantitipan extends cTable {
 					if ($this->id->Exportable) $Doc->ExportCaption($this->id);
 					if ($this->pinjaman_id->Exportable) $Doc->ExportCaption($this->pinjaman_id);
 					if ($this->Tanggal->Exportable) $Doc->ExportCaption($this->Tanggal);
+					if ($this->Keterangan->Exportable) $Doc->ExportCaption($this->Keterangan);
 					if ($this->Masuk->Exportable) $Doc->ExportCaption($this->Masuk);
 					if ($this->Keluar->Exportable) $Doc->ExportCaption($this->Keluar);
 					if ($this->Sisa->Exportable) $Doc->ExportCaption($this->Sisa);
@@ -820,7 +877,6 @@ class ct06_pinjamantitipan extends cTable {
 				if (!$Doc->ExportCustom) {
 					$Doc->BeginExportRow($RowCnt); // Allow CSS styles if enabled
 					if ($ExportPageType == "view") {
-						if ($this->id->Exportable) $Doc->ExportField($this->id);
 						if ($this->pinjaman_id->Exportable) $Doc->ExportField($this->pinjaman_id);
 						if ($this->Tanggal->Exportable) $Doc->ExportField($this->Tanggal);
 						if ($this->Keterangan->Exportable) $Doc->ExportField($this->Keterangan);
@@ -831,6 +887,7 @@ class ct06_pinjamantitipan extends cTable {
 						if ($this->id->Exportable) $Doc->ExportField($this->id);
 						if ($this->pinjaman_id->Exportable) $Doc->ExportField($this->pinjaman_id);
 						if ($this->Tanggal->Exportable) $Doc->ExportField($this->Tanggal);
+						if ($this->Keterangan->Exportable) $Doc->ExportField($this->Keterangan);
 						if ($this->Masuk->Exportable) $Doc->ExportField($this->Masuk);
 						if ($this->Keluar->Exportable) $Doc->ExportField($this->Keluar);
 						if ($this->Sisa->Exportable) $Doc->ExportField($this->Sisa);

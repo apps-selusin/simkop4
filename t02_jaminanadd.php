@@ -920,6 +920,26 @@ class ct02_jaminan_add extends ct02_jaminan {
 	// Add record
 	function AddRow($rsold = NULL) {
 		global $Language, $Security;
+
+		// Check referential integrity for master table 't01_nasabah'
+		$bValidMasterRecord = TRUE;
+		$sMasterFilter = $this->SqlMasterFilter_t01_nasabah();
+		if (strval($this->nasabah_id->CurrentValue) <> "") {
+			$sMasterFilter = str_replace("@id@", ew_AdjustSql($this->nasabah_id->CurrentValue, "DB"), $sMasterFilter);
+		} else {
+			$bValidMasterRecord = FALSE;
+		}
+		if ($bValidMasterRecord) {
+			if (!isset($GLOBALS["t01_nasabah"])) $GLOBALS["t01_nasabah"] = new ct01_nasabah();
+			$rsmaster = $GLOBALS["t01_nasabah"]->LoadRs($sMasterFilter);
+			$bValidMasterRecord = ($rsmaster && !$rsmaster->EOF);
+			$rsmaster->Close();
+		}
+		if (!$bValidMasterRecord) {
+			$sRelatedRecordMsg = str_replace("%t", "t01_nasabah", $Language->Phrase("RelatedRecordRequired"));
+			$this->setFailureMessage($sRelatedRecordMsg);
+			return FALSE;
+		}
 		$conn = &$this->Connection();
 
 		// Load db values from rsold

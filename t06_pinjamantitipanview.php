@@ -6,6 +6,7 @@ ob_start(); // Turn on output buffering
 <?php include_once ((EW_USE_ADODB) ? "adodb5/adodb.inc.php" : "ewmysql13.php") ?>
 <?php include_once "phpfn13.php" ?>
 <?php include_once "t06_pinjamantitipaninfo.php" ?>
+<?php include_once "t03_pinjamaninfo.php" ?>
 <?php include_once "t96_employeesinfo.php" ?>
 <?php include_once "userfn13.php" ?>
 <?php
@@ -276,6 +277,9 @@ class ct06_pinjamantitipan_view extends ct06_pinjamantitipan {
 		$this->ExportCsvUrl = $this->PageUrl() . "export=csv" . $KeyUrl;
 		$this->ExportPdfUrl = $this->PageUrl() . "export=pdf" . $KeyUrl;
 
+		// Table object (t03_pinjaman)
+		if (!isset($GLOBALS['t03_pinjaman'])) $GLOBALS['t03_pinjaman'] = new ct03_pinjaman();
+
 		// Table object (t96_employees)
 		if (!isset($GLOBALS['t96_employees'])) $GLOBALS['t96_employees'] = new ct96_employees();
 
@@ -383,8 +387,6 @@ class ct06_pinjamantitipan_view extends ct06_pinjamantitipan {
 
 		// Setup export options
 		$this->SetupExportOptions();
-		$this->id->SetVisibility();
-		$this->id->Visible = !$this->IsAdd() && !$this->IsCopy() && !$this->IsGridAdd();
 		$this->pinjaman_id->SetVisibility();
 		$this->Tanggal->SetVisibility();
 		$this->Keterangan->SetVisibility();
@@ -490,6 +492,9 @@ class ct06_pinjamantitipan_view extends ct06_pinjamantitipan {
 		$bLoadCurrentRecord = FALSE;
 		$sReturnUrl = "";
 		$bMatchRecord = FALSE;
+
+		// Set up master/detail parameters
+		$this->SetUpMasterParms();
 		if ($this->IsPageRequest()) { // Validate request
 			if (@$_GET["id"] <> "") {
 				$this->id->setQueryStringValue($_GET["id"]);
@@ -608,7 +613,7 @@ class ct06_pinjamantitipan_view extends ct06_pinjamantitipan {
 		$option = &$options["action"];
 		$option->DropDownButtonPhrase = $Language->Phrase("ButtonActions");
 		$option->UseImageAndText = TRUE;
-		$option->UseDropDownButton = TRUE;
+		$option->UseDropDownButton = FALSE;
 		$option->UseButtonGroup = TRUE;
 		$item = &$option->Add($option->GroupOptionName);
 		$item->Body = "";
@@ -795,11 +800,6 @@ class ct06_pinjamantitipan_view extends ct06_pinjamantitipan {
 		// Sisa
 		$this->Sisa->ViewValue = $this->Sisa->CurrentValue;
 		$this->Sisa->ViewCustomAttributes = "";
-
-			// id
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-			$this->id->TooltipValue = "";
 
 			// pinjaman_id
 			$this->pinjaman_id->LinkCustomAttributes = "";
@@ -1084,6 +1084,67 @@ class ct06_pinjamantitipan_view extends ct06_pinjamantitipan {
 		return $sQry;
 	}
 
+	// Set up master/detail based on QueryString
+	function SetUpMasterParms() {
+		$bValidMaster = FALSE;
+
+		// Get the keys for master table
+		if (isset($_GET[EW_TABLE_SHOW_MASTER])) {
+			$sMasterTblVar = $_GET[EW_TABLE_SHOW_MASTER];
+			if ($sMasterTblVar == "") {
+				$bValidMaster = TRUE;
+				$this->DbMasterFilter = "";
+				$this->DbDetailFilter = "";
+			}
+			if ($sMasterTblVar == "t03_pinjaman") {
+				$bValidMaster = TRUE;
+				if (@$_GET["fk_id"] <> "") {
+					$GLOBALS["t03_pinjaman"]->id->setQueryStringValue($_GET["fk_id"]);
+					$this->pinjaman_id->setQueryStringValue($GLOBALS["t03_pinjaman"]->id->QueryStringValue);
+					$this->pinjaman_id->setSessionValue($this->pinjaman_id->QueryStringValue);
+					if (!is_numeric($GLOBALS["t03_pinjaman"]->id->QueryStringValue)) $bValidMaster = FALSE;
+				} else {
+					$bValidMaster = FALSE;
+				}
+			}
+		} elseif (isset($_POST[EW_TABLE_SHOW_MASTER])) {
+			$sMasterTblVar = $_POST[EW_TABLE_SHOW_MASTER];
+			if ($sMasterTblVar == "") {
+				$bValidMaster = TRUE;
+				$this->DbMasterFilter = "";
+				$this->DbDetailFilter = "";
+			}
+			if ($sMasterTblVar == "t03_pinjaman") {
+				$bValidMaster = TRUE;
+				if (@$_POST["fk_id"] <> "") {
+					$GLOBALS["t03_pinjaman"]->id->setFormValue($_POST["fk_id"]);
+					$this->pinjaman_id->setFormValue($GLOBALS["t03_pinjaman"]->id->FormValue);
+					$this->pinjaman_id->setSessionValue($this->pinjaman_id->FormValue);
+					if (!is_numeric($GLOBALS["t03_pinjaman"]->id->FormValue)) $bValidMaster = FALSE;
+				} else {
+					$bValidMaster = FALSE;
+				}
+			}
+		}
+		if ($bValidMaster) {
+
+			// Save current master table
+			$this->setCurrentMasterTable($sMasterTblVar);
+			$this->setSessionWhere($this->GetDetailFilter());
+
+			// Reset start record counter (new master key)
+			$this->StartRec = 1;
+			$this->setStartRecordNumber($this->StartRec);
+
+			// Clear previous master key from Session
+			if ($sMasterTblVar <> "t03_pinjaman") {
+				if ($this->pinjaman_id->CurrentValue == "") $this->pinjaman_id->setSessionValue("");
+			}
+		}
+		$this->DbMasterFilter = $this->GetMasterFilter(); // Get master filter
+		$this->DbDetailFilter = $this->GetDetailFilter(); // Get detail filter
+	}
+
 	// Set up Breadcrumb
 	function SetupBreadcrumb() {
 		global $Breadcrumb, $Language;
@@ -1327,17 +1388,6 @@ $t06_pinjamantitipan_view->ShowMessage();
 <input type="hidden" name="modal" value="1">
 <?php } ?>
 <table class="table table-bordered table-striped ewViewTable">
-<?php if ($t06_pinjamantitipan->id->Visible) { // id ?>
-	<tr id="r_id">
-		<td><span id="elh_t06_pinjamantitipan_id"><?php echo $t06_pinjamantitipan->id->FldCaption() ?></span></td>
-		<td data-name="id"<?php echo $t06_pinjamantitipan->id->CellAttributes() ?>>
-<span id="el_t06_pinjamantitipan_id">
-<span<?php echo $t06_pinjamantitipan->id->ViewAttributes() ?>>
-<?php echo $t06_pinjamantitipan->id->ViewValue ?></span>
-</span>
-</td>
-	</tr>
-<?php } ?>
 <?php if ($t06_pinjamantitipan->pinjaman_id->Visible) { // pinjaman_id ?>
 	<tr id="r_pinjaman_id">
 		<td><span id="elh_t06_pinjamantitipan_pinjaman_id"><?php echo $t06_pinjamantitipan->pinjaman_id->FldCaption() ?></span></td>
