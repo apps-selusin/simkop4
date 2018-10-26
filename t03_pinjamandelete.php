@@ -425,7 +425,7 @@ class ct03_pinjaman_delete extends ct03_pinjaman {
 		if ($this->UseSelectLimit) {
 			$conn->raiseErrorFn = $GLOBALS["EW_ERROR_FN"];
 			if ($dbtype == "MSSQL") {
-				$rs = $conn->SelectLimit($sSql, $rowcnt, $offset, array("_hasOrderBy" => trim($this->getOrderBy()) || trim($this->getSessionOrderBy())));
+				$rs = $conn->SelectLimit($sSql, $rowcnt, $offset, array("_hasOrderBy" => trim($this->getOrderBy()) || trim($this->getSessionOrderByList())));
 			} else {
 				$rs = $conn->SelectLimit($sSql, $rowcnt, $offset);
 			}
@@ -472,6 +472,11 @@ class ct03_pinjaman_delete extends ct03_pinjaman {
 		$this->Kontrak_No->setDbValue($rs->fields('Kontrak_No'));
 		$this->Kontrak_Tgl->setDbValue($rs->fields('Kontrak_Tgl'));
 		$this->nasabah_id->setDbValue($rs->fields('nasabah_id'));
+		if (array_key_exists('EV__nasabah_id', $rs->fields)) {
+			$this->nasabah_id->VirtualValue = $rs->fields('EV__nasabah_id'); // Set up virtual field value
+		} else {
+			$this->nasabah_id->VirtualValue = ""; // Clear value
+		}
 		$this->Pinjaman->setDbValue($rs->fields('Pinjaman'));
 		$this->Angsuran_Lama->setDbValue($rs->fields('Angsuran_Lama'));
 		$this->Angsuran_Bunga_Prosen->setDbValue($rs->fields('Angsuran_Bunga_Prosen'));
@@ -566,11 +571,15 @@ class ct03_pinjaman_delete extends ct03_pinjaman {
 		$this->Kontrak_Tgl->ViewCustomAttributes = "";
 
 		// nasabah_id
+		if ($this->nasabah_id->VirtualValue <> "") {
+			$this->nasabah_id->ViewValue = $this->nasabah_id->VirtualValue;
+		} else {
+			$this->nasabah_id->ViewValue = $this->nasabah_id->CurrentValue;
 		if (strval($this->nasabah_id->CurrentValue) <> "") {
 			$sFilterWrk = "`id`" . ew_SearchString("=", $this->nasabah_id->CurrentValue, EW_DATATYPE_NUMBER, "");
 		$sSqlWrk = "SELECT `id`, `Nama` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `t01_nasabah`";
 		$sWhereWrk = "";
-		$this->nasabah_id->LookupFilters = array();
+		$this->nasabah_id->LookupFilters = array("dx1" => '`Nama`');
 		ew_AddFilter($sWhereWrk, $sFilterWrk);
 		$this->Lookup_Selecting($this->nasabah_id, $sWhereWrk); // Call Lookup selecting
 		if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
@@ -585,6 +594,7 @@ class ct03_pinjaman_delete extends ct03_pinjaman {
 			}
 		} else {
 			$this->nasabah_id->ViewValue = NULL;
+		}
 		}
 		$this->nasabah_id->ViewCustomAttributes = "";
 

@@ -75,10 +75,8 @@ class ct03_pinjaman extends cTable {
 		$this->fields['Kontrak_Tgl'] = &$this->Kontrak_Tgl;
 
 		// nasabah_id
-		$this->nasabah_id = new cField('t03_pinjaman', 't03_pinjaman', 'x_nasabah_id', 'nasabah_id', '`nasabah_id`', '`nasabah_id`', 3, -1, FALSE, '`nasabah_id`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'SELECT');
+		$this->nasabah_id = new cField('t03_pinjaman', 't03_pinjaman', 'x_nasabah_id', 'nasabah_id', '`nasabah_id`', '`nasabah_id`', 3, -1, FALSE, '`EV__nasabah_id`', TRUE, FALSE, TRUE, 'FORMATTED TEXT', 'TEXT');
 		$this->nasabah_id->Sortable = TRUE; // Allow sort
-		$this->nasabah_id->UsePleaseSelect = TRUE; // Use PleaseSelect by default
-		$this->nasabah_id->PleaseSelectText = $Language->Phrase("PleaseSelect"); // PleaseSelect text
 		$this->nasabah_id->FldDefaultErrMsg = $Language->Phrase("IncorrectInteger");
 		$this->fields['nasabah_id'] = &$this->nasabah_id;
 
@@ -165,9 +163,31 @@ class ct03_pinjaman extends cTable {
 			} else {
 				$this->setSessionOrderBy($sSortField . " " . $sThisSort); // Save to Session
 			}
+			$sSortFieldList = ($ofld->FldVirtualExpression <> "") ? $ofld->FldVirtualExpression : $sSortField;
+			if ($ctrl) {
+				$sOrderByList = $this->getSessionOrderByList();
+				if (strpos($sOrderByList, $sSortFieldList . " " . $sLastSort) !== FALSE) {
+					$sOrderByList = str_replace($sSortFieldList . " " . $sLastSort, $sSortFieldList . " " . $sThisSort, $sOrderByList);
+				} else {
+					if ($sOrderByList <> "") $sOrderByList .= ", ";
+					$sOrderByList .= $sSortFieldList . " " . $sThisSort;
+				}
+				$this->setSessionOrderByList($sOrderByList); // Save to Session
+			} else {
+				$this->setSessionOrderByList($sSortFieldList . " " . $sThisSort); // Save to Session
+			}
 		} else {
 			if (!$ctrl) $ofld->setSort("");
 		}
+	}
+
+	// Session ORDER BY for List page
+	function getSessionOrderByList() {
+		return @$_SESSION[EW_PROJECT_NAME . "_" . $this->TableVar . "_" . EW_TABLE_ORDER_BY_LIST];
+	}
+
+	function setSessionOrderByList($v) {
+		$_SESSION[EW_PROJECT_NAME . "_" . $this->TableVar . "_" . EW_TABLE_ORDER_BY_LIST] = $v;
 	}
 
 	// Current detail table name
@@ -228,6 +248,23 @@ class ct03_pinjaman extends cTable {
 
 	function setSqlSelect($v) {
 		$this->_SqlSelect = $v;
+	}
+	var $_SqlSelectList = "";
+
+	function getSqlSelectList() { // Select for List page
+		$select = "";
+		$select = "SELECT * FROM (" .
+			"SELECT *, (SELECT `Nama` FROM `t01_nasabah` `EW_TMP_LOOKUPTABLE` WHERE `EW_TMP_LOOKUPTABLE`.`id` = `t03_pinjaman`.`nasabah_id` LIMIT 1) AS `EV__nasabah_id` FROM `t03_pinjaman`" .
+			") `EW_TMP_TABLE`";
+		return ($this->_SqlSelectList <> "") ? $this->_SqlSelectList : $select;
+	}
+
+	function SqlSelectList() { // For backward compatibility
+		return $this->getSqlSelectList();
+	}
+
+	function setSqlSelectList($v) {
+		$this->_SqlSelectList = $v;
 	}
 	var $_SqlWhere = "";
 
@@ -340,15 +377,38 @@ class ct03_pinjaman extends cTable {
 		ew_AddFilter($sFilter, $this->CurrentFilter);
 		$sFilter = $this->ApplyUserIDFilters($sFilter);
 		$this->Recordset_Selecting($sFilter);
-		$sSort = $this->getSessionOrderBy();
-		return ew_BuildSelectSql($this->getSqlSelect(), $this->getSqlWhere(), $this->getSqlGroupBy(),
-			$this->getSqlHaving(), $this->getSqlOrderBy(), $sFilter, $sSort);
+		if ($this->UseVirtualFields()) {
+			$sSort = $this->getSessionOrderByList();
+			return ew_BuildSelectSql($this->getSqlSelectList(), $this->getSqlWhere(), $this->getSqlGroupBy(),
+				$this->getSqlHaving(), $this->getSqlOrderBy(), $sFilter, $sSort);
+		} else {
+			$sSort = $this->getSessionOrderBy();
+			return ew_BuildSelectSql($this->getSqlSelect(), $this->getSqlWhere(), $this->getSqlGroupBy(),
+				$this->getSqlHaving(), $this->getSqlOrderBy(), $sFilter, $sSort);
+		}
 	}
 
 	// Get ORDER BY clause
 	function GetOrderBy() {
-		$sSort = $this->getSessionOrderBy();
+		$sSort = ($this->UseVirtualFields()) ? $this->getSessionOrderByList() : $this->getSessionOrderBy();
 		return ew_BuildSelectSql("", "", "", "", $this->getSqlOrderBy(), "", $sSort);
+	}
+
+	// Check if virtual fields is used in SQL
+	function UseVirtualFields() {
+		$sWhere = $this->getSessionWhere();
+		$sOrderBy = $this->getSessionOrderByList();
+		if ($sWhere <> "")
+			$sWhere = " " . str_replace(array("(",")"), array("",""), $sWhere) . " ";
+		if ($sOrderBy <> "")
+			$sOrderBy = " " . str_replace(array("(",")"), array("",""), $sOrderBy) . " ";
+		if ($this->nasabah_id->AdvancedSearch->SearchValue <> "" ||
+			$this->nasabah_id->AdvancedSearch->SearchValue2 <> "" ||
+			strpos($sWhere, " " . $this->nasabah_id->FldVirtualExpression . " ") !== FALSE)
+			return TRUE;
+		if (strpos($sOrderBy, " " . $this->nasabah_id->FldVirtualExpression . " ") !== FALSE)
+			return TRUE;
+		return FALSE;
 	}
 
 	// Try to get record count
@@ -819,11 +879,15 @@ class ct03_pinjaman extends cTable {
 		$this->Kontrak_Tgl->ViewCustomAttributes = "";
 
 		// nasabah_id
+		if ($this->nasabah_id->VirtualValue <> "") {
+			$this->nasabah_id->ViewValue = $this->nasabah_id->VirtualValue;
+		} else {
+			$this->nasabah_id->ViewValue = $this->nasabah_id->CurrentValue;
 		if (strval($this->nasabah_id->CurrentValue) <> "") {
 			$sFilterWrk = "`id`" . ew_SearchString("=", $this->nasabah_id->CurrentValue, EW_DATATYPE_NUMBER, "");
 		$sSqlWrk = "SELECT `id`, `Nama` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `t01_nasabah`";
 		$sWhereWrk = "";
-		$this->nasabah_id->LookupFilters = array();
+		$this->nasabah_id->LookupFilters = array("dx1" => '`Nama`');
 		ew_AddFilter($sWhereWrk, $sFilterWrk);
 		$this->Lookup_Selecting($this->nasabah_id, $sWhereWrk); // Call Lookup selecting
 		if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
@@ -838,6 +902,7 @@ class ct03_pinjaman extends cTable {
 			}
 		} else {
 			$this->nasabah_id->ViewValue = NULL;
+		}
 		}
 		$this->nasabah_id->ViewCustomAttributes = "";
 
@@ -982,6 +1047,8 @@ class ct03_pinjaman extends cTable {
 		// nasabah_id
 		$this->nasabah_id->EditAttrs["class"] = "form-control";
 		$this->nasabah_id->EditCustomAttributes = "";
+		$this->nasabah_id->EditValue = $this->nasabah_id->CurrentValue;
+		$this->nasabah_id->PlaceHolder = ew_RemoveHtml($this->nasabah_id->FldCaption());
 
 		// Pinjaman
 		$this->Pinjaman->EditAttrs["class"] = "form-control";
@@ -1032,7 +1099,7 @@ class ct03_pinjaman extends cTable {
 
 		// Angsuran_Total
 		$this->Angsuran_Total->EditAttrs["class"] = "form-control";
-		$this->Angsuran_Total->EditCustomAttributes = "";
+		$this->Angsuran_Total->EditCustomAttributes = "disabled";
 		$this->Angsuran_Total->EditValue = $this->Angsuran_Total->CurrentValue;
 		$this->Angsuran_Total->PlaceHolder = ew_RemoveHtml($this->Angsuran_Total->FldCaption());
 		if (strval($this->Angsuran_Total->EditValue) <> "" && is_numeric($this->Angsuran_Total->EditValue)) $this->Angsuran_Total->EditValue = ew_FormatNumber($this->Angsuran_Total->EditValue, -2, -2, -2, -2);
@@ -1369,6 +1436,51 @@ class ct03_pinjaman extends cTable {
 	function Row_Inserted($rsold, &$rsnew) {
 
 		//echo "Row Inserted"
+		// create data rincian angsuran
+
+		$pinjaman_id      = $rsnew["id"];
+		$Angsuran_Tanggal = $rsnew["Kontrak_Tgl"];
+		$Angsuran_Tgl     = substr($Angsuran_Tanggal, -2);
+		$Angsuran_Pokok   = $rsnew["Angsuran_Pokok"];
+		$Angsuran_Bunga   = $rsnew["Angsuran_Bunga"];
+		$Angsuran_Total   = $Angsuran_Pokok + $Angsuran_Bunga;
+		$Sisa_Hutang      = $rsnew["Pinjaman"];
+		$Angsuran_Pokok_Total = 0;
+		$Angsuran_Bunga_Total = 0;
+		$Angsuran_Total_Grand = 0;
+
+		//for ($i; $i <= 12; $i++) {
+		for ($Angsuran_Ke = 1; $Angsuran_Ke <= $rsnew["Angsuran_Lama"]; $Angsuran_Ke++) {
+			$Angsuran_Tanggal      = f_TanggalAngsuran($Angsuran_Tanggal, $Angsuran_Tgl);
+			$Angsuran_Pokok_Total += $Angsuran_Pokok;
+			if ($Angsuran_Pokok_Total >= $rsnew["Pinjaman"]) {
+				$Angsuran_Pokok       = $Angsuran_Pokok - ($Angsuran_Pokok_Total - $rsnew["Pinjaman"]);
+				$Angsuran_Pokok_Total = $Angsuran_Pokok_Total - ($Angsuran_Pokok_Total - $rsnew["Pinjaman"]);
+			}
+			$Sisa_Hutang          -= $Angsuran_Pokok;
+			$Angsuran_Bunga        = $Angsuran_Total - $Angsuran_Pokok;
+			$Angsuran_Bunga_Total += $Angsuran_Bunga;
+			$Angsuran_Total_Grand += $Angsuran_Total;
+			$q = "insert into t04_pinjamanangsuran (
+				pinjaman_id,
+				Angsuran_Ke,
+				Angsuran_Tanggal,
+				Angsuran_Pokok,
+				Angsuran_Bunga,
+				Angsuran_Total,
+				Sisa_Hutang
+				) values (
+				'".$pinjaman_id."',
+				'".$Angsuran_Ke."',
+				'".$Angsuran_Tanggal."',
+				".$Angsuran_Pokok.",
+				".$Angsuran_Bunga.",
+				".$Angsuran_Total.",
+				".$Sisa_Hutang."
+				)";
+			ew_Execute($q);
+		}
+		f_updatesaldotitipan($pinjaman_id);
 	}
 
 	// Row Updating event
@@ -1376,7 +1488,27 @@ class ct03_pinjaman extends cTable {
 
 		// Enter your code here
 		// To cancel, set return value to FALSE
+		// check perubahan data master pinjaman
+		// jika ada perubahan pada data master tapi sudah ada data pembayaran
+		// maka perubahan harus tidak diperbolehkan
 
+		$q = "select count(id) from t04_pinjamanangsuran where
+			pinjaman_id = ".$rsold["id"]."
+			and Tanggal_Bayar is not null"; //echo $q; exit;
+		$t04_reccount = ew_ExecuteScalar($q);
+		if ($t04_reccount > 0) {
+			if (
+				$rsold["Angsuran_Lama"] == $rsnew["Angsuran_Lama"] and
+				$rsold["Angsuran_Pokok"] == $rsnew["Angsuran_Pokok"] and
+				$rsold["Angsuran_Bunga"] == $rsnew["Angsuran_Bunga"] and
+				$rsold["Angsuran_Total"] == $rsnew["Angsuran_Total"]
+			) {
+			}
+			else {
+				$this->setFailureMessage("Sudah ada Transaksi Pembayaran Angsuran, data tidak bisa diubah !");
+				return FALSE;
+			}
+		}
 		return TRUE;
 	}
 
@@ -1384,6 +1516,69 @@ class ct03_pinjaman extends cTable {
 	function Row_Updated($rsold, &$rsnew) {
 
 		//echo "Row Updated";
+		// check apakah ada perubahan data pada field
+		// lama angsuran
+		// angs. pokok
+		// angs. bunga
+		// angs. total
+		// jika ada perubahan :: maka detail angsuran diperbarui
+
+		$pinjaman_id = $rsold["id"];
+		if (
+			$rsold["Angsuran_Lama"] == $rsnew["Angsuran_Lama"] and
+			$rsold["Angsuran_Pokok"] == $rsnew["Angsuran_Pokok"] and
+			$rsold["Angsuran_Bunga"] == $rsnew["Angsuran_Bunga"] and
+			$rsold["Angsuran_Total"] == $rsnew["Angsuran_Total"]
+			) {
+		}
+		else {
+
+			// hapus data rincian angsuran yang lama
+			$q = "delete from t04_pinjamanangsuran where pinjaman_id = ".$rsold["id"]."";
+			ew_Execute($q);
+
+			// create data rincian angsuran
+			$Angsuran_Tanggal = $rsnew["Kontrak_Tgl"];
+			$Angsuran_Tgl     = substr($Angsuran_Tanggal, -2);
+			$Angsuran_Pokok   = $rsnew["Angsuran_Pokok"];
+			$Angsuran_Bunga   = $rsnew["Angsuran_Bunga"];
+			$Angsuran_Total   = $Angsuran_Pokok + $Angsuran_Bunga;
+			$Sisa_Hutang      = $rsnew["Pinjaman"];
+			$Angsuran_Pokok_Total = 0;
+			$Angsuran_Bunga_Total = 0;
+			$Angsuran_Total_Grand = 0;
+			for ($Angsuran_Ke = 1; $Angsuran_Ke <= $rsnew["Angsuran_Lama"]; $Angsuran_Ke++) {
+				$Angsuran_Tanggal      = f_TanggalAngsuran($Angsuran_Tanggal, $Angsuran_Tgl);
+				$Angsuran_Pokok_Total += $Angsuran_Pokok;
+				if ($Angsuran_Pokok_Total >= $rsnew["Pinjaman"]) {
+					$Angsuran_Pokok       = $Angsuran_Pokok - ($Angsuran_Pokok_Total - $rsnew["Pinjaman"]);
+					$Angsuran_Pokok_Total = $Angsuran_Pokok_Total - ($Angsuran_Pokok_Total - $rsnew["Pinjaman"]);
+				}
+				$Sisa_Hutang          -= $Angsuran_Pokok;
+				$Angsuran_Bunga        = $Angsuran_Total - $Angsuran_Pokok;
+				$Angsuran_Bunga_Total += $Angsuran_Bunga;
+				$Angsuran_Total_Grand += $Angsuran_Total;
+				$q = "insert into t04_pinjamanangsuran (
+					pinjaman_id,
+					Angsuran_Ke,
+					Angsuran_Tanggal,
+					Angsuran_Pokok,
+					Angsuran_Bunga,
+					Angsuran_Total,
+					Sisa_Hutang
+					) values (
+					'".$pinjaman_id."',
+					'".$Angsuran_Ke."',
+					'".$Angsuran_Tanggal."',
+					".$Angsuran_Pokok.",
+					".$Angsuran_Bunga.",
+					".$Angsuran_Total.",
+					".$Sisa_Hutang."
+					)";
+				ew_Execute($q); //echo $q; exit;
+			}
+		}
+		f_updatesaldotitipan($pinjaman_id);
 	}
 
 	// Row Update Conflict event
