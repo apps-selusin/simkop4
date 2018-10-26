@@ -974,7 +974,6 @@ class ct03_pinjaman_view extends ct03_pinjaman {
 		if ($this->nasabah_id->VirtualValue <> "") {
 			$this->nasabah_id->ViewValue = $this->nasabah_id->VirtualValue;
 		} else {
-			$this->nasabah_id->ViewValue = $this->nasabah_id->CurrentValue;
 		if (strval($this->nasabah_id->CurrentValue) <> "") {
 			$sFilterWrk = "`id`" . ew_SearchString("=", $this->nasabah_id->CurrentValue, EW_DATATYPE_NUMBER, "");
 		$sSqlWrk = "SELECT `id`, `Nama` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `t01_nasabah`";

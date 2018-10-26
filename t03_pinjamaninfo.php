@@ -75,8 +75,10 @@ class ct03_pinjaman extends cTable {
 		$this->fields['Kontrak_Tgl'] = &$this->Kontrak_Tgl;
 
 		// nasabah_id
-		$this->nasabah_id = new cField('t03_pinjaman', 't03_pinjaman', 'x_nasabah_id', 'nasabah_id', '`nasabah_id`', '`nasabah_id`', 3, -1, FALSE, '`EV__nasabah_id`', TRUE, FALSE, TRUE, 'FORMATTED TEXT', 'TEXT');
+		$this->nasabah_id = new cField('t03_pinjaman', 't03_pinjaman', 'x_nasabah_id', 'nasabah_id', '`nasabah_id`', '`nasabah_id`', 3, -1, FALSE, '`EV__nasabah_id`', TRUE, TRUE, TRUE, 'FORMATTED TEXT', 'SELECT');
 		$this->nasabah_id->Sortable = TRUE; // Allow sort
+		$this->nasabah_id->UsePleaseSelect = TRUE; // Use PleaseSelect by default
+		$this->nasabah_id->PleaseSelectText = $Language->Phrase("PleaseSelect"); // PleaseSelect text
 		$this->nasabah_id->FldDefaultErrMsg = $Language->Phrase("IncorrectInteger");
 		$this->fields['nasabah_id'] = &$this->nasabah_id;
 
@@ -882,7 +884,6 @@ class ct03_pinjaman extends cTable {
 		if ($this->nasabah_id->VirtualValue <> "") {
 			$this->nasabah_id->ViewValue = $this->nasabah_id->VirtualValue;
 		} else {
-			$this->nasabah_id->ViewValue = $this->nasabah_id->CurrentValue;
 		if (strval($this->nasabah_id->CurrentValue) <> "") {
 			$sFilterWrk = "`id`" . ew_SearchString("=", $this->nasabah_id->CurrentValue, EW_DATATYPE_NUMBER, "");
 		$sSqlWrk = "SELECT `id`, `Nama` AS `DispFld`, '' AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `t01_nasabah`";
@@ -1047,8 +1048,6 @@ class ct03_pinjaman extends cTable {
 		// nasabah_id
 		$this->nasabah_id->EditAttrs["class"] = "form-control";
 		$this->nasabah_id->EditCustomAttributes = "";
-		$this->nasabah_id->EditValue = $this->nasabah_id->CurrentValue;
-		$this->nasabah_id->PlaceHolder = ew_RemoveHtml($this->nasabah_id->FldCaption());
 
 		// Pinjaman
 		$this->Pinjaman->EditAttrs["class"] = "form-control";
@@ -1099,7 +1098,7 @@ class ct03_pinjaman extends cTable {
 
 		// Angsuran_Total
 		$this->Angsuran_Total->EditAttrs["class"] = "form-control";
-		$this->Angsuran_Total->EditCustomAttributes = "disabled";
+		$this->Angsuran_Total->EditCustomAttributes = "";
 		$this->Angsuran_Total->EditValue = $this->Angsuran_Total->CurrentValue;
 		$this->Angsuran_Total->PlaceHolder = ew_RemoveHtml($this->Angsuran_Total->FldCaption());
 		if (strval($this->Angsuran_Total->EditValue) <> "" && is_numeric($this->Angsuran_Total->EditValue)) $this->Angsuran_Total->EditValue = ew_FormatNumber($this->Angsuran_Total->EditValue, -2, -2, -2, -2);

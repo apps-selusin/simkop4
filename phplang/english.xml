@@ -718,7 +718,7 @@
         <phrase id="fldcaption" value="Angsuran Total" />
       </field>
       <field id="no_ref">
-        <phrase id="fldcaption" value="No. Ref. Kontrak" />
+        <phrase id="fldcaption" value="No. Kontrak Lanjutan" />
       </field>
     </table>
     <table id="t04_pinjamanangsuran">
@@ -733,13 +733,13 @@
         <phrase id="fldcaption" value="Angsuran Ke" />
       </field>
       <field id="angsuran_tanggal">
-        <phrase id="fldcaption" value="Angsuran Tanggal" />
+        <phrase id="fldcaption" value="Tgl. Jatuh Tempo" />
       </field>
       <field id="angsuran_pokok">
         <phrase id="fldcaption" value="Angsuran Pokok" />
       </field>
       <field id="angsuran_bunga">
-        <phrase id="fldcaption" value="Angsuran Bunga" />
+        <phrase id="fldcaption" value="Bunga" />
       </field>
       <field id="angsuran_total">
         <phrase id="fldcaption" value="Angsuran Total" />
@@ -748,7 +748,7 @@
         <phrase id="fldcaption" value="Sisa Hutang" />
       </field>
       <field id="tanggal_bayar">
-        <phrase id="fldcaption" value="Tanggal Bayar" />
+        <phrase id="fldcaption" value="Tgl. Bayar" />
       </field>
       <field id="terlambat">
         <phrase id="fldcaption" value="Terlambat" />

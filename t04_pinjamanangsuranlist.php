@@ -1307,6 +1307,9 @@ class ct04_pinjamanangsuran_list extends ct04_pinjamanangsuran {
 		// pinjaman_id
 		// Angsuran_Ke
 		// Angsuran_Tanggal
+
+		$this->Angsuran_Tanggal->CellCssStyle = "white-space: nowrap;";
+
 		// Angsuran_Pokok
 		// Angsuran_Bunga
 		// Angsuran_Total
@@ -1336,52 +1339,72 @@ class ct04_pinjamanangsuran_list extends ct04_pinjamanangsuran {
 
 		// Angsuran_Tanggal
 		$this->Angsuran_Tanggal->ViewValue = $this->Angsuran_Tanggal->CurrentValue;
-		$this->Angsuran_Tanggal->ViewValue = ew_FormatDateTime($this->Angsuran_Tanggal->ViewValue, 0);
+		$this->Angsuran_Tanggal->ViewValue = ew_FormatDateTime($this->Angsuran_Tanggal->ViewValue, 7);
 		$this->Angsuran_Tanggal->ViewCustomAttributes = "";
 
 		// Angsuran_Pokok
 		$this->Angsuran_Pokok->ViewValue = $this->Angsuran_Pokok->CurrentValue;
+		$this->Angsuran_Pokok->ViewValue = ew_FormatNumber($this->Angsuran_Pokok->ViewValue, 2, -2, -2, -2);
+		$this->Angsuran_Pokok->CellCssStyle .= "text-align: right;";
 		$this->Angsuran_Pokok->ViewCustomAttributes = "";
 
 		// Angsuran_Bunga
 		$this->Angsuran_Bunga->ViewValue = $this->Angsuran_Bunga->CurrentValue;
+		$this->Angsuran_Bunga->ViewValue = ew_FormatNumber($this->Angsuran_Bunga->ViewValue, 2, -2, -2, -2);
+		$this->Angsuran_Bunga->CellCssStyle .= "text-align: right;";
 		$this->Angsuran_Bunga->ViewCustomAttributes = "";
 
 		// Angsuran_Total
 		$this->Angsuran_Total->ViewValue = $this->Angsuran_Total->CurrentValue;
+		$this->Angsuran_Total->ViewValue = ew_FormatNumber($this->Angsuran_Total->ViewValue, 2, -2, -2, -2);
+		$this->Angsuran_Total->CellCssStyle .= "text-align: right;";
 		$this->Angsuran_Total->ViewCustomAttributes = "";
 
 		// Sisa_Hutang
 		$this->Sisa_Hutang->ViewValue = $this->Sisa_Hutang->CurrentValue;
+		$this->Sisa_Hutang->ViewValue = ew_FormatNumber($this->Sisa_Hutang->ViewValue, 2, -2, -2, -2);
+		$this->Sisa_Hutang->CellCssStyle .= "text-align: right;";
 		$this->Sisa_Hutang->ViewCustomAttributes = "";
 
 		// Tanggal_Bayar
 		$this->Tanggal_Bayar->ViewValue = $this->Tanggal_Bayar->CurrentValue;
-		$this->Tanggal_Bayar->ViewValue = ew_FormatDateTime($this->Tanggal_Bayar->ViewValue, 0);
+		$this->Tanggal_Bayar->ViewValue = ew_FormatDateTime($this->Tanggal_Bayar->ViewValue, 7);
 		$this->Tanggal_Bayar->ViewCustomAttributes = "";
 
 		// Terlambat
 		$this->Terlambat->ViewValue = $this->Terlambat->CurrentValue;
+		$this->Terlambat->ViewValue = ew_FormatNumber($this->Terlambat->ViewValue, 2, -2, -2, -2);
+		$this->Terlambat->CellCssStyle .= "text-align: right;";
 		$this->Terlambat->ViewCustomAttributes = "";
 
 		// Total_Denda
 		$this->Total_Denda->ViewValue = $this->Total_Denda->CurrentValue;
+		$this->Total_Denda->ViewValue = ew_FormatNumber($this->Total_Denda->ViewValue, 2, -2, -2, -2);
+		$this->Total_Denda->CellCssStyle .= "text-align: right;";
 		$this->Total_Denda->ViewCustomAttributes = "";
 
 		// Bayar_Titipan
 		$this->Bayar_Titipan->ViewValue = $this->Bayar_Titipan->CurrentValue;
+		$this->Bayar_Titipan->ViewValue = ew_FormatNumber($this->Bayar_Titipan->ViewValue, 2, -2, -2, -2);
+		$this->Bayar_Titipan->CellCssStyle .= "text-align: right;";
 		$this->Bayar_Titipan->ViewCustomAttributes = "";
 
 		// Bayar_Non_Titipan
 		$this->Bayar_Non_Titipan->ViewValue = $this->Bayar_Non_Titipan->CurrentValue;
+		$this->Bayar_Non_Titipan->ViewValue = ew_FormatNumber($this->Bayar_Non_Titipan->ViewValue, 2, -2, -2, -2);
+		$this->Bayar_Non_Titipan->CellCssStyle .= "text-align: right;";
 		$this->Bayar_Non_Titipan->ViewCustomAttributes = "";
 
 		// Bayar_Total
 		$this->Bayar_Total->ViewValue = $this->Bayar_Total->CurrentValue;
+		$this->Bayar_Total->ViewValue = ew_FormatNumber($this->Bayar_Total->ViewValue, 2, -2, -2, -2);
+		$this->Bayar_Total->CellCssStyle .= "text-align: right;";
 		$this->Bayar_Total->ViewCustomAttributes = "";
 
 		// pinjamantitipan_id
 		$this->pinjamantitipan_id->ViewValue = $this->pinjamantitipan_id->CurrentValue;
+		$this->pinjamantitipan_id->ViewValue = ew_FormatNumber($this->pinjamantitipan_id->ViewValue, 2, -2, -2, -2);
+		$this->pinjamantitipan_id->CellCssStyle .= "text-align: right;";
 		$this->pinjamantitipan_id->ViewCustomAttributes = "";
 
 			// pinjaman_id
@@ -2188,10 +2211,10 @@ $t04_pinjamanangsuran_list->ListOptions->Render("header", "left");
 <?php } ?>		
 <?php if ($t04_pinjamanangsuran->Angsuran_Tanggal->Visible) { // Angsuran_Tanggal ?>
 	<?php if ($t04_pinjamanangsuran->SortUrl($t04_pinjamanangsuran->Angsuran_Tanggal) == "") { ?>
-		<th data-name="Angsuran_Tanggal"><div id="elh_t04_pinjamanangsuran_Angsuran_Tanggal" class="t04_pinjamanangsuran_Angsuran_Tanggal"><div class="ewTableHeaderCaption"><?php echo $t04_pinjamanangsuran->Angsuran_Tanggal->FldCaption() ?></div></div></th>
+		<th data-name="Angsuran_Tanggal"><div id="elh_t04_pinjamanangsuran_Angsuran_Tanggal" class="t04_pinjamanangsuran_Angsuran_Tanggal"><div class="ewTableHeaderCaption" style="white-space: nowrap;"><?php echo $t04_pinjamanangsuran->Angsuran_Tanggal->FldCaption() ?></div></div></th>
 	<?php } else { ?>
 		<th data-name="Angsuran_Tanggal"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t04_pinjamanangsuran->SortUrl($t04_pinjamanangsuran->Angsuran_Tanggal) ?>',2);"><div id="elh_t04_pinjamanangsuran_Angsuran_Tanggal" class="t04_pinjamanangsuran_Angsuran_Tanggal">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t04_pinjamanangsuran->Angsuran_Tanggal->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t04_pinjamanangsuran->Angsuran_Tanggal->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t04_pinjamanangsuran->Angsuran_Tanggal->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
+			<div class="ewTableHeaderBtn" style="white-space: nowrap;"><span class="ewTableHeaderCaption"><?php echo $t04_pinjamanangsuran->Angsuran_Tanggal->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t04_pinjamanangsuran->Angsuran_Tanggal->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t04_pinjamanangsuran->Angsuran_Tanggal->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
         </div></div></th>
 	<?php } ?>
 <?php } ?>		
