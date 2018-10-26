@@ -6,6 +6,7 @@ ob_start(); // Turn on output buffering
 <?php include_once ((EW_USE_ADODB) ? "adodb5/adodb.inc.php" : "ewmysql13.php") ?>
 <?php include_once "phpfn13.php" ?>
 <?php include_once "t95_logdescinfo.php" ?>
+<?php include_once "t94_loginfo.php" ?>
 <?php include_once "t96_employeesinfo.php" ?>
 <?php include_once "userfn13.php" ?>
 <?php
@@ -276,6 +277,9 @@ class ct95_logdesc_view extends ct95_logdesc {
 		$this->ExportCsvUrl = $this->PageUrl() . "export=csv" . $KeyUrl;
 		$this->ExportPdfUrl = $this->PageUrl() . "export=pdf" . $KeyUrl;
 
+		// Table object (t94_log)
+		if (!isset($GLOBALS['t94_log'])) $GLOBALS['t94_log'] = new ct94_log();
+
 		// Table object (t96_employees)
 		if (!isset($GLOBALS['t96_employees'])) $GLOBALS['t96_employees'] = new ct96_employees();
 
@@ -383,8 +387,6 @@ class ct95_logdesc_view extends ct95_logdesc {
 
 		// Setup export options
 		$this->SetupExportOptions();
-		$this->id->SetVisibility();
-		$this->id->Visible = !$this->IsAdd() && !$this->IsCopy() && !$this->IsGridAdd();
 		$this->log_id->SetVisibility();
 		$this->date_issued->SetVisibility();
 		$this->desc_->SetVisibility();
@@ -488,6 +490,9 @@ class ct95_logdesc_view extends ct95_logdesc {
 		$bLoadCurrentRecord = FALSE;
 		$sReturnUrl = "";
 		$bMatchRecord = FALSE;
+
+		// Set up master/detail parameters
+		$this->SetUpMasterParms();
 		if ($this->IsPageRequest()) { // Validate request
 			if (@$_GET["id"] <> "") {
 				$this->id->setQueryStringValue($_GET["id"]);
@@ -753,11 +758,32 @@ class ct95_logdesc_view extends ct95_logdesc {
 
 		// log_id
 		$this->log_id->ViewValue = $this->log_id->CurrentValue;
+		if (strval($this->log_id->CurrentValue) <> "") {
+			$sFilterWrk = "`id`" . ew_SearchString("=", $this->log_id->CurrentValue, EW_DATATYPE_NUMBER, "");
+		$sSqlWrk = "SELECT `id`, `index_` AS `DispFld`, `subj_` AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `t94_log`";
+		$sWhereWrk = "";
+		$this->log_id->LookupFilters = array();
+		ew_AddFilter($sWhereWrk, $sFilterWrk);
+		$this->Lookup_Selecting($this->log_id, $sWhereWrk); // Call Lookup selecting
+		if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
+			$rswrk = Conn()->Execute($sSqlWrk);
+			if ($rswrk && !$rswrk->EOF) { // Lookup values found
+				$arwrk = array();
+				$arwrk[1] = $rswrk->fields('DispFld');
+				$arwrk[2] = $rswrk->fields('Disp2Fld');
+				$this->log_id->ViewValue = $this->log_id->DisplayValue($arwrk);
+				$rswrk->Close();
+			} else {
+				$this->log_id->ViewValue = $this->log_id->CurrentValue;
+			}
+		} else {
+			$this->log_id->ViewValue = NULL;
+		}
 		$this->log_id->ViewCustomAttributes = "";
 
 		// date_issued
 		$this->date_issued->ViewValue = $this->date_issued->CurrentValue;
-		$this->date_issued->ViewValue = ew_FormatDateTime($this->date_issued->ViewValue, 0);
+		$this->date_issued->ViewValue = ew_FormatDateTime($this->date_issued->ViewValue, 7);
 		$this->date_issued->ViewCustomAttributes = "";
 
 		// desc_
@@ -766,13 +792,8 @@ class ct95_logdesc_view extends ct95_logdesc {
 
 		// date_solved
 		$this->date_solved->ViewValue = $this->date_solved->CurrentValue;
-		$this->date_solved->ViewValue = ew_FormatDateTime($this->date_solved->ViewValue, 0);
+		$this->date_solved->ViewValue = ew_FormatDateTime($this->date_solved->ViewValue, 7);
 		$this->date_solved->ViewCustomAttributes = "";
-
-			// id
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-			$this->id->TooltipValue = "";
 
 			// log_id
 			$this->log_id->LinkCustomAttributes = "";
@@ -1047,6 +1068,67 @@ class ct95_logdesc_view extends ct95_logdesc {
 		return $sQry;
 	}
 
+	// Set up master/detail based on QueryString
+	function SetUpMasterParms() {
+		$bValidMaster = FALSE;
+
+		// Get the keys for master table
+		if (isset($_GET[EW_TABLE_SHOW_MASTER])) {
+			$sMasterTblVar = $_GET[EW_TABLE_SHOW_MASTER];
+			if ($sMasterTblVar == "") {
+				$bValidMaster = TRUE;
+				$this->DbMasterFilter = "";
+				$this->DbDetailFilter = "";
+			}
+			if ($sMasterTblVar == "t94_log") {
+				$bValidMaster = TRUE;
+				if (@$_GET["fk_id"] <> "") {
+					$GLOBALS["t94_log"]->id->setQueryStringValue($_GET["fk_id"]);
+					$this->log_id->setQueryStringValue($GLOBALS["t94_log"]->id->QueryStringValue);
+					$this->log_id->setSessionValue($this->log_id->QueryStringValue);
+					if (!is_numeric($GLOBALS["t94_log"]->id->QueryStringValue)) $bValidMaster = FALSE;
+				} else {
+					$bValidMaster = FALSE;
+				}
+			}
+		} elseif (isset($_POST[EW_TABLE_SHOW_MASTER])) {
+			$sMasterTblVar = $_POST[EW_TABLE_SHOW_MASTER];
+			if ($sMasterTblVar == "") {
+				$bValidMaster = TRUE;
+				$this->DbMasterFilter = "";
+				$this->DbDetailFilter = "";
+			}
+			if ($sMasterTblVar == "t94_log") {
+				$bValidMaster = TRUE;
+				if (@$_POST["fk_id"] <> "") {
+					$GLOBALS["t94_log"]->id->setFormValue($_POST["fk_id"]);
+					$this->log_id->setFormValue($GLOBALS["t94_log"]->id->FormValue);
+					$this->log_id->setSessionValue($this->log_id->FormValue);
+					if (!is_numeric($GLOBALS["t94_log"]->id->FormValue)) $bValidMaster = FALSE;
+				} else {
+					$bValidMaster = FALSE;
+				}
+			}
+		}
+		if ($bValidMaster) {
+
+			// Save current master table
+			$this->setCurrentMasterTable($sMasterTblVar);
+			$this->setSessionWhere($this->GetDetailFilter());
+
+			// Reset start record counter (new master key)
+			$this->StartRec = 1;
+			$this->setStartRecordNumber($this->StartRec);
+
+			// Clear previous master key from Session
+			if ($sMasterTblVar <> "t94_log") {
+				if ($this->log_id->CurrentValue == "") $this->log_id->setSessionValue("");
+			}
+		}
+		$this->DbMasterFilter = $this->GetMasterFilter(); // Get master filter
+		$this->DbDetailFilter = $this->GetDetailFilter(); // Get detail filter
+	}
+
 	// Set up Breadcrumb
 	function SetupBreadcrumb() {
 		global $Breadcrumb, $Language;
@@ -1202,8 +1284,9 @@ ft95_logdescview.ValidateRequired = false;
 <?php } ?>
 
 // Dynamic selection lists
-// Form object for search
+ft95_logdescview.Lists["x_log_id"] = {"LinkField":"x_id","Ajax":true,"AutoFill":false,"DisplayFields":["x_index_","x_subj_","",""],"ParentFields":[],"ChildFields":[],"FilterFields":[],"Options":[],"Template":"","LinkTable":"t94_log"};
 
+// Form object for search
 </script>
 <script type="text/javascript">
 
@@ -1290,17 +1373,6 @@ $t95_logdesc_view->ShowMessage();
 <input type="hidden" name="modal" value="1">
 <?php } ?>
 <table class="table table-bordered table-striped ewViewTable">
-<?php if ($t95_logdesc->id->Visible) { // id ?>
-	<tr id="r_id">
-		<td><span id="elh_t95_logdesc_id"><?php echo $t95_logdesc->id->FldCaption() ?></span></td>
-		<td data-name="id"<?php echo $t95_logdesc->id->CellAttributes() ?>>
-<span id="el_t95_logdesc_id">
-<span<?php echo $t95_logdesc->id->ViewAttributes() ?>>
-<?php echo $t95_logdesc->id->ViewValue ?></span>
-</span>
-</td>
-	</tr>
-<?php } ?>
 <?php if ($t95_logdesc->log_id->Visible) { // log_id ?>
 	<tr id="r_log_id">
 		<td><span id="elh_t95_logdesc_log_id"><?php echo $t95_logdesc->log_id->FldCaption() ?></span></td>

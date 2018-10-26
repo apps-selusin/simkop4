@@ -6,6 +6,7 @@ ob_start(); // Turn on output buffering
 <?php include_once ((EW_USE_ADODB) ? "adodb5/adodb.inc.php" : "ewmysql13.php") ?>
 <?php include_once "phpfn13.php" ?>
 <?php include_once "t95_logdescinfo.php" ?>
+<?php include_once "t94_loginfo.php" ?>
 <?php include_once "t96_employeesinfo.php" ?>
 <?php include_once "userfn13.php" ?>
 <?php
@@ -287,6 +288,9 @@ class ct95_logdesc_list extends ct95_logdesc {
 		$this->MultiDeleteUrl = "t95_logdescdelete.php";
 		$this->MultiUpdateUrl = "t95_logdescupdate.php";
 
+		// Table object (t94_log)
+		if (!isset($GLOBALS['t94_log'])) $GLOBALS['t94_log'] = new ct94_log();
+
 		// Table object (t96_employees)
 		if (!isset($GLOBALS['t96_employees'])) $GLOBALS['t96_employees'] = new ct96_employees();
 
@@ -410,10 +414,9 @@ class ct95_logdesc_list extends ct95_logdesc {
 
 		// Setup export options
 		$this->SetupExportOptions();
-		$this->id->SetVisibility();
-		$this->id->Visible = !$this->IsAdd() && !$this->IsCopy() && !$this->IsGridAdd();
 		$this->log_id->SetVisibility();
 		$this->date_issued->SetVisibility();
+		$this->desc_->SetVisibility();
 		$this->date_solved->SetVisibility();
 
 		// Global Page Loading event (in userfn*.php)
@@ -445,6 +448,9 @@ class ct95_logdesc_list extends ct95_logdesc {
 
 		// Create Token
 		$this->CreateToken();
+
+		// Set up master detail parameters
+		$this->SetUpMasterParms();
 
 		// Setup other options
 		$this->SetupOtherOptions();
@@ -600,8 +606,28 @@ class ct95_logdesc_list extends ct95_logdesc {
 					$option->HideAllOptions();
 			}
 
+			// Get default search criteria
+			ew_AddFilter($this->DefaultSearchWhere, $this->BasicSearchWhere(TRUE));
+
+			// Get basic search values
+			$this->LoadBasicSearchValues();
+
+			// Process filter list
+			$this->ProcessFilterList();
+
+			// Restore search parms from Session if not searching / reset / export
+			if (($this->Export <> "" || $this->Command <> "search" && $this->Command <> "reset" && $this->Command <> "resetall") && $this->CheckSearchParms())
+				$this->RestoreSearchParms();
+
+			// Call Recordset SearchValidated event
+			$this->Recordset_SearchValidated();
+
 			// Set up sorting order
 			$this->SetUpSortOrder();
+
+			// Get basic search criteria
+			if ($gsSearchError == "")
+				$sSrchBasic = $this->BasicSearchWhere();
 		}
 
 		// Restore display records
@@ -614,12 +640,57 @@ class ct95_logdesc_list extends ct95_logdesc {
 		// Load Sorting Order
 		$this->LoadSortOrder();
 
+		// Load search default if no existing search criteria
+		if (!$this->CheckSearchParms()) {
+
+			// Load basic search from default
+			$this->BasicSearch->LoadDefault();
+			if ($this->BasicSearch->Keyword != "")
+				$sSrchBasic = $this->BasicSearchWhere();
+		}
+
+		// Build search criteria
+		ew_AddFilter($this->SearchWhere, $sSrchAdvanced);
+		ew_AddFilter($this->SearchWhere, $sSrchBasic);
+
+		// Call Recordset_Searching event
+		$this->Recordset_Searching($this->SearchWhere);
+
+		// Save search criteria
+		if ($this->Command == "search" && !$this->RestoreSearch) {
+			$this->setSearchWhere($this->SearchWhere); // Save to Session
+			$this->StartRec = 1; // Reset start record counter
+			$this->setStartRecordNumber($this->StartRec);
+		} else {
+			$this->SearchWhere = $this->getSearchWhere();
+		}
+
 		// Build filter
 		$sFilter = "";
 		if (!$Security->CanList())
 			$sFilter = "(0=1)"; // Filter all records
+
+		// Restore master/detail filter
+		$this->DbMasterFilter = $this->GetMasterFilter(); // Restore master filter
+		$this->DbDetailFilter = $this->GetDetailFilter(); // Restore detail filter
 		ew_AddFilter($sFilter, $this->DbDetailFilter);
 		ew_AddFilter($sFilter, $this->SearchWhere);
+
+		// Load master record
+		if ($this->CurrentMode <> "add" && $this->GetMasterFilter() <> "" && $this->getCurrentMasterTable() == "t94_log") {
+			global $t94_log;
+			$rsmaster = $t94_log->LoadRs($this->DbMasterFilter);
+			$this->MasterRecordExists = ($rsmaster && !$rsmaster->EOF);
+			if (!$this->MasterRecordExists) {
+				$this->setFailureMessage($Language->Phrase("NoRecord")); // Set no record found
+				$this->Page_Terminate("t94_loglist.php"); // Return to master page
+			} else {
+				$t94_log->LoadListRowValues($rsmaster);
+				$t94_log->RowType = EW_ROWTYPE_MASTER; // Master row
+				$t94_log->RenderListRow();
+				$rsmaster->Close();
+			}
+		}
 
 		// Set up filter in session
 		$this->setSessionWhere($sFilter);
@@ -706,6 +777,273 @@ class ct95_logdesc_list extends ct95_logdesc {
 		return TRUE;
 	}
 
+	// Get list of filters
+	function GetFilterList() {
+		global $UserProfile;
+
+		// Load server side filters
+		if (EW_SEARCH_FILTER_OPTION == "Server") {
+			$sSavedFilterList = isset($UserProfile) ? $UserProfile->GetSearchFilters(CurrentUserName(), "ft95_logdesclistsrch") : "";
+		} else {
+			$sSavedFilterList = "";
+		}
+
+		// Initialize
+		$sFilterList = "";
+		$sFilterList = ew_Concat($sFilterList, $this->id->AdvancedSearch->ToJSON(), ","); // Field id
+		$sFilterList = ew_Concat($sFilterList, $this->log_id->AdvancedSearch->ToJSON(), ","); // Field log_id
+		$sFilterList = ew_Concat($sFilterList, $this->date_issued->AdvancedSearch->ToJSON(), ","); // Field date_issued
+		$sFilterList = ew_Concat($sFilterList, $this->desc_->AdvancedSearch->ToJSON(), ","); // Field desc_
+		$sFilterList = ew_Concat($sFilterList, $this->date_solved->AdvancedSearch->ToJSON(), ","); // Field date_solved
+		if ($this->BasicSearch->Keyword <> "") {
+			$sWrk = "\"" . EW_TABLE_BASIC_SEARCH . "\":\"" . ew_JsEncode2($this->BasicSearch->Keyword) . "\",\"" . EW_TABLE_BASIC_SEARCH_TYPE . "\":\"" . ew_JsEncode2($this->BasicSearch->Type) . "\"";
+			$sFilterList = ew_Concat($sFilterList, $sWrk, ",");
+		}
+		$sFilterList = preg_replace('/,$/', "", $sFilterList);
+
+		// Return filter list in json
+		if ($sFilterList <> "")
+			$sFilterList = "\"data\":{" . $sFilterList . "}";
+		if ($sSavedFilterList <> "") {
+			if ($sFilterList <> "")
+				$sFilterList .= ",";
+			$sFilterList .= "\"filters\":" . $sSavedFilterList;
+		}
+		return ($sFilterList <> "") ? "{" . $sFilterList . "}" : "null";
+	}
+
+	// Process filter list
+	function ProcessFilterList() {
+		global $UserProfile;
+		if (@$_POST["ajax"] == "savefilters") { // Save filter request (Ajax)
+			$filters = ew_StripSlashes(@$_POST["filters"]);
+			$UserProfile->SetSearchFilters(CurrentUserName(), "ft95_logdesclistsrch", $filters);
+
+			// Clean output buffer
+			if (!EW_DEBUG_ENABLED && ob_get_length())
+				ob_end_clean();
+			echo ew_ArrayToJson(array(array("success" => TRUE))); // Success
+			$this->Page_Terminate();
+			exit();
+		} elseif (@$_POST["cmd"] == "resetfilter") {
+			$this->RestoreFilterList();
+		}
+	}
+
+	// Restore list of filters
+	function RestoreFilterList() {
+
+		// Return if not reset filter
+		if (@$_POST["cmd"] <> "resetfilter")
+			return FALSE;
+		$filter = json_decode(ew_StripSlashes(@$_POST["filter"]), TRUE);
+		$this->Command = "search";
+
+		// Field id
+		$this->id->AdvancedSearch->SearchValue = @$filter["x_id"];
+		$this->id->AdvancedSearch->SearchOperator = @$filter["z_id"];
+		$this->id->AdvancedSearch->SearchCondition = @$filter["v_id"];
+		$this->id->AdvancedSearch->SearchValue2 = @$filter["y_id"];
+		$this->id->AdvancedSearch->SearchOperator2 = @$filter["w_id"];
+		$this->id->AdvancedSearch->Save();
+
+		// Field log_id
+		$this->log_id->AdvancedSearch->SearchValue = @$filter["x_log_id"];
+		$this->log_id->AdvancedSearch->SearchOperator = @$filter["z_log_id"];
+		$this->log_id->AdvancedSearch->SearchCondition = @$filter["v_log_id"];
+		$this->log_id->AdvancedSearch->SearchValue2 = @$filter["y_log_id"];
+		$this->log_id->AdvancedSearch->SearchOperator2 = @$filter["w_log_id"];
+		$this->log_id->AdvancedSearch->Save();
+
+		// Field date_issued
+		$this->date_issued->AdvancedSearch->SearchValue = @$filter["x_date_issued"];
+		$this->date_issued->AdvancedSearch->SearchOperator = @$filter["z_date_issued"];
+		$this->date_issued->AdvancedSearch->SearchCondition = @$filter["v_date_issued"];
+		$this->date_issued->AdvancedSearch->SearchValue2 = @$filter["y_date_issued"];
+		$this->date_issued->AdvancedSearch->SearchOperator2 = @$filter["w_date_issued"];
+		$this->date_issued->AdvancedSearch->Save();
+
+		// Field desc_
+		$this->desc_->AdvancedSearch->SearchValue = @$filter["x_desc_"];
+		$this->desc_->AdvancedSearch->SearchOperator = @$filter["z_desc_"];
+		$this->desc_->AdvancedSearch->SearchCondition = @$filter["v_desc_"];
+		$this->desc_->AdvancedSearch->SearchValue2 = @$filter["y_desc_"];
+		$this->desc_->AdvancedSearch->SearchOperator2 = @$filter["w_desc_"];
+		$this->desc_->AdvancedSearch->Save();
+
+		// Field date_solved
+		$this->date_solved->AdvancedSearch->SearchValue = @$filter["x_date_solved"];
+		$this->date_solved->AdvancedSearch->SearchOperator = @$filter["z_date_solved"];
+		$this->date_solved->AdvancedSearch->SearchCondition = @$filter["v_date_solved"];
+		$this->date_solved->AdvancedSearch->SearchValue2 = @$filter["y_date_solved"];
+		$this->date_solved->AdvancedSearch->SearchOperator2 = @$filter["w_date_solved"];
+		$this->date_solved->AdvancedSearch->Save();
+		$this->BasicSearch->setKeyword(@$filter[EW_TABLE_BASIC_SEARCH]);
+		$this->BasicSearch->setType(@$filter[EW_TABLE_BASIC_SEARCH_TYPE]);
+	}
+
+	// Return basic search SQL
+	function BasicSearchSQL($arKeywords, $type) {
+		$sWhere = "";
+		$this->BuildBasicSearchSQL($sWhere, $this->desc_, $arKeywords, $type);
+		return $sWhere;
+	}
+
+	// Build basic search SQL
+	function BuildBasicSearchSQL(&$Where, &$Fld, $arKeywords, $type) {
+		global $EW_BASIC_SEARCH_IGNORE_PATTERN;
+		$sDefCond = ($type == "OR") ? "OR" : "AND";
+		$arSQL = array(); // Array for SQL parts
+		$arCond = array(); // Array for search conditions
+		$cnt = count($arKeywords);
+		$j = 0; // Number of SQL parts
+		for ($i = 0; $i < $cnt; $i++) {
+			$Keyword = $arKeywords[$i];
+			$Keyword = trim($Keyword);
+			if ($EW_BASIC_SEARCH_IGNORE_PATTERN <> "") {
+				$Keyword = preg_replace($EW_BASIC_SEARCH_IGNORE_PATTERN, "\\", $Keyword);
+				$ar = explode("\\", $Keyword);
+			} else {
+				$ar = array($Keyword);
+			}
+			foreach ($ar as $Keyword) {
+				if ($Keyword <> "") {
+					$sWrk = "";
+					if ($Keyword == "OR" && $type == "") {
+						if ($j > 0)
+							$arCond[$j-1] = "OR";
+					} elseif ($Keyword == EW_NULL_VALUE) {
+						$sWrk = $Fld->FldExpression . " IS NULL";
+					} elseif ($Keyword == EW_NOT_NULL_VALUE) {
+						$sWrk = $Fld->FldExpression . " IS NOT NULL";
+					} elseif ($Fld->FldIsVirtual) {
+						$sWrk = $Fld->FldVirtualExpression . ew_Like(ew_QuotedValue("%" . $Keyword . "%", EW_DATATYPE_STRING, $this->DBID), $this->DBID);
+					} elseif ($Fld->FldDataType != EW_DATATYPE_NUMBER || is_numeric($Keyword)) {
+						$sWrk = $Fld->FldBasicSearchExpression . ew_Like(ew_QuotedValue("%" . $Keyword . "%", EW_DATATYPE_STRING, $this->DBID), $this->DBID);
+					}
+					if ($sWrk <> "") {
+						$arSQL[$j] = $sWrk;
+						$arCond[$j] = $sDefCond;
+						$j += 1;
+					}
+				}
+			}
+		}
+		$cnt = count($arSQL);
+		$bQuoted = FALSE;
+		$sSql = "";
+		if ($cnt > 0) {
+			for ($i = 0; $i < $cnt-1; $i++) {
+				if ($arCond[$i] == "OR") {
+					if (!$bQuoted) $sSql .= "(";
+					$bQuoted = TRUE;
+				}
+				$sSql .= $arSQL[$i];
+				if ($bQuoted && $arCond[$i] <> "OR") {
+					$sSql .= ")";
+					$bQuoted = FALSE;
+				}
+				$sSql .= " " . $arCond[$i] . " ";
+			}
+			$sSql .= $arSQL[$cnt-1];
+			if ($bQuoted)
+				$sSql .= ")";
+		}
+		if ($sSql <> "") {
+			if ($Where <> "") $Where .= " OR ";
+			$Where .=  "(" . $sSql . ")";
+		}
+	}
+
+	// Return basic search WHERE clause based on search keyword and type
+	function BasicSearchWhere($Default = FALSE) {
+		global $Security;
+		$sSearchStr = "";
+		if (!$Security->CanSearch()) return "";
+		$sSearchKeyword = ($Default) ? $this->BasicSearch->KeywordDefault : $this->BasicSearch->Keyword;
+		$sSearchType = ($Default) ? $this->BasicSearch->TypeDefault : $this->BasicSearch->Type;
+		if ($sSearchKeyword <> "") {
+			$sSearch = trim($sSearchKeyword);
+			if ($sSearchType <> "=") {
+				$ar = array();
+
+				// Match quoted keywords (i.e.: "...")
+				if (preg_match_all('/"([^"]*)"/i', $sSearch, $matches, PREG_SET_ORDER)) {
+					foreach ($matches as $match) {
+						$p = strpos($sSearch, $match[0]);
+						$str = substr($sSearch, 0, $p);
+						$sSearch = substr($sSearch, $p + strlen($match[0]));
+						if (strlen(trim($str)) > 0)
+							$ar = array_merge($ar, explode(" ", trim($str)));
+						$ar[] = $match[1]; // Save quoted keyword
+					}
+				}
+
+				// Match individual keywords
+				if (strlen(trim($sSearch)) > 0)
+					$ar = array_merge($ar, explode(" ", trim($sSearch)));
+
+				// Search keyword in any fields
+				if (($sSearchType == "OR" || $sSearchType == "AND") && $this->BasicSearch->BasicSearchAnyFields) {
+					foreach ($ar as $sKeyword) {
+						if ($sKeyword <> "") {
+							if ($sSearchStr <> "") $sSearchStr .= " " . $sSearchType . " ";
+							$sSearchStr .= "(" . $this->BasicSearchSQL(array($sKeyword), $sSearchType) . ")";
+						}
+					}
+				} else {
+					$sSearchStr = $this->BasicSearchSQL($ar, $sSearchType);
+				}
+			} else {
+				$sSearchStr = $this->BasicSearchSQL(array($sSearch), $sSearchType);
+			}
+			if (!$Default) $this->Command = "search";
+		}
+		if (!$Default && $this->Command == "search") {
+			$this->BasicSearch->setKeyword($sSearchKeyword);
+			$this->BasicSearch->setType($sSearchType);
+		}
+		return $sSearchStr;
+	}
+
+	// Check if search parm exists
+	function CheckSearchParms() {
+
+		// Check basic search
+		if ($this->BasicSearch->IssetSession())
+			return TRUE;
+		return FALSE;
+	}
+
+	// Clear all search parameters
+	function ResetSearchParms() {
+
+		// Clear search WHERE clause
+		$this->SearchWhere = "";
+		$this->setSearchWhere($this->SearchWhere);
+
+		// Clear basic search parameters
+		$this->ResetBasicSearchParms();
+	}
+
+	// Load advanced search default values
+	function LoadAdvancedSearchDefault() {
+		return FALSE;
+	}
+
+	// Clear all basic search parameters
+	function ResetBasicSearchParms() {
+		$this->BasicSearch->UnsetSession();
+	}
+
+	// Restore all search parameters
+	function RestoreSearchParms() {
+		$this->RestoreSearch = TRUE;
+
+		// Restore basic search values
+		$this->BasicSearch->Load();
+	}
+
 	// Set up sort parameters
 	function SetUpSortOrder() {
 
@@ -716,9 +1054,9 @@ class ct95_logdesc_list extends ct95_logdesc {
 		if (@$_GET["order"] <> "") {
 			$this->CurrentOrder = ew_StripSlashes(@$_GET["order"]);
 			$this->CurrentOrderType = @$_GET["ordertype"];
-			$this->UpdateSort($this->id, $bCtrl); // id
 			$this->UpdateSort($this->log_id, $bCtrl); // log_id
 			$this->UpdateSort($this->date_issued, $bCtrl); // date_issued
+			$this->UpdateSort($this->desc_, $bCtrl); // desc_
 			$this->UpdateSort($this->date_solved, $bCtrl); // date_solved
 			$this->setStartRecordNumber(1); // Reset start position
 		}
@@ -744,13 +1082,25 @@ class ct95_logdesc_list extends ct95_logdesc {
 		// Check if reset command
 		if (substr($this->Command,0,5) == "reset") {
 
+			// Reset search criteria
+			if ($this->Command == "reset" || $this->Command == "resetall")
+				$this->ResetSearchParms();
+
+			// Reset master/detail keys
+			if ($this->Command == "resetall") {
+				$this->setCurrentMasterTable(""); // Clear master table
+				$this->DbMasterFilter = "";
+				$this->DbDetailFilter = "";
+				$this->log_id->setSessionValue("");
+			}
+
 			// Reset sorting order
 			if ($this->Command == "resetsort") {
 				$sOrderBy = "";
 				$this->setSessionOrderBy($sOrderBy);
-				$this->id->setSort("");
 				$this->log_id->setSort("");
 				$this->date_issued->setSort("");
+				$this->desc_->setSort("");
 				$this->date_solved->setSort("");
 			}
 
@@ -805,6 +1155,14 @@ class ct95_logdesc_list extends ct95_logdesc {
 		$item->ShowInDropDown = FALSE;
 		$item->ShowInButtonGroup = FALSE;
 
+		// "sequence"
+		$item = &$this->ListOptions->Add("sequence");
+		$item->CssStyle = "white-space: nowrap;";
+		$item->Visible = TRUE;
+		$item->OnLeft = TRUE; // Always on left
+		$item->ShowInDropDown = FALSE;
+		$item->ShowInButtonGroup = FALSE;
+
 		// Drop down button for ListOptions
 		$this->ListOptions->UseImageAndText = TRUE;
 		$this->ListOptions->UseDropDownButton = FALSE;
@@ -825,6 +1183,10 @@ class ct95_logdesc_list extends ct95_logdesc {
 	function RenderListOptions() {
 		global $Security, $Language, $objForm;
 		$this->ListOptions->LoadDefault();
+
+		// "sequence"
+		$oListOpt = &$this->ListOptions->Items["sequence"];
+		$oListOpt->Body = ew_FormatSeqNo($this->RecCnt);
 
 		// "view"
 		$oListOpt = &$this->ListOptions->Items["view"];
@@ -926,10 +1288,10 @@ class ct95_logdesc_list extends ct95_logdesc {
 		// Filter button
 		$item = &$this->FilterOptions->Add("savecurrentfilter");
 		$item->Body = "<a class=\"ewSaveFilter\" data-form=\"ft95_logdesclistsrch\" href=\"#\">" . $Language->Phrase("SaveCurrentFilter") . "</a>";
-		$item->Visible = FALSE;
+		$item->Visible = TRUE;
 		$item = &$this->FilterOptions->Add("deletefilter");
 		$item->Body = "<a class=\"ewDeleteFilter\" data-form=\"ft95_logdesclistsrch\" href=\"#\">" . $Language->Phrase("DeleteFilter") . "</a>";
-		$item->Visible = FALSE;
+		$item->Visible = TRUE;
 		$this->FilterOptions->UseDropDownButton = TRUE;
 		$this->FilterOptions->UseButtonGroup = !$this->FilterOptions->UseDropDownButton;
 		$this->FilterOptions->DropDownButtonPhrase = $Language->Phrase("Filters");
@@ -1053,6 +1415,17 @@ class ct95_logdesc_list extends ct95_logdesc {
 		$this->SearchOptions->Tag = "div";
 		$this->SearchOptions->TagClassName = "ewSearchOption";
 
+		// Search button
+		$item = &$this->SearchOptions->Add("searchtoggle");
+		$SearchToggleClass = ($this->SearchWhere <> "") ? " active" : " active";
+		$item->Body = "<button type=\"button\" class=\"btn btn-default ewSearchToggle" . $SearchToggleClass . "\" title=\"" . $Language->Phrase("SearchPanel") . "\" data-caption=\"" . $Language->Phrase("SearchPanel") . "\" data-toggle=\"button\" data-form=\"ft95_logdesclistsrch\">" . $Language->Phrase("SearchBtn") . "</button>";
+		$item->Visible = TRUE;
+
+		// Show all button
+		$item = &$this->SearchOptions->Add("showall");
+		$item->Body = "<a class=\"btn btn-default ewShowAll\" title=\"" . $Language->Phrase("ShowAll") . "\" data-caption=\"" . $Language->Phrase("ShowAll") . "\" href=\"" . $this->PageUrl() . "cmd=reset\">" . $Language->Phrase("ShowAllBtn") . "</a>";
+		$item->Visible = ($this->SearchWhere <> $this->DefaultSearchWhere && $this->SearchWhere <> "0=101");
+
 		// Button group for search
 		$this->SearchOptions->UseDropDownButton = FALSE;
 		$this->SearchOptions->UseImageAndText = TRUE;
@@ -1116,6 +1489,13 @@ class ct95_logdesc_list extends ct95_logdesc {
 			$this->StartRec = intval(($this->StartRec-1)/$this->DisplayRecs)*$this->DisplayRecs+1; // Point to page boundary
 			$this->setStartRecordNumber($this->StartRec);
 		}
+	}
+
+	// Load basic search values
+	function LoadBasicSearchValues() {
+		$this->BasicSearch->Keyword = @$_GET[EW_TABLE_BASIC_SEARCH];
+		if ($this->BasicSearch->Keyword <> "") $this->Command = "search";
+		$this->BasicSearch->Type = @$_GET[EW_TABLE_BASIC_SEARCH_TYPE];
 	}
 
 	// Load recordset
@@ -1244,22 +1624,42 @@ class ct95_logdesc_list extends ct95_logdesc {
 
 		// log_id
 		$this->log_id->ViewValue = $this->log_id->CurrentValue;
+		if (strval($this->log_id->CurrentValue) <> "") {
+			$sFilterWrk = "`id`" . ew_SearchString("=", $this->log_id->CurrentValue, EW_DATATYPE_NUMBER, "");
+		$sSqlWrk = "SELECT `id`, `index_` AS `DispFld`, `subj_` AS `Disp2Fld`, '' AS `Disp3Fld`, '' AS `Disp4Fld` FROM `t94_log`";
+		$sWhereWrk = "";
+		$this->log_id->LookupFilters = array();
+		ew_AddFilter($sWhereWrk, $sFilterWrk);
+		$this->Lookup_Selecting($this->log_id, $sWhereWrk); // Call Lookup selecting
+		if ($sWhereWrk <> "") $sSqlWrk .= " WHERE " . $sWhereWrk;
+			$rswrk = Conn()->Execute($sSqlWrk);
+			if ($rswrk && !$rswrk->EOF) { // Lookup values found
+				$arwrk = array();
+				$arwrk[1] = $rswrk->fields('DispFld');
+				$arwrk[2] = $rswrk->fields('Disp2Fld');
+				$this->log_id->ViewValue = $this->log_id->DisplayValue($arwrk);
+				$rswrk->Close();
+			} else {
+				$this->log_id->ViewValue = $this->log_id->CurrentValue;
+			}
+		} else {
+			$this->log_id->ViewValue = NULL;
+		}
 		$this->log_id->ViewCustomAttributes = "";
 
 		// date_issued
 		$this->date_issued->ViewValue = $this->date_issued->CurrentValue;
-		$this->date_issued->ViewValue = ew_FormatDateTime($this->date_issued->ViewValue, 0);
+		$this->date_issued->ViewValue = ew_FormatDateTime($this->date_issued->ViewValue, 7);
 		$this->date_issued->ViewCustomAttributes = "";
+
+		// desc_
+		$this->desc_->ViewValue = $this->desc_->CurrentValue;
+		$this->desc_->ViewCustomAttributes = "";
 
 		// date_solved
 		$this->date_solved->ViewValue = $this->date_solved->CurrentValue;
-		$this->date_solved->ViewValue = ew_FormatDateTime($this->date_solved->ViewValue, 0);
+		$this->date_solved->ViewValue = ew_FormatDateTime($this->date_solved->ViewValue, 7);
 		$this->date_solved->ViewCustomAttributes = "";
-
-			// id
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-			$this->id->TooltipValue = "";
 
 			// log_id
 			$this->log_id->LinkCustomAttributes = "";
@@ -1270,6 +1670,11 @@ class ct95_logdesc_list extends ct95_logdesc {
 			$this->date_issued->LinkCustomAttributes = "";
 			$this->date_issued->HrefValue = "";
 			$this->date_issued->TooltipValue = "";
+
+			// desc_
+			$this->desc_->LinkCustomAttributes = "";
+			$this->desc_->HrefValue = "";
+			$this->desc_->TooltipValue = "";
 
 			// date_solved
 			$this->date_solved->LinkCustomAttributes = "";
@@ -1396,6 +1801,25 @@ class ct95_logdesc_list extends ct95_logdesc {
 		// Call Page Exporting server event
 		$this->ExportDoc->ExportCustom = !$this->Page_Exporting();
 		$ParentTable = "";
+
+		// Export master record
+		if (EW_EXPORT_MASTER_RECORD && $this->GetMasterFilter() <> "" && $this->getCurrentMasterTable() == "t94_log") {
+			global $t94_log;
+			if (!isset($t94_log)) $t94_log = new ct94_log;
+			$rsmaster = $t94_log->LoadRs($this->DbMasterFilter); // Load master record
+			if ($rsmaster && !$rsmaster->EOF) {
+				$ExportStyle = $Doc->Style;
+				$Doc->SetStyle("v"); // Change to vertical
+				if ($this->Export <> "csv" || EW_EXPORT_MASTER_RECORD_FOR_CSV) {
+					$Doc->Table = &$t94_log;
+					$t94_log->ExportDocument($Doc, $rsmaster, 1, 1);
+					$Doc->ExportEmptyRow();
+					$Doc->Table = &$this;
+				}
+				$Doc->SetStyle($ExportStyle); // Restore
+				$rsmaster->Close();
+			}
+		}
 		$sHeader = $this->PageHeader;
 		$this->Page_DataRendering($sHeader);
 		$Doc->Text .= $sHeader;
@@ -1531,8 +1955,11 @@ class ct95_logdesc_list extends ct95_logdesc {
 		$sQry = "export=html";
 
 		// Build QueryString for search
-		// Build QueryString for pager
+		if ($this->BasicSearch->getKeyword() <> "") {
+			$sQry .= "&" . EW_TABLE_BASIC_SEARCH . "=" . urlencode($this->BasicSearch->getKeyword()) . "&" . EW_TABLE_BASIC_SEARCH_TYPE . "=" . urlencode($this->BasicSearch->getType());
+		}
 
+		// Build QueryString for pager
 		$sQry .= "&" . EW_TABLE_REC_PER_PAGE . "=" . urlencode($this->getRecordsPerPage()) . "&" . EW_TABLE_START_REC . "=" . urlencode($this->getStartRecordNumber());
 		return $sQry;
 	}
@@ -1551,6 +1978,72 @@ class ct95_logdesc_list extends ct95_logdesc {
 				"&y_" . $FldParm . "=" . urlencode($FldSearchValue2) .
 				"&w_" . $FldParm . "=" . urlencode($Fld->AdvancedSearch->getValue("w"));
 		}
+	}
+
+	// Set up master/detail based on QueryString
+	function SetUpMasterParms() {
+		$bValidMaster = FALSE;
+
+		// Get the keys for master table
+		if (isset($_GET[EW_TABLE_SHOW_MASTER])) {
+			$sMasterTblVar = $_GET[EW_TABLE_SHOW_MASTER];
+			if ($sMasterTblVar == "") {
+				$bValidMaster = TRUE;
+				$this->DbMasterFilter = "";
+				$this->DbDetailFilter = "";
+			}
+			if ($sMasterTblVar == "t94_log") {
+				$bValidMaster = TRUE;
+				if (@$_GET["fk_id"] <> "") {
+					$GLOBALS["t94_log"]->id->setQueryStringValue($_GET["fk_id"]);
+					$this->log_id->setQueryStringValue($GLOBALS["t94_log"]->id->QueryStringValue);
+					$this->log_id->setSessionValue($this->log_id->QueryStringValue);
+					if (!is_numeric($GLOBALS["t94_log"]->id->QueryStringValue)) $bValidMaster = FALSE;
+				} else {
+					$bValidMaster = FALSE;
+				}
+			}
+		} elseif (isset($_POST[EW_TABLE_SHOW_MASTER])) {
+			$sMasterTblVar = $_POST[EW_TABLE_SHOW_MASTER];
+			if ($sMasterTblVar == "") {
+				$bValidMaster = TRUE;
+				$this->DbMasterFilter = "";
+				$this->DbDetailFilter = "";
+			}
+			if ($sMasterTblVar == "t94_log") {
+				$bValidMaster = TRUE;
+				if (@$_POST["fk_id"] <> "") {
+					$GLOBALS["t94_log"]->id->setFormValue($_POST["fk_id"]);
+					$this->log_id->setFormValue($GLOBALS["t94_log"]->id->FormValue);
+					$this->log_id->setSessionValue($this->log_id->FormValue);
+					if (!is_numeric($GLOBALS["t94_log"]->id->FormValue)) $bValidMaster = FALSE;
+				} else {
+					$bValidMaster = FALSE;
+				}
+			}
+		}
+		if ($bValidMaster) {
+
+			// Update URL
+			$this->AddUrl = $this->AddMasterUrl($this->AddUrl);
+			$this->InlineAddUrl = $this->AddMasterUrl($this->InlineAddUrl);
+			$this->GridAddUrl = $this->AddMasterUrl($this->GridAddUrl);
+			$this->GridEditUrl = $this->AddMasterUrl($this->GridEditUrl);
+
+			// Save current master table
+			$this->setCurrentMasterTable($sMasterTblVar);
+
+			// Reset start record counter (new master key)
+			$this->StartRec = 1;
+			$this->setStartRecordNumber($this->StartRec);
+
+			// Clear previous master key from Session
+			if ($sMasterTblVar <> "t94_log") {
+				if ($this->log_id->CurrentValue == "") $this->log_id->setSessionValue("");
+			}
+		}
+		$this->DbMasterFilter = $this->GetMasterFilter(); // Get master filter
+		$this->DbDetailFilter = $this->GetDetailFilter(); // Get detail filter
 	}
 
 	// Set up Breadcrumb
@@ -1741,8 +2234,10 @@ ft95_logdesclist.ValidateRequired = false;
 <?php } ?>
 
 // Dynamic selection lists
-// Form object for search
+ft95_logdesclist.Lists["x_log_id"] = {"LinkField":"x_id","Ajax":true,"AutoFill":false,"DisplayFields":["x_index_","x_subj_","",""],"ParentFields":[],"ChildFields":[],"FilterFields":[],"Options":[],"Template":"","LinkTable":"t94_log"};
 
+// Form object for search
+var CurrentSearchForm = ft95_logdesclistsrch = new ew_Form("ft95_logdesclistsrch");
 </script>
 <script type="text/javascript">
 
@@ -1757,11 +2252,28 @@ ft95_logdesclist.ValidateRequired = false;
 <?php if ($t95_logdesc_list->TotalRecs > 0 && $t95_logdesc_list->ExportOptions->Visible()) { ?>
 <?php $t95_logdesc_list->ExportOptions->Render("body") ?>
 <?php } ?>
+<?php if ($t95_logdesc_list->SearchOptions->Visible()) { ?>
+<?php $t95_logdesc_list->SearchOptions->Render("body") ?>
+<?php } ?>
+<?php if ($t95_logdesc_list->FilterOptions->Visible()) { ?>
+<?php $t95_logdesc_list->FilterOptions->Render("body") ?>
+<?php } ?>
 <?php if ($t95_logdesc->Export == "") { ?>
 <?php echo $Language->SelectionForm(); ?>
 <?php } ?>
 <div class="clearfix"></div>
 </div>
+<?php } ?>
+<?php if (($t95_logdesc->Export == "") || (EW_EXPORT_MASTER_RECORD && $t95_logdesc->Export == "print")) { ?>
+<?php
+if ($t95_logdesc_list->DbMasterFilter <> "" && $t95_logdesc->getCurrentMasterTable() == "t94_log") {
+	if ($t95_logdesc_list->MasterRecordExists) {
+?>
+<?php include_once "t94_logmaster.php" ?>
+<?php
+	}
+}
+?>
 <?php } ?>
 <?php
 	$bSelectLimit = $t95_logdesc_list->UseSelectLimit;
@@ -1789,8 +2301,44 @@ ft95_logdesclist.ValidateRequired = false;
 		else
 			$t95_logdesc_list->setWarningMessage($Language->Phrase("NoRecord"));
 	}
+
+	// Audit trail on search
+	if ($t95_logdesc_list->AuditTrailOnSearch && $t95_logdesc_list->Command == "search" && !$t95_logdesc_list->RestoreSearch) {
+		$searchparm = ew_ServerVar("QUERY_STRING");
+		$searchsql = $t95_logdesc_list->getSessionWhere();
+		$t95_logdesc_list->WriteAuditTrailOnSearch($searchparm, $searchsql);
+	}
 $t95_logdesc_list->RenderOtherOptions();
 ?>
+<?php if ($Security->CanSearch()) { ?>
+<?php if ($t95_logdesc->Export == "" && $t95_logdesc->CurrentAction == "") { ?>
+<form name="ft95_logdesclistsrch" id="ft95_logdesclistsrch" class="form-inline ewForm" action="<?php echo ew_CurrentPage() ?>">
+<?php $SearchPanelClass = ($t95_logdesc_list->SearchWhere <> "") ? " in" : " in"; ?>
+<div id="ft95_logdesclistsrch_SearchPanel" class="ewSearchPanel collapse<?php echo $SearchPanelClass ?>">
+<input type="hidden" name="cmd" value="search">
+<input type="hidden" name="t" value="t95_logdesc">
+	<div class="ewBasicSearch">
+<div id="xsr_1" class="ewRow">
+	<div class="ewQuickSearch input-group">
+	<input type="text" name="<?php echo EW_TABLE_BASIC_SEARCH ?>" id="<?php echo EW_TABLE_BASIC_SEARCH ?>" class="form-control" value="<?php echo ew_HtmlEncode($t95_logdesc_list->BasicSearch->getKeyword()) ?>" placeholder="<?php echo ew_HtmlEncode($Language->Phrase("Search")) ?>">
+	<input type="hidden" name="<?php echo EW_TABLE_BASIC_SEARCH_TYPE ?>" id="<?php echo EW_TABLE_BASIC_SEARCH_TYPE ?>" value="<?php echo ew_HtmlEncode($t95_logdesc_list->BasicSearch->getType()) ?>">
+	<div class="input-group-btn">
+		<button type="button" data-toggle="dropdown" class="btn btn-default"><span id="searchtype"><?php echo $t95_logdesc_list->BasicSearch->getTypeNameShort() ?></span><span class="caret"></span></button>
+		<ul class="dropdown-menu pull-right" role="menu">
+			<li<?php if ($t95_logdesc_list->BasicSearch->getType() == "") echo " class=\"active\""; ?>><a href="javascript:void(0);" onclick="ew_SetSearchType(this)"><?php echo $Language->Phrase("QuickSearchAuto") ?></a></li>
+			<li<?php if ($t95_logdesc_list->BasicSearch->getType() == "=") echo " class=\"active\""; ?>><a href="javascript:void(0);" onclick="ew_SetSearchType(this,'=')"><?php echo $Language->Phrase("QuickSearchExact") ?></a></li>
+			<li<?php if ($t95_logdesc_list->BasicSearch->getType() == "AND") echo " class=\"active\""; ?>><a href="javascript:void(0);" onclick="ew_SetSearchType(this,'AND')"><?php echo $Language->Phrase("QuickSearchAll") ?></a></li>
+			<li<?php if ($t95_logdesc_list->BasicSearch->getType() == "OR") echo " class=\"active\""; ?>><a href="javascript:void(0);" onclick="ew_SetSearchType(this,'OR')"><?php echo $Language->Phrase("QuickSearchAny") ?></a></li>
+		</ul>
+	<button class="btn btn-primary ewButton" name="btnsubmit" id="btnsubmit" type="submit"><?php echo $Language->Phrase("QuickSearchBtn") ?></button>
+	</div>
+	</div>
+</div>
+	</div>
+</div>
+</form>
+<?php } ?>
+<?php } ?>
 <?php $t95_logdesc_list->ShowPageHeader(); ?>
 <?php
 $t95_logdesc_list->ShowMessage();
@@ -1873,6 +2421,10 @@ $t95_logdesc_list->ShowMessage();
 <input type="hidden" name="<?php echo EW_TOKEN_NAME ?>" value="<?php echo $t95_logdesc_list->Token ?>">
 <?php } ?>
 <input type="hidden" name="t" value="t95_logdesc">
+<?php if ($t95_logdesc->getCurrentMasterTable() == "t94_log" && $t95_logdesc->CurrentAction <> "") { ?>
+<input type="hidden" name="<?php echo EW_TABLE_SHOW_MASTER ?>" value="t94_log">
+<input type="hidden" name="fk_id" value="<?php echo $t95_logdesc->log_id->getSessionValue() ?>">
+<?php } ?>
 <div id="gmp_t95_logdesc" class="<?php if (ew_IsResponsiveLayout()) { echo "table-responsive "; } ?>ewGridMiddlePanel">
 <?php if ($t95_logdesc_list->TotalRecs > 0 || $t95_logdesc->CurrentAction == "gridedit") { ?>
 <table id="tbl_t95_logdesclist" class="table ewTable">
@@ -1890,15 +2442,6 @@ $t95_logdesc_list->RenderListOptions();
 // Render list options (header, left)
 $t95_logdesc_list->ListOptions->Render("header", "left");
 ?>
-<?php if ($t95_logdesc->id->Visible) { // id ?>
-	<?php if ($t95_logdesc->SortUrl($t95_logdesc->id) == "") { ?>
-		<th data-name="id"><div id="elh_t95_logdesc_id" class="t95_logdesc_id"><div class="ewTableHeaderCaption"><?php echo $t95_logdesc->id->FldCaption() ?></div></div></th>
-	<?php } else { ?>
-		<th data-name="id"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t95_logdesc->SortUrl($t95_logdesc->id) ?>',2);"><div id="elh_t95_logdesc_id" class="t95_logdesc_id">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t95_logdesc->id->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t95_logdesc->id->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t95_logdesc->id->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
-        </div></div></th>
-	<?php } ?>
-<?php } ?>		
 <?php if ($t95_logdesc->log_id->Visible) { // log_id ?>
 	<?php if ($t95_logdesc->SortUrl($t95_logdesc->log_id) == "") { ?>
 		<th data-name="log_id"><div id="elh_t95_logdesc_log_id" class="t95_logdesc_log_id"><div class="ewTableHeaderCaption"><?php echo $t95_logdesc->log_id->FldCaption() ?></div></div></th>
@@ -1914,6 +2457,15 @@ $t95_logdesc_list->ListOptions->Render("header", "left");
 	<?php } else { ?>
 		<th data-name="date_issued"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t95_logdesc->SortUrl($t95_logdesc->date_issued) ?>',2);"><div id="elh_t95_logdesc_date_issued" class="t95_logdesc_date_issued">
 			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t95_logdesc->date_issued->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t95_logdesc->date_issued->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t95_logdesc->date_issued->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
+        </div></div></th>
+	<?php } ?>
+<?php } ?>		
+<?php if ($t95_logdesc->desc_->Visible) { // desc_ ?>
+	<?php if ($t95_logdesc->SortUrl($t95_logdesc->desc_) == "") { ?>
+		<th data-name="desc_"><div id="elh_t95_logdesc_desc_" class="t95_logdesc_desc_"><div class="ewTableHeaderCaption"><?php echo $t95_logdesc->desc_->FldCaption() ?></div></div></th>
+	<?php } else { ?>
+		<th data-name="desc_"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t95_logdesc->SortUrl($t95_logdesc->desc_) ?>',2);"><div id="elh_t95_logdesc_desc_" class="t95_logdesc_desc_">
+			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t95_logdesc->desc_->FldCaption() ?><?php echo $Language->Phrase("SrchLegend") ?></span><span class="ewTableHeaderSort"><?php if ($t95_logdesc->desc_->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t95_logdesc->desc_->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
         </div></div></th>
 	<?php } ?>
 <?php } ?>		
@@ -1991,27 +2543,27 @@ while ($t95_logdesc_list->RecCnt < $t95_logdesc_list->StopRec) {
 // Render list options (body, left)
 $t95_logdesc_list->ListOptions->Render("body", "left", $t95_logdesc_list->RowCnt);
 ?>
-	<?php if ($t95_logdesc->id->Visible) { // id ?>
-		<td data-name="id"<?php echo $t95_logdesc->id->CellAttributes() ?>>
-<span id="el<?php echo $t95_logdesc_list->RowCnt ?>_t95_logdesc_id" class="t95_logdesc_id">
-<span<?php echo $t95_logdesc->id->ViewAttributes() ?>>
-<?php echo $t95_logdesc->id->ListViewValue() ?></span>
-</span>
-<a id="<?php echo $t95_logdesc_list->PageObjName . "_row_" . $t95_logdesc_list->RowCnt ?>"></a></td>
-	<?php } ?>
 	<?php if ($t95_logdesc->log_id->Visible) { // log_id ?>
 		<td data-name="log_id"<?php echo $t95_logdesc->log_id->CellAttributes() ?>>
 <span id="el<?php echo $t95_logdesc_list->RowCnt ?>_t95_logdesc_log_id" class="t95_logdesc_log_id">
 <span<?php echo $t95_logdesc->log_id->ViewAttributes() ?>>
 <?php echo $t95_logdesc->log_id->ListViewValue() ?></span>
 </span>
-</td>
+<a id="<?php echo $t95_logdesc_list->PageObjName . "_row_" . $t95_logdesc_list->RowCnt ?>"></a></td>
 	<?php } ?>
 	<?php if ($t95_logdesc->date_issued->Visible) { // date_issued ?>
 		<td data-name="date_issued"<?php echo $t95_logdesc->date_issued->CellAttributes() ?>>
 <span id="el<?php echo $t95_logdesc_list->RowCnt ?>_t95_logdesc_date_issued" class="t95_logdesc_date_issued">
 <span<?php echo $t95_logdesc->date_issued->ViewAttributes() ?>>
 <?php echo $t95_logdesc->date_issued->ListViewValue() ?></span>
+</span>
+</td>
+	<?php } ?>
+	<?php if ($t95_logdesc->desc_->Visible) { // desc_ ?>
+		<td data-name="desc_"<?php echo $t95_logdesc->desc_->CellAttributes() ?>>
+<span id="el<?php echo $t95_logdesc_list->RowCnt ?>_t95_logdesc_desc_" class="t95_logdesc_desc_">
+<span<?php echo $t95_logdesc->desc_->ViewAttributes() ?>>
+<?php echo $t95_logdesc->desc_->ListViewValue() ?></span>
 </span>
 </td>
 	<?php } ?>
@@ -2135,6 +2687,8 @@ if ($t95_logdesc_list->Recordset)
 <?php } ?>
 <?php if ($t95_logdesc->Export == "") { ?>
 <script type="text/javascript">
+ft95_logdesclistsrch.FilterList = <?php echo $t95_logdesc_list->GetFilterList() ?>;
+ft95_logdesclistsrch.Init();
 ft95_logdesclist.Init();
 </script>
 <?php } ?>

@@ -7,6 +7,7 @@ ob_start(); // Turn on output buffering
 <?php include_once "phpfn13.php" ?>
 <?php include_once "t94_loginfo.php" ?>
 <?php include_once "t96_employeesinfo.php" ?>
+<?php include_once "t95_logdescgridcls.php" ?>
 <?php include_once "userfn13.php" ?>
 <?php
 
@@ -280,7 +281,7 @@ class ct94_log_list extends ct94_log {
 		$this->ExportXmlUrl = $this->PageUrl() . "export=xml";
 		$this->ExportCsvUrl = $this->PageUrl() . "export=csv";
 		$this->ExportPdfUrl = $this->PageUrl() . "export=pdf";
-		$this->AddUrl = "t94_logadd.php";
+		$this->AddUrl = "t94_logadd.php?" . EW_TABLE_SHOW_DETAIL . "=";
 		$this->InlineAddUrl = $this->PageUrl() . "a=add";
 		$this->GridAddUrl = $this->PageUrl() . "a=gridadd";
 		$this->GridEditUrl = $this->PageUrl() . "a=gridedit";
@@ -410,8 +411,6 @@ class ct94_log_list extends ct94_log {
 
 		// Setup export options
 		$this->SetupExportOptions();
-		$this->id->SetVisibility();
-		$this->id->Visible = !$this->IsAdd() && !$this->IsCopy() && !$this->IsGridAdd();
 		$this->index_->SetVisibility();
 		$this->subj_->SetVisibility();
 
@@ -430,6 +429,14 @@ class ct94_log_list extends ct94_log {
 
 		// Process auto fill
 		if (@$_POST["ajax"] == "autofill") {
+
+			// Process auto fill for detail table 't95_logdesc'
+			if (@$_POST["grid"] == "ft95_logdescgrid") {
+				if (!isset($GLOBALS["t95_logdesc_grid"])) $GLOBALS["t95_logdesc_grid"] = new ct95_logdesc_grid;
+				$GLOBALS["t95_logdesc_grid"]->Page_Init();
+				$this->Page_Terminate();
+				exit();
+			}
 			$results = $this->GetAutoFill(@$_POST["name"], @$_POST["q"]);
 			if ($results) {
 
@@ -1009,7 +1016,6 @@ class ct94_log_list extends ct94_log {
 		if (@$_GET["order"] <> "") {
 			$this->CurrentOrder = ew_StripSlashes(@$_GET["order"]);
 			$this->CurrentOrderType = @$_GET["ordertype"];
-			$this->UpdateSort($this->id, $bCtrl); // id
 			$this->UpdateSort($this->index_, $bCtrl); // index_
 			$this->UpdateSort($this->subj_, $bCtrl); // subj_
 			$this->setStartRecordNumber(1); // Reset start position
@@ -1044,7 +1050,6 @@ class ct94_log_list extends ct94_log {
 			if ($this->Command == "resetsort") {
 				$sOrderBy = "";
 				$this->setSessionOrderBy($sOrderBy);
-				$this->id->setSort("");
 				$this->index_->setSort("");
 				$this->subj_->setSort("");
 			}
@@ -1083,6 +1088,28 @@ class ct94_log_list extends ct94_log {
 		$item->Visible = $Security->CanAdd();
 		$item->OnLeft = TRUE;
 
+		// "detail_t95_logdesc"
+		$item = &$this->ListOptions->Add("detail_t95_logdesc");
+		$item->CssStyle = "white-space: nowrap;";
+		$item->Visible = $Security->AllowList(CurrentProjectID() . 't95_logdesc') && !$this->ShowMultipleDetails;
+		$item->OnLeft = TRUE;
+		$item->ShowInButtonGroup = FALSE;
+		if (!isset($GLOBALS["t95_logdesc_grid"])) $GLOBALS["t95_logdesc_grid"] = new ct95_logdesc_grid;
+
+		// Multiple details
+		if ($this->ShowMultipleDetails) {
+			$item = &$this->ListOptions->Add("details");
+			$item->CssStyle = "white-space: nowrap;";
+			$item->Visible = $this->ShowMultipleDetails;
+			$item->OnLeft = TRUE;
+			$item->ShowInButtonGroup = FALSE;
+		}
+
+		// Set up detail pages
+		$pages = new cSubPages();
+		$pages->Add("t95_logdesc");
+		$this->DetailPages = $pages;
+
 		// List actions
 		$item = &$this->ListOptions->Add("listactions");
 		$item->CssStyle = "white-space: nowrap;";
@@ -1097,6 +1124,14 @@ class ct94_log_list extends ct94_log {
 		$item->OnLeft = TRUE;
 		$item->Header = "<input type=\"checkbox\" name=\"key\" id=\"key\" onclick=\"ew_SelectAllKey(this);\">";
 		$item->MoveTo(0);
+		$item->ShowInDropDown = FALSE;
+		$item->ShowInButtonGroup = FALSE;
+
+		// "sequence"
+		$item = &$this->ListOptions->Add("sequence");
+		$item->CssStyle = "white-space: nowrap;";
+		$item->Visible = TRUE;
+		$item->OnLeft = TRUE; // Always on left
 		$item->ShowInDropDown = FALSE;
 		$item->ShowInButtonGroup = FALSE;
 
@@ -1120,6 +1155,10 @@ class ct94_log_list extends ct94_log {
 	function RenderListOptions() {
 		global $Security, $Language, $objForm;
 		$this->ListOptions->LoadDefault();
+
+		// "sequence"
+		$oListOpt = &$this->ListOptions->Items["sequence"];
+		$oListOpt->Body = ew_FormatSeqNo($this->RecCnt);
 
 		// "view"
 		$oListOpt = &$this->ListOptions->Items["view"];
@@ -1176,6 +1215,62 @@ class ct94_log_list extends ct94_log {
 				$oListOpt->Visible = TRUE;
 			}
 		}
+		$DetailViewTblVar = "";
+		$DetailCopyTblVar = "";
+		$DetailEditTblVar = "";
+
+		// "detail_t95_logdesc"
+		$oListOpt = &$this->ListOptions->Items["detail_t95_logdesc"];
+		if ($Security->AllowList(CurrentProjectID() . 't95_logdesc')) {
+			$body = $Language->Phrase("DetailLink") . $Language->TablePhrase("t95_logdesc", "TblCaption");
+			$body = "<a class=\"btn btn-default btn-sm ewRowLink ewDetail\" data-action=\"list\" href=\"" . ew_HtmlEncode("t95_logdesclist.php?" . EW_TABLE_SHOW_MASTER . "=t94_log&fk_id=" . urlencode(strval($this->id->CurrentValue)) . "") . "\">" . $body . "</a>";
+			$links = "";
+			if ($GLOBALS["t95_logdesc_grid"]->DetailView && $Security->CanView() && $Security->AllowView(CurrentProjectID() . 't95_logdesc')) {
+				$links .= "<li><a class=\"ewRowLink ewDetailView\" data-action=\"view\" data-caption=\"" . ew_HtmlTitle($Language->Phrase("MasterDetailViewLink")) . "\" href=\"" . ew_HtmlEncode($this->GetViewUrl(EW_TABLE_SHOW_DETAIL . "=t95_logdesc")) . "\">" . ew_HtmlImageAndText($Language->Phrase("MasterDetailViewLink")) . "</a></li>";
+				if ($DetailViewTblVar <> "") $DetailViewTblVar .= ",";
+				$DetailViewTblVar .= "t95_logdesc";
+			}
+			if ($GLOBALS["t95_logdesc_grid"]->DetailEdit && $Security->CanEdit() && $Security->AllowEdit(CurrentProjectID() . 't95_logdesc')) {
+				$links .= "<li><a class=\"ewRowLink ewDetailEdit\" data-action=\"edit\" data-caption=\"" . ew_HtmlTitle($Language->Phrase("MasterDetailEditLink")) . "\" href=\"" . ew_HtmlEncode($this->GetEditUrl(EW_TABLE_SHOW_DETAIL . "=t95_logdesc")) . "\">" . ew_HtmlImageAndText($Language->Phrase("MasterDetailEditLink")) . "</a></li>";
+				if ($DetailEditTblVar <> "") $DetailEditTblVar .= ",";
+				$DetailEditTblVar .= "t95_logdesc";
+			}
+			if ($GLOBALS["t95_logdesc_grid"]->DetailAdd && $Security->CanAdd() && $Security->AllowAdd(CurrentProjectID() . 't95_logdesc')) {
+				$links .= "<li><a class=\"ewRowLink ewDetailCopy\" data-action=\"add\" data-caption=\"" . ew_HtmlTitle($Language->Phrase("MasterDetailCopyLink")) . "\" href=\"" . ew_HtmlEncode($this->GetCopyUrl(EW_TABLE_SHOW_DETAIL . "=t95_logdesc")) . "\">" . ew_HtmlImageAndText($Language->Phrase("MasterDetailCopyLink")) . "</a></li>";
+				if ($DetailCopyTblVar <> "") $DetailCopyTblVar .= ",";
+				$DetailCopyTblVar .= "t95_logdesc";
+			}
+			if ($links <> "") {
+				$body .= "<button class=\"dropdown-toggle btn btn-default btn-sm ewDetail\" data-toggle=\"dropdown\"><b class=\"caret\"></b></button>";
+				$body .= "<ul class=\"dropdown-menu\">". $links . "</ul>";
+			}
+			$body = "<div class=\"btn-group\">" . $body . "</div>";
+			$oListOpt->Body = $body;
+			if ($this->ShowMultipleDetails) $oListOpt->Visible = FALSE;
+		}
+		if ($this->ShowMultipleDetails) {
+			$body = $Language->Phrase("MultipleMasterDetails");
+			$body = "<div class=\"btn-group\">";
+			$links = "";
+			if ($DetailViewTblVar <> "") {
+				$links .= "<li><a class=\"ewRowLink ewDetailView\" data-action=\"view\" data-caption=\"" . ew_HtmlTitle($Language->Phrase("MasterDetailViewLink")) . "\" href=\"" . ew_HtmlEncode($this->GetViewUrl(EW_TABLE_SHOW_DETAIL . "=" . $DetailViewTblVar)) . "\">" . ew_HtmlImageAndText($Language->Phrase("MasterDetailViewLink")) . "</a></li>";
+			}
+			if ($DetailEditTblVar <> "") {
+				$links .= "<li><a class=\"ewRowLink ewDetailEdit\" data-action=\"edit\" data-caption=\"" . ew_HtmlTitle($Language->Phrase("MasterDetailEditLink")) . "\" href=\"" . ew_HtmlEncode($this->GetEditUrl(EW_TABLE_SHOW_DETAIL . "=" . $DetailEditTblVar)) . "\">" . ew_HtmlImageAndText($Language->Phrase("MasterDetailEditLink")) . "</a></li>";
+			}
+			if ($DetailCopyTblVar <> "") {
+				$links .= "<li><a class=\"ewRowLink ewDetailCopy\" data-action=\"add\" data-caption=\"" . ew_HtmlTitle($Language->Phrase("MasterDetailCopyLink")) . "\" href=\"" . ew_HtmlEncode($this->GetCopyUrl(EW_TABLE_SHOW_DETAIL . "=" . $DetailCopyTblVar)) . "\">" . ew_HtmlImageAndText($Language->Phrase("MasterDetailCopyLink")) . "</a></li>";
+			}
+			if ($links <> "") {
+				$body .= "<button class=\"dropdown-toggle btn btn-default btn-sm ewMasterDetail\" title=\"" . ew_HtmlTitle($Language->Phrase("MultipleMasterDetails")) . "\" data-toggle=\"dropdown\">" . $Language->Phrase("MultipleMasterDetails") . "<b class=\"caret\"></b></button>";
+				$body .= "<ul class=\"dropdown-menu ewMenu\">". $links . "</ul>";
+			}
+			$body .= "</div>";
+
+			// Multiple details
+			$oListOpt = &$this->ListOptions->Items["details"];
+			$oListOpt->Body = $body;
+		}
 
 		// "checkbox"
 		$oListOpt = &$this->ListOptions->Items["checkbox"];
@@ -1197,6 +1292,33 @@ class ct94_log_list extends ct94_log {
 		$addcaption = ew_HtmlTitle($Language->Phrase("AddLink"));
 		$item->Body = "<a class=\"ewAddEdit ewAdd\" title=\"" . $addcaption . "\" data-caption=\"" . $addcaption . "\" href=\"" . ew_HtmlEncode($this->AddUrl) . "\">" . $Language->Phrase("AddLink") . "</a>";
 		$item->Visible = ($this->AddUrl <> "" && $Security->CanAdd());
+		$option = $options["detail"];
+		$DetailTableLink = "";
+		$item = &$option->Add("detailadd_t95_logdesc");
+		$url = $this->GetAddUrl(EW_TABLE_SHOW_DETAIL . "=t95_logdesc");
+		$caption = $Language->Phrase("Add") . "&nbsp;" . $this->TableCaption() . "/" . $GLOBALS["t95_logdesc"]->TableCaption();
+		$item->Body = "<a class=\"ewDetailAddGroup ewDetailAdd\" title=\"" . ew_HtmlTitle($caption) . "\" data-caption=\"" . ew_HtmlTitle($caption) . "\" href=\"" . ew_HtmlEncode($url) . "\">" . $caption . "</a>";
+		$item->Visible = ($GLOBALS["t95_logdesc"]->DetailAdd && $Security->AllowAdd(CurrentProjectID() . 't95_logdesc') && $Security->CanAdd());
+		if ($item->Visible) {
+			if ($DetailTableLink <> "") $DetailTableLink .= ",";
+			$DetailTableLink .= "t95_logdesc";
+		}
+
+		// Add multiple details
+		if ($this->ShowMultipleDetails) {
+			$item = &$option->Add("detailsadd");
+			$url = $this->GetAddUrl(EW_TABLE_SHOW_DETAIL . "=" . $DetailTableLink);
+			$item->Body = "<a class=\"ewDetailAddGroup ewDetailAdd\" title=\"" . ew_HtmlTitle($Language->Phrase("AddMasterDetailLink")) . "\" data-caption=\"" . ew_HtmlTitle($Language->Phrase("AddMasterDetailLink")) . "\" href=\"" . ew_HtmlEncode($url) . "\">" . $Language->Phrase("AddMasterDetailLink") . "</a>";
+			$item->Visible = ($DetailTableLink <> "" && $Security->CanAdd());
+
+			// Hide single master/detail items
+			$ar = explode(",", $DetailTableLink);
+			$cnt = count($ar);
+			for ($i = 0; $i < $cnt; $i++) {
+				if ($item = &$option->GetItem("detailadd_" . $ar[$i]))
+					$item->Visible = FALSE;
+			}
+		}
 		$option = $options["action"];
 
 		// Add multi delete
@@ -1556,11 +1678,6 @@ class ct94_log_list extends ct94_log {
 		// subj_
 		$this->subj_->ViewValue = $this->subj_->CurrentValue;
 		$this->subj_->ViewCustomAttributes = "";
-
-			// id
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-			$this->id->TooltipValue = "";
 
 			// index_
 			$this->index_->LinkCustomAttributes = "";
@@ -2232,15 +2349,6 @@ $t94_log_list->RenderListOptions();
 // Render list options (header, left)
 $t94_log_list->ListOptions->Render("header", "left");
 ?>
-<?php if ($t94_log->id->Visible) { // id ?>
-	<?php if ($t94_log->SortUrl($t94_log->id) == "") { ?>
-		<th data-name="id"><div id="elh_t94_log_id" class="t94_log_id"><div class="ewTableHeaderCaption"><?php echo $t94_log->id->FldCaption() ?></div></div></th>
-	<?php } else { ?>
-		<th data-name="id"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t94_log->SortUrl($t94_log->id) ?>',2);"><div id="elh_t94_log_id" class="t94_log_id">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t94_log->id->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t94_log->id->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t94_log->id->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
-        </div></div></th>
-	<?php } ?>
-<?php } ?>		
 <?php if ($t94_log->index_->Visible) { // index_ ?>
 	<?php if ($t94_log->SortUrl($t94_log->index_) == "") { ?>
 		<th data-name="index_"><div id="elh_t94_log_index_" class="t94_log_index_"><div class="ewTableHeaderCaption"><?php echo $t94_log->index_->FldCaption() ?></div></div></th>
@@ -2324,21 +2432,13 @@ while ($t94_log_list->RecCnt < $t94_log_list->StopRec) {
 // Render list options (body, left)
 $t94_log_list->ListOptions->Render("body", "left", $t94_log_list->RowCnt);
 ?>
-	<?php if ($t94_log->id->Visible) { // id ?>
-		<td data-name="id"<?php echo $t94_log->id->CellAttributes() ?>>
-<span id="el<?php echo $t94_log_list->RowCnt ?>_t94_log_id" class="t94_log_id">
-<span<?php echo $t94_log->id->ViewAttributes() ?>>
-<?php echo $t94_log->id->ListViewValue() ?></span>
-</span>
-<a id="<?php echo $t94_log_list->PageObjName . "_row_" . $t94_log_list->RowCnt ?>"></a></td>
-	<?php } ?>
 	<?php if ($t94_log->index_->Visible) { // index_ ?>
 		<td data-name="index_"<?php echo $t94_log->index_->CellAttributes() ?>>
 <span id="el<?php echo $t94_log_list->RowCnt ?>_t94_log_index_" class="t94_log_index_">
 <span<?php echo $t94_log->index_->ViewAttributes() ?>>
 <?php echo $t94_log->index_->ListViewValue() ?></span>
 </span>
-</td>
+<a id="<?php echo $t94_log_list->PageObjName . "_row_" . $t94_log_list->RowCnt ?>"></a></td>
 	<?php } ?>
 	<?php if ($t94_log->subj_->Visible) { // subj_ ?>
 		<td data-name="subj_"<?php echo $t94_log->subj_->CellAttributes() ?>>
