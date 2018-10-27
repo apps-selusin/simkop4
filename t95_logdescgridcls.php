@@ -313,8 +313,8 @@ class ct95_logdesc_grid extends ct95_logdesc {
 		// Set up list options
 		$this->SetupListOptions();
 		$this->log_id->SetVisibility();
-		$this->date_issued->SetVisibility();
 		$this->desc_->SetVisibility();
+		$this->date_issued->SetVisibility();
 		$this->date_solved->SetVisibility();
 
 		// Global Page Loading event (in userfn*.php)
@@ -804,9 +804,9 @@ class ct95_logdesc_grid extends ct95_logdesc {
 		global $objForm;
 		if ($objForm->HasValue("x_log_id") && $objForm->HasValue("o_log_id") && $this->log_id->CurrentValue <> $this->log_id->OldValue)
 			return FALSE;
-		if ($objForm->HasValue("x_date_issued") && $objForm->HasValue("o_date_issued") && $this->date_issued->CurrentValue <> $this->date_issued->OldValue)
-			return FALSE;
 		if ($objForm->HasValue("x_desc_") && $objForm->HasValue("o_desc_") && $this->desc_->CurrentValue <> $this->desc_->OldValue)
+			return FALSE;
+		if ($objForm->HasValue("x_date_issued") && $objForm->HasValue("o_date_issued") && $this->date_issued->CurrentValue <> $this->date_issued->OldValue)
 			return FALSE;
 		if ($objForm->HasValue("x_date_solved") && $objForm->HasValue("o_date_solved") && $this->date_solved->CurrentValue <> $this->date_solved->OldValue)
 			return FALSE;
@@ -1168,10 +1168,10 @@ class ct95_logdesc_grid extends ct95_logdesc {
 	function LoadDefaultValues() {
 		$this->log_id->CurrentValue = NULL;
 		$this->log_id->OldValue = $this->log_id->CurrentValue;
-		$this->date_issued->CurrentValue = NULL;
-		$this->date_issued->OldValue = $this->date_issued->CurrentValue;
 		$this->desc_->CurrentValue = NULL;
 		$this->desc_->OldValue = $this->desc_->CurrentValue;
+		$this->date_issued->CurrentValue = NULL;
+		$this->date_issued->OldValue = $this->date_issued->CurrentValue;
 		$this->date_solved->CurrentValue = NULL;
 		$this->date_solved->OldValue = $this->date_solved->CurrentValue;
 	}
@@ -1186,15 +1186,15 @@ class ct95_logdesc_grid extends ct95_logdesc {
 			$this->log_id->setFormValue($objForm->GetValue("x_log_id"));
 		}
 		$this->log_id->setOldValue($objForm->GetValue("o_log_id"));
+		if (!$this->desc_->FldIsDetailKey) {
+			$this->desc_->setFormValue($objForm->GetValue("x_desc_"));
+		}
+		$this->desc_->setOldValue($objForm->GetValue("o_desc_"));
 		if (!$this->date_issued->FldIsDetailKey) {
 			$this->date_issued->setFormValue($objForm->GetValue("x_date_issued"));
 			$this->date_issued->CurrentValue = ew_UnFormatDateTime($this->date_issued->CurrentValue, 7);
 		}
 		$this->date_issued->setOldValue($objForm->GetValue("o_date_issued"));
-		if (!$this->desc_->FldIsDetailKey) {
-			$this->desc_->setFormValue($objForm->GetValue("x_desc_"));
-		}
-		$this->desc_->setOldValue($objForm->GetValue("o_desc_"));
 		if (!$this->date_solved->FldIsDetailKey) {
 			$this->date_solved->setFormValue($objForm->GetValue("x_date_solved"));
 			$this->date_solved->CurrentValue = ew_UnFormatDateTime($this->date_solved->CurrentValue, 7);
@@ -1210,9 +1210,9 @@ class ct95_logdesc_grid extends ct95_logdesc {
 		if ($this->CurrentAction <> "gridadd" && $this->CurrentAction <> "add")
 			$this->id->CurrentValue = $this->id->FormValue;
 		$this->log_id->CurrentValue = $this->log_id->FormValue;
+		$this->desc_->CurrentValue = $this->desc_->FormValue;
 		$this->date_issued->CurrentValue = $this->date_issued->FormValue;
 		$this->date_issued->CurrentValue = ew_UnFormatDateTime($this->date_issued->CurrentValue, 7);
-		$this->desc_->CurrentValue = $this->desc_->FormValue;
 		$this->date_solved->CurrentValue = $this->date_solved->FormValue;
 		$this->date_solved->CurrentValue = ew_UnFormatDateTime($this->date_solved->CurrentValue, 7);
 	}
@@ -1274,8 +1274,8 @@ class ct95_logdesc_grid extends ct95_logdesc {
 		$this->Row_Selected($row);
 		$this->id->setDbValue($rs->fields('id'));
 		$this->log_id->setDbValue($rs->fields('log_id'));
-		$this->date_issued->setDbValue($rs->fields('date_issued'));
 		$this->desc_->setDbValue($rs->fields('desc_'));
+		$this->date_issued->setDbValue($rs->fields('date_issued'));
 		$this->date_solved->setDbValue($rs->fields('date_solved'));
 	}
 
@@ -1285,8 +1285,8 @@ class ct95_logdesc_grid extends ct95_logdesc {
 		$row = is_array($rs) ? $rs : $rs->fields;
 		$this->id->DbValue = $row['id'];
 		$this->log_id->DbValue = $row['log_id'];
-		$this->date_issued->DbValue = $row['date_issued'];
 		$this->desc_->DbValue = $row['desc_'];
+		$this->date_issued->DbValue = $row['date_issued'];
 		$this->date_solved->DbValue = $row['date_solved'];
 	}
 
@@ -1335,8 +1335,8 @@ class ct95_logdesc_grid extends ct95_logdesc {
 		// Common render codes for all row types
 		// id
 		// log_id
-		// date_issued
 		// desc_
+		// date_issued
 		// date_solved
 
 		if ($this->RowType == EW_ROWTYPE_VIEW) { // View row
@@ -1370,14 +1370,14 @@ class ct95_logdesc_grid extends ct95_logdesc {
 		}
 		$this->log_id->ViewCustomAttributes = "";
 
+		// desc_
+		$this->desc_->ViewValue = $this->desc_->CurrentValue;
+		$this->desc_->ViewCustomAttributes = "";
+
 		// date_issued
 		$this->date_issued->ViewValue = $this->date_issued->CurrentValue;
 		$this->date_issued->ViewValue = ew_FormatDateTime($this->date_issued->ViewValue, 7);
 		$this->date_issued->ViewCustomAttributes = "";
-
-		// desc_
-		$this->desc_->ViewValue = $this->desc_->CurrentValue;
-		$this->desc_->ViewCustomAttributes = "";
 
 		// date_solved
 		$this->date_solved->ViewValue = $this->date_solved->CurrentValue;
@@ -1389,15 +1389,15 @@ class ct95_logdesc_grid extends ct95_logdesc {
 			$this->log_id->HrefValue = "";
 			$this->log_id->TooltipValue = "";
 
-			// date_issued
-			$this->date_issued->LinkCustomAttributes = "";
-			$this->date_issued->HrefValue = "";
-			$this->date_issued->TooltipValue = "";
-
 			// desc_
 			$this->desc_->LinkCustomAttributes = "";
 			$this->desc_->HrefValue = "";
 			$this->desc_->TooltipValue = "";
+
+			// date_issued
+			$this->date_issued->LinkCustomAttributes = "";
+			$this->date_issued->HrefValue = "";
+			$this->date_issued->TooltipValue = "";
 
 			// date_solved
 			$this->date_solved->LinkCustomAttributes = "";
@@ -1460,17 +1460,17 @@ class ct95_logdesc_grid extends ct95_logdesc {
 			$this->log_id->PlaceHolder = ew_RemoveHtml($this->log_id->FldCaption());
 			}
 
-			// date_issued
-			$this->date_issued->EditAttrs["class"] = "form-control";
-			$this->date_issued->EditCustomAttributes = "";
-			$this->date_issued->EditValue = ew_HtmlEncode(ew_FormatDateTime($this->date_issued->CurrentValue, 7));
-			$this->date_issued->PlaceHolder = ew_RemoveHtml($this->date_issued->FldCaption());
-
 			// desc_
 			$this->desc_->EditAttrs["class"] = "form-control";
 			$this->desc_->EditCustomAttributes = "";
 			$this->desc_->EditValue = ew_HtmlEncode($this->desc_->CurrentValue);
 			$this->desc_->PlaceHolder = ew_RemoveHtml($this->desc_->FldCaption());
+
+			// date_issued
+			$this->date_issued->EditAttrs["class"] = "form-control";
+			$this->date_issued->EditCustomAttributes = "";
+			$this->date_issued->EditValue = ew_HtmlEncode(ew_FormatDateTime($this->date_issued->CurrentValue, 7));
+			$this->date_issued->PlaceHolder = ew_RemoveHtml($this->date_issued->FldCaption());
 
 			// date_solved
 			$this->date_solved->EditAttrs["class"] = "form-control";
@@ -1484,13 +1484,13 @@ class ct95_logdesc_grid extends ct95_logdesc {
 			$this->log_id->LinkCustomAttributes = "";
 			$this->log_id->HrefValue = "";
 
-			// date_issued
-			$this->date_issued->LinkCustomAttributes = "";
-			$this->date_issued->HrefValue = "";
-
 			// desc_
 			$this->desc_->LinkCustomAttributes = "";
 			$this->desc_->HrefValue = "";
+
+			// date_issued
+			$this->date_issued->LinkCustomAttributes = "";
+			$this->date_issued->HrefValue = "";
 
 			// date_solved
 			$this->date_solved->LinkCustomAttributes = "";
@@ -1552,17 +1552,17 @@ class ct95_logdesc_grid extends ct95_logdesc {
 			$this->log_id->PlaceHolder = ew_RemoveHtml($this->log_id->FldCaption());
 			}
 
-			// date_issued
-			$this->date_issued->EditAttrs["class"] = "form-control";
-			$this->date_issued->EditCustomAttributes = "";
-			$this->date_issued->EditValue = ew_HtmlEncode(ew_FormatDateTime($this->date_issued->CurrentValue, 7));
-			$this->date_issued->PlaceHolder = ew_RemoveHtml($this->date_issued->FldCaption());
-
 			// desc_
 			$this->desc_->EditAttrs["class"] = "form-control";
 			$this->desc_->EditCustomAttributes = "";
 			$this->desc_->EditValue = ew_HtmlEncode($this->desc_->CurrentValue);
 			$this->desc_->PlaceHolder = ew_RemoveHtml($this->desc_->FldCaption());
+
+			// date_issued
+			$this->date_issued->EditAttrs["class"] = "form-control";
+			$this->date_issued->EditCustomAttributes = "";
+			$this->date_issued->EditValue = ew_HtmlEncode(ew_FormatDateTime($this->date_issued->CurrentValue, 7));
+			$this->date_issued->PlaceHolder = ew_RemoveHtml($this->date_issued->FldCaption());
 
 			// date_solved
 			$this->date_solved->EditAttrs["class"] = "form-control";
@@ -1576,13 +1576,13 @@ class ct95_logdesc_grid extends ct95_logdesc {
 			$this->log_id->LinkCustomAttributes = "";
 			$this->log_id->HrefValue = "";
 
-			// date_issued
-			$this->date_issued->LinkCustomAttributes = "";
-			$this->date_issued->HrefValue = "";
-
 			// desc_
 			$this->desc_->LinkCustomAttributes = "";
 			$this->desc_->HrefValue = "";
+
+			// date_issued
+			$this->date_issued->LinkCustomAttributes = "";
+			$this->date_issued->HrefValue = "";
 
 			// date_solved
 			$this->date_solved->LinkCustomAttributes = "";
@@ -1612,14 +1612,14 @@ class ct95_logdesc_grid extends ct95_logdesc {
 		if (!ew_CheckInteger($this->log_id->FormValue)) {
 			ew_AddMessage($gsFormError, $this->log_id->FldErrMsg());
 		}
+		if (!$this->desc_->FldIsDetailKey && !is_null($this->desc_->FormValue) && $this->desc_->FormValue == "") {
+			ew_AddMessage($gsFormError, str_replace("%s", $this->desc_->FldCaption(), $this->desc_->ReqErrMsg));
+		}
 		if (!$this->date_issued->FldIsDetailKey && !is_null($this->date_issued->FormValue) && $this->date_issued->FormValue == "") {
 			ew_AddMessage($gsFormError, str_replace("%s", $this->date_issued->FldCaption(), $this->date_issued->ReqErrMsg));
 		}
 		if (!ew_CheckEuroDate($this->date_issued->FormValue)) {
 			ew_AddMessage($gsFormError, $this->date_issued->FldErrMsg());
-		}
-		if (!$this->desc_->FldIsDetailKey && !is_null($this->desc_->FormValue) && $this->desc_->FormValue == "") {
-			ew_AddMessage($gsFormError, str_replace("%s", $this->desc_->FldCaption(), $this->desc_->ReqErrMsg));
 		}
 		if (!ew_CheckEuroDate($this->date_solved->FormValue)) {
 			ew_AddMessage($gsFormError, $this->date_solved->FldErrMsg());
@@ -1745,11 +1745,11 @@ class ct95_logdesc_grid extends ct95_logdesc {
 			// log_id
 			$this->log_id->SetDbValueDef($rsnew, $this->log_id->CurrentValue, 0, $this->log_id->ReadOnly);
 
-			// date_issued
-			$this->date_issued->SetDbValueDef($rsnew, ew_UnFormatDateTime($this->date_issued->CurrentValue, 7), ew_CurrentDate(), $this->date_issued->ReadOnly);
-
 			// desc_
 			$this->desc_->SetDbValueDef($rsnew, $this->desc_->CurrentValue, "", $this->desc_->ReadOnly);
+
+			// date_issued
+			$this->date_issued->SetDbValueDef($rsnew, ew_UnFormatDateTime($this->date_issued->CurrentValue, 7), ew_CurrentDate(), $this->date_issued->ReadOnly);
 
 			// date_solved
 			$this->date_solved->SetDbValueDef($rsnew, ew_UnFormatDateTime($this->date_solved->CurrentValue, 7), NULL, $this->date_solved->ReadOnly);
@@ -1847,11 +1847,11 @@ class ct95_logdesc_grid extends ct95_logdesc {
 		// log_id
 		$this->log_id->SetDbValueDef($rsnew, $this->log_id->CurrentValue, 0, FALSE);
 
-		// date_issued
-		$this->date_issued->SetDbValueDef($rsnew, ew_UnFormatDateTime($this->date_issued->CurrentValue, 7), ew_CurrentDate(), FALSE);
-
 		// desc_
 		$this->desc_->SetDbValueDef($rsnew, $this->desc_->CurrentValue, "", FALSE);
+
+		// date_issued
+		$this->date_issued->SetDbValueDef($rsnew, ew_UnFormatDateTime($this->date_issued->CurrentValue, 7), ew_CurrentDate(), FALSE);
 
 		// date_solved
 		$this->date_solved->SetDbValueDef($rsnew, ew_UnFormatDateTime($this->date_solved->CurrentValue, 7), NULL, FALSE);

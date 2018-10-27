@@ -410,8 +410,6 @@ class ct99_audittrail_list extends ct99_audittrail {
 
 		// Setup export options
 		$this->SetupExportOptions();
-		$this->id->SetVisibility();
-		$this->id->Visible = !$this->IsAdd() && !$this->IsCopy() && !$this->IsGridAdd();
 		$this->datetime->SetVisibility();
 		$this->script->SetVisibility();
 		$this->user->SetVisibility();
@@ -1083,7 +1081,6 @@ class ct99_audittrail_list extends ct99_audittrail {
 		if (@$_GET["order"] <> "") {
 			$this->CurrentOrder = ew_StripSlashes(@$_GET["order"]);
 			$this->CurrentOrderType = @$_GET["ordertype"];
-			$this->UpdateSort($this->id, $bCtrl); // id
 			$this->UpdateSort($this->datetime, $bCtrl); // datetime
 			$this->UpdateSort($this->script, $bCtrl); // script
 			$this->UpdateSort($this->user, $bCtrl); // user
@@ -1122,7 +1119,6 @@ class ct99_audittrail_list extends ct99_audittrail {
 			if ($this->Command == "resetsort") {
 				$sOrderBy = "";
 				$this->setSessionOrderBy($sOrderBy);
-				$this->id->setSort("");
 				$this->datetime->setSort("");
 				$this->script->setSort("");
 				$this->user->setSort("");
@@ -1147,24 +1143,6 @@ class ct99_audittrail_list extends ct99_audittrail {
 		$item->OnLeft = TRUE;
 		$item->Visible = FALSE;
 
-		// "view"
-		$item = &$this->ListOptions->Add("view");
-		$item->CssStyle = "white-space: nowrap;";
-		$item->Visible = $Security->CanView();
-		$item->OnLeft = TRUE;
-
-		// "edit"
-		$item = &$this->ListOptions->Add("edit");
-		$item->CssStyle = "white-space: nowrap;";
-		$item->Visible = $Security->CanEdit();
-		$item->OnLeft = TRUE;
-
-		// "copy"
-		$item = &$this->ListOptions->Add("copy");
-		$item->CssStyle = "white-space: nowrap;";
-		$item->Visible = $Security->CanAdd();
-		$item->OnLeft = TRUE;
-
 		// List actions
 		$item = &$this->ListOptions->Add("listactions");
 		$item->CssStyle = "white-space: nowrap;";
@@ -1175,10 +1153,18 @@ class ct99_audittrail_list extends ct99_audittrail {
 
 		// "checkbox"
 		$item = &$this->ListOptions->Add("checkbox");
-		$item->Visible = $Security->CanDelete();
+		$item->Visible = FALSE;
 		$item->OnLeft = TRUE;
 		$item->Header = "<input type=\"checkbox\" name=\"key\" id=\"key\" onclick=\"ew_SelectAllKey(this);\">";
 		$item->MoveTo(0);
+		$item->ShowInDropDown = FALSE;
+		$item->ShowInButtonGroup = FALSE;
+
+		// "sequence"
+		$item = &$this->ListOptions->Add("sequence");
+		$item->CssStyle = "white-space: nowrap;";
+		$item->Visible = TRUE;
+		$item->OnLeft = TRUE; // Always on left
 		$item->ShowInDropDown = FALSE;
 		$item->ShowInButtonGroup = FALSE;
 
@@ -1203,32 +1189,9 @@ class ct99_audittrail_list extends ct99_audittrail {
 		global $Security, $Language, $objForm;
 		$this->ListOptions->LoadDefault();
 
-		// "view"
-		$oListOpt = &$this->ListOptions->Items["view"];
-		$viewcaption = ew_HtmlTitle($Language->Phrase("ViewLink"));
-		if ($Security->CanView()) {
-			$oListOpt->Body = "<a class=\"ewRowLink ewView\" title=\"" . $viewcaption . "\" data-caption=\"" . $viewcaption . "\" href=\"" . ew_HtmlEncode($this->ViewUrl) . "\">" . $Language->Phrase("ViewLink") . "</a>";
-		} else {
-			$oListOpt->Body = "";
-		}
-
-		// "edit"
-		$oListOpt = &$this->ListOptions->Items["edit"];
-		$editcaption = ew_HtmlTitle($Language->Phrase("EditLink"));
-		if ($Security->CanEdit()) {
-			$oListOpt->Body = "<a class=\"ewRowLink ewEdit\" title=\"" . ew_HtmlTitle($Language->Phrase("EditLink")) . "\" data-caption=\"" . ew_HtmlTitle($Language->Phrase("EditLink")) . "\" href=\"" . ew_HtmlEncode($this->EditUrl) . "\">" . $Language->Phrase("EditLink") . "</a>";
-		} else {
-			$oListOpt->Body = "";
-		}
-
-		// "copy"
-		$oListOpt = &$this->ListOptions->Items["copy"];
-		$copycaption = ew_HtmlTitle($Language->Phrase("CopyLink"));
-		if ($Security->CanAdd()) {
-			$oListOpt->Body = "<a class=\"ewRowLink ewCopy\" title=\"" . $copycaption . "\" data-caption=\"" . $copycaption . "\" href=\"" . ew_HtmlEncode($this->CopyUrl) . "\">" . $Language->Phrase("CopyLink") . "</a>";
-		} else {
-			$oListOpt->Body = "";
-		}
+		// "sequence"
+		$oListOpt = &$this->ListOptions->Items["sequence"];
+		$oListOpt->Body = ew_FormatSeqNo($this->RecCnt);
 
 		// Set up list action buttons
 		$oListOpt = &$this->ListOptions->GetItem("listactions");
@@ -1272,19 +1235,7 @@ class ct99_audittrail_list extends ct99_audittrail {
 	function SetupOtherOptions() {
 		global $Language, $Security;
 		$options = &$this->OtherOptions;
-		$option = $options["addedit"];
-
-		// Add
-		$item = &$option->Add("add");
-		$addcaption = ew_HtmlTitle($Language->Phrase("AddLink"));
-		$item->Body = "<a class=\"ewAddEdit ewAdd\" title=\"" . $addcaption . "\" data-caption=\"" . $addcaption . "\" href=\"" . ew_HtmlEncode($this->AddUrl) . "\">" . $Language->Phrase("AddLink") . "</a>";
-		$item->Visible = ($this->AddUrl <> "" && $Security->CanAdd());
 		$option = $options["action"];
-
-		// Add multi delete
-		$item = &$option->Add("multidelete");
-		$item->Body = "<a class=\"ewAction ewMultiDelete\" title=\"" . ew_HtmlTitle($Language->Phrase("DeleteSelectedLink")) . "\" data-caption=\"" . ew_HtmlTitle($Language->Phrase("DeleteSelectedLink")) . "\" href=\"\" onclick=\"ew_SubmitAction(event,{f:document.ft99_audittraillist,url:'" . $this->MultiDeleteUrl . "'});return false;\">" . $Language->Phrase("DeleteSelectedLink") . "</a>";
-		$item->Visible = ($Security->CanDelete());
 
 		// Set up options default
 		foreach ($options as &$option) {
@@ -1676,11 +1627,6 @@ class ct99_audittrail_list extends ct99_audittrail {
 		// field
 		$this->_field->ViewValue = $this->_field->CurrentValue;
 		$this->_field->ViewCustomAttributes = "";
-
-			// id
-			$this->id->LinkCustomAttributes = "";
-			$this->id->HrefValue = "";
-			$this->id->TooltipValue = "";
 
 			// datetime
 			$this->datetime->LinkCustomAttributes = "";
@@ -2372,15 +2318,6 @@ $t99_audittrail_list->RenderListOptions();
 // Render list options (header, left)
 $t99_audittrail_list->ListOptions->Render("header", "left");
 ?>
-<?php if ($t99_audittrail->id->Visible) { // id ?>
-	<?php if ($t99_audittrail->SortUrl($t99_audittrail->id) == "") { ?>
-		<th data-name="id"><div id="elh_t99_audittrail_id" class="t99_audittrail_id"><div class="ewTableHeaderCaption"><?php echo $t99_audittrail->id->FldCaption() ?></div></div></th>
-	<?php } else { ?>
-		<th data-name="id"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t99_audittrail->SortUrl($t99_audittrail->id) ?>',2);"><div id="elh_t99_audittrail_id" class="t99_audittrail_id">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t99_audittrail->id->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t99_audittrail->id->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t99_audittrail->id->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
-        </div></div></th>
-	<?php } ?>
-<?php } ?>		
 <?php if ($t99_audittrail->datetime->Visible) { // datetime ?>
 	<?php if ($t99_audittrail->SortUrl($t99_audittrail->datetime) == "") { ?>
 		<th data-name="datetime"><div id="elh_t99_audittrail_datetime" class="t99_audittrail_datetime"><div class="ewTableHeaderCaption"><?php echo $t99_audittrail->datetime->FldCaption() ?></div></div></th>
@@ -2500,21 +2437,13 @@ while ($t99_audittrail_list->RecCnt < $t99_audittrail_list->StopRec) {
 // Render list options (body, left)
 $t99_audittrail_list->ListOptions->Render("body", "left", $t99_audittrail_list->RowCnt);
 ?>
-	<?php if ($t99_audittrail->id->Visible) { // id ?>
-		<td data-name="id"<?php echo $t99_audittrail->id->CellAttributes() ?>>
-<span id="el<?php echo $t99_audittrail_list->RowCnt ?>_t99_audittrail_id" class="t99_audittrail_id">
-<span<?php echo $t99_audittrail->id->ViewAttributes() ?>>
-<?php echo $t99_audittrail->id->ListViewValue() ?></span>
-</span>
-<a id="<?php echo $t99_audittrail_list->PageObjName . "_row_" . $t99_audittrail_list->RowCnt ?>"></a></td>
-	<?php } ?>
 	<?php if ($t99_audittrail->datetime->Visible) { // datetime ?>
 		<td data-name="datetime"<?php echo $t99_audittrail->datetime->CellAttributes() ?>>
 <span id="el<?php echo $t99_audittrail_list->RowCnt ?>_t99_audittrail_datetime" class="t99_audittrail_datetime">
 <span<?php echo $t99_audittrail->datetime->ViewAttributes() ?>>
 <?php echo $t99_audittrail->datetime->ListViewValue() ?></span>
 </span>
-</td>
+<a id="<?php echo $t99_audittrail_list->PageObjName . "_row_" . $t99_audittrail_list->RowCnt ?>"></a></td>
 	<?php } ?>
 	<?php if ($t99_audittrail->script->Visible) { // script ?>
 		<td data-name="script"<?php echo $t99_audittrail->script->CellAttributes() ?>>

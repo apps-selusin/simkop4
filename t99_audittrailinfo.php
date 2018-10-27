@@ -837,7 +837,6 @@ class ct99_audittrail extends cTable {
 			if ($Doc->Horizontal) { // Horizontal format, write header
 				$Doc->BeginExportRow();
 				if ($ExportPageType == "view") {
-					if ($this->id->Exportable) $Doc->ExportCaption($this->id);
 					if ($this->datetime->Exportable) $Doc->ExportCaption($this->datetime);
 					if ($this->script->Exportable) $Doc->ExportCaption($this->script);
 					if ($this->user->Exportable) $Doc->ExportCaption($this->user);
@@ -886,7 +885,6 @@ class ct99_audittrail extends cTable {
 				if (!$Doc->ExportCustom) {
 					$Doc->BeginExportRow($RowCnt); // Allow CSS styles if enabled
 					if ($ExportPageType == "view") {
-						if ($this->id->Exportable) $Doc->ExportField($this->id);
 						if ($this->datetime->Exportable) $Doc->ExportField($this->datetime);
 						if ($this->script->Exportable) $Doc->ExportField($this->script);
 						if ($this->user->Exportable) $Doc->ExportField($this->user);

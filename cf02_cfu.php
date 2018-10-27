@@ -14,9 +14,9 @@ ob_start(); // Turn on output buffering
 // Page class
 //
 
-$cf01_home_php = NULL; // Initialize page object first
+$cf02_cfu_php = NULL; // Initialize page object first
 
-class ccf01_home_php {
+class ccf02_cfu_php {
 
 	// Page ID
 	var $PageID = 'custom';
@@ -25,10 +25,10 @@ class ccf01_home_php {
 	var $ProjectID = "{1F4EE816-E057-4A7E-9024-5EA4446B7598}";
 
 	// Table name
-	var $TableName = 'cf01_home.php';
+	var $TableName = 'cf02_cfu.php';
 
 	// Page object name
-	var $PageObjName = 'cf01_home_php';
+	var $PageObjName = 'cf02_cfu_php';
 
 	// Page name
 	function PageName() {
@@ -195,7 +195,7 @@ class ccf01_home_php {
 
 		// Table name (for backward compatibility)
 		if (!defined("EW_TABLE_NAME"))
-			define("EW_TABLE_NAME", 'cf01_home.php', TRUE);
+			define("EW_TABLE_NAME", 'cf02_cfu.php', TRUE);
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();
@@ -284,7 +284,7 @@ class ccf01_home_php {
 		global $Breadcrumb;
 		$Breadcrumb = new cBreadcrumb();
 		$url = substr(ew_CurrentUrl(), strrpos(ew_CurrentUrl(), "/")+1);
-		$Breadcrumb->Add("custom", "cf01_home_php", $url, "", "cf01_home_php", TRUE);
+		$Breadcrumb->Add("custom", "cf02_cfu_php", $url, "", "cf02_cfu_php", TRUE);
 	}
 }
 ?>
@@ -292,13 +292,13 @@ class ccf01_home_php {
 <?php
 
 // Create page object
-if (!isset($cf01_home_php)) $cf01_home_php = new ccf01_home_php();
+if (!isset($cf02_cfu_php)) $cf02_cfu_php = new ccf02_cfu_php();
 
 // Page init
-$cf01_home_php->Page_Init();
+$cf02_cfu_php->Page_Init();
 
 // Page main
-$cf01_home_php->Page_Main();
+$cf02_cfu_php->Page_Main();
 
 // Global Page Rendering event (in userfn*.php)
 Page_Rendering();
@@ -312,196 +312,49 @@ Page_Rendering();
 </div>
 <?php } ?>
 <?php
-$db =& DbHelper(); 
+// cfu = check for update
+exec("git pull");
 ?>
 
 <style>
 .panel-heading a{
   display:block;
 }
-
 .panel-heading a.collapsed {
   background: url(http://upload.wikimedia.org/wikipedia/commons/3/36/Vector_skin_right_arrow.png) center right no-repeat;
 }
-
 .panel-heading a {
   background: url(http://www.useragentman.com/blog/wp-content/themes/useragentman/images/widgets/downArrow.png) center right no-repeat;
 }
 </style>
 
-<?php
-	$db =& DbHelper(); // Create instance of the database helper class by DbHelper() (for main database) or DbHelper("<dbname>") (for linked databases) where <dbname> is database variable name
-?>
-
-<!-- log -->
-<div class="panel panel-default">
-	<div class="panel-heading"><strong><a class='collapsed' data-toggle="collapse" href="#log">Progress Log</a></strong></div>
-	<div id="log" class="panel-collapse collapse in">
-		<div class="panel-body">
-			<div>
-				<p>&nbsp;</p>
-				<!-- to do -->
-				<p><strong>to do</strong></p>
-				<?php
-				$q = "
-					select
-						a.index_,
-						a.subj_,
-						b.date_issued,
-						b.desc_,
-						b.date_solved
-					from
-						t94_log a
-						left join t95_logdesc b on a.id = b.log_id
-					where
-						b.date_solved is null
-					order by
-						a.index_,
-						b.date_issued
-					";
-				//echo $db->ExecuteHtml($q, array("fieldcaption" => TRUE, "tablename" => array("t94_log", "t95_logdesc")));
-				$r = Conn()->Execute($q);
-				?>
-				<table class='table table-striped table-hover table-condensed'>
-					<tbody>
-					<?php
-					while (!$r->EOF) {
-						$index_ = $r->fields["index_"];
-						?>
-						<tr>
-							<td colspan="4">[<?php echo $r->fields["subj_"]; ?>]</td>
-						</tr>
-						<?php
-						while ($index_ == $r->fields["index_"]) {
-							?>
-							<tr>
-								<td width="20">-</td>
-								<td><?php echo $r->fields["desc_"];?></td>
-								<td width="100"><?php echo $r->fields["date_issued"];?></td>
-								<td width="100">&nbsp;</td>
-							</tr>
-							<?php
-							$r->MoveNext();
-						}
-						if (!$r->EOF) {
-							?>
-							<tr>
-								<td colspan="4">&nbsp;</td>
-							</tr>
-							<?php
-						}
-					}
-					?>
-					</tbody>
-				</table>
-
-				<p>&nbsp;</p>
-				<!-- done -->
-				<p><strong>done</strong></p>
-				<?php
-				$q = "
-					select
-						a.index_,
-						a.subj_,
-						b.date_issued,
-						b.desc_,
-						b.date_solved
-					from
-						t94_log a
-						left join t95_logdesc b on a.id = b.log_id
-					where
-						b.date_solved is not null
-					order by
-						a.index_,
-						b.date_issued,
-						b.date_solved
-					";
-				//echo $db->ExecuteHtml($q, array("fieldcaption" => TRUE, "tablename" => array("t94_log", "t95_logdesc")));
-				$r = Conn()->Execute($q);
-				?>
-				<table class='table table-striped table-hover table-condensed'>
-					<?php
-					while (!$r->EOF) {
-						$index_ = $r->fields["index_"];
-						?>
-						<tr>
-							<td colspan="4">[<?php echo $r->fields["subj_"]; ?>]</td>
-						</tr>
-						<?php
-						while ($index_ == $r->fields["index_"]) {
-							?>
-							<tr>
-								<td width="20">-</td>
-								<td><?php echo $r->fields["desc_"];?></td>
-								<td width="100"><?php echo $r->fields["date_issued"];?></td>
-								<td width="100"><?php echo $r->fields["date_solved"];?></td>
-							</tr>
-							<?php
-							$r->MoveNext();
-						}
-						if (!$r->EOF) {
-							?>
-							<tr>
-								<td colspan="4">&nbsp;</td>
-							</tr>
-							<?php
-						}
-					}
-					?>
+		<!-- <div class="panel panel-default">
+			<div class="panel-body">
+				<table class='table table-striped table-bordered table-hover table-condensed'>
+					<tr>
+						<td>Proses selesai !</td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+					</tr>
+					<tr>
+						<td><a href='.'><button>Selesai</button></a></td>
+					</tr>
 				</table>
 			</div>
-		</div>
-	</div>
-</div>
+		</div> -->
 
-<!-- log -->
-<!-- <div class="panel panel-default">
-	<div class="panel-heading"><strong><a class='collapsed' data-toggle="collapse" href="#log">Log</a></strong></div>
-	<div id="log" class="panel-collapse collapse out">
-		<div class="panel-body">
-			<div> -->
-<!-- <strong>to do:</strong><br/> -->
-<!-- [pinjaman - angsuran]:<br/> -->
-<!-- - ada tambahan kolom POTONGAN, mengurangi SISA HUTANG;<br/> -->
-<!-- - setiap ada pembayaran menggunakan SALDO TITIPAN maka akan mengurangi jumlah SALDO TITIPAN;<br/> -->
-<!-- - check jumlah TOTAL PEMBAYARAN harus sama dengan jumlah TOTAL ANGSURAN;<br/>&nbsp;<br/> -->
+<!--Proses Selesai !<br/>-->
 
-<!-- [aplikasi]:<br/>&nbsp;<br/> -->
+<?php
+CurrentPage()->SetSuccessMessage("Proses selesai !");
+CurrentPage()->ShowMessage();
+?>
 
-<!-- <strong>done:</strong><br/> -->
-<!-- [pinjaman]:<br/> -->
-<!-- - tipe data nomor referensi diubah dari integer menjadi varchar;<br/>&nbsp;<br/> -->
-
-<!-- [pinjaman - angsuran]:<br/> -->
-<!-- - rumus [jumlah angsuran];<br/> -->
-<!-- - button refresh detail angsuran;<br/> -->
-<!-- - tambah field untuk transaksi pembayaran;<br/> -->
-<!-- - perbesar kolom tanggal bayar;<br/>&nbsp;<br/> -->
-
-<!-- [pinjaman - nasabah]:<br/> -->
-<!-- - alamat nasabah harus diisi;<br/> -->
-<!-- - melengkapi tampilan add nasabah di menu pinjaman;<br/>&nbsp;<br/> -->
-
-<!-- [pinjaman - titipan]:<br/> -->
-<!-- - menghilangkan nasabah_id di add jaminan pada proses input pinjaman;<br/> -->
-<!-- - setelah input setoran titipan :: harus save dulu agar nilai saldo terupdate;<br/>&nbsp;<br/> -->
-
-<!-- [aplikasi]:<br/> -->
-<!-- - menghilangkan menu setup nasabah;<br/> -->
-<!-- - buat CHECK FOR UPDATE; aplikasi yang harus ada :: github desktop & gitscm;<br/> -->
-<!-- - log at home, List - User Log;<br/>&nbsp;<br/> -->
-<!--			</div>
-		</div>
-	</div>
-</div> -->
-
-<!--
-<div>
-&copy;2018 Selaras Solusindo. All rights reserved.
-</div>
--->
+<!-- &nbsp;<br/> -->
+<a href='.'><button>Back to Home</button></a>
 <?php if (EW_DEBUG_ENABLED) echo ew_DebugMsg(); ?>
 <?php include_once "footer.php" ?>
 <?php
-$cf01_home_php->Page_Terminate();
+$cf02_cfu_php->Page_Terminate();
 ?>
