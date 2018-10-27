@@ -1398,7 +1398,14 @@ class ct04_pinjamanangsuran extends cTable {
 
 		// Enter your code here
 		// To cancel, set return value to FALSE
+		// check inputan pembayaran apakah sudah sesuai dengan angsuran total ?
+		//echo "old - ".$rsold["TanggalBayar"]." - new - ".$rsnew["TanggalBayar"];
 
+		$id = $rsold["id"];
+		if ($rsnew["Bayar_Total"] < $rsold["Angsuran_Total"] and ($rsold["Tanggal_Bayar"] != null or $rsnew["Tanggal_Bayar"] != null)) {
+			$this->setFailureMessage("id: ".$rsold["id"].", total pembayaran: ".$rsnew["Bayar_Total"]);
+			return false;
+		}
 		return TRUE;
 	}
 
