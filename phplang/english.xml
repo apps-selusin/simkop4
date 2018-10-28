@@ -607,6 +607,9 @@
     <menu id="25">
       <phrase id="menutext" value="Setup" />
     </menu>
+    <menu id="27">
+      <phrase id="menutext" value="Periode" />
+    </menu>
     <menu id="10">
       <phrase id="menutext" value="Level User" />
     </menu>
@@ -628,6 +631,12 @@
     <menu id="26">
       <phrase id="menutext" value="Check for updates" />
     </menu>
+    <table id="cf01_home_php">
+      <phrase id="tblcaption" value="Home" />
+    </table>
+    <table id="cf02_cfu_php">
+      <phrase id="tblcaption" value="Check for updates" />
+    </table>
     <table id="t01_nasabah">
       <phrase id="tblcaption" value="Nasabah" />
       <field id="id">
@@ -814,6 +823,18 @@
         <phrase id="fldcaption" value="Sisa" />
       </field>
     </table>
+    <table id="t93_periode">
+      <phrase id="tblcaption" value="Periode" />
+      <field id="id">
+        <phrase id="fldcaption" value="id" />
+      </field>
+      <field id="bulan">
+        <phrase id="fldcaption" value="Bulan" />
+      </field>
+      <field id="tahun">
+        <phrase id="fldcaption" value="Tahun" />
+      </field>
+    </table>
     <table id="t94_log">
       <phrase id="tblcaption" value="Progress Log" />
       <field id="id">
@@ -941,9 +962,6 @@
         <phrase id="fldcaption" value="permission" />
       </field>
     </table>
-    <table id="cf01_home_php">
-      <phrase id="tblcaption" value="Home" />
-    </table>
     <table id="t99_audittrail">
       <phrase id="tblcaption" value="Activity Log" />
       <field id="id">
@@ -976,9 +994,6 @@
       <field id="newvalue">
         <phrase id="fldcaption" value="newvalue" />
       </field>
-    </table>
-    <table id="cf02_cfu_php">
-      <phrase id="tblcaption" value="Check for updates" />
     </table>
   </project>
 </ew-language>
