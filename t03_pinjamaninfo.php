@@ -1447,6 +1447,7 @@ class ct03_pinjaman extends cTable {
 		$Angsuran_Pokok_Total = 0;
 		$Angsuran_Bunga_Total = 0;
 		$Angsuran_Total_Grand = 0;
+		$Flag_Edit = 1; // untuk keperluan read only row; hanya boleh 1 row yang aktif;
 
 		//for ($i; $i <= 12; $i++) {
 		for ($Angsuran_Ke = 1; $Angsuran_Ke <= $rsnew["Angsuran_Lama"]; $Angsuran_Ke++) {
@@ -1467,7 +1468,8 @@ class ct03_pinjaman extends cTable {
 				Angsuran_Pokok,
 				Angsuran_Bunga,
 				Angsuran_Total,
-				Sisa_Hutang
+				Sisa_Hutang,
+				Flag_Edit
 				) values (
 				'".$pinjaman_id."',
 				'".$Angsuran_Ke."',
@@ -1475,9 +1477,13 @@ class ct03_pinjaman extends cTable {
 				".$Angsuran_Pokok.",
 				".$Angsuran_Bunga.",
 				".$Angsuran_Total.",
-				".$Sisa_Hutang."
+				".$Sisa_Hutang.",
+				".$Flag_Edit."
 				)";
 			ew_Execute($q);
+			if ($Flag_Edit == 1) {
+				$Flag_Edit == 0;
+			}
 		}
 		f_updatesaldotitipan($pinjaman_id);
 	}

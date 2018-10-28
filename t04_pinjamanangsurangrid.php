@@ -83,6 +83,9 @@ ft04_pinjamanangsurangrid.Validate = function() {
 			elm = this.GetElements("x" + infix + "_Bayar_Total");
 			if (elm && !ew_CheckNumber(elm.value))
 				return this.OnError(elm, "<?php echo ew_JsEncode2($t04_pinjamanangsuran->Bayar_Total->FldErrMsg()) ?>");
+			elm = this.GetElements("x" + infix + "_Flag_Edit");
+			if (elm && !ew_IsHidden(elm) && !ew_HasValue(elm))
+				return this.OnError(elm, "<?php echo ew_JsEncode2(str_replace("%s", $t04_pinjamanangsuran->Flag_Edit->FldCaption(), $t04_pinjamanangsuran->Flag_Edit->ReqErrMsg)) ?>");
 			elm = this.GetElements("x" + infix + "_pinjamantitipan_id");
 			if (elm && !ew_CheckInteger(elm.value))
 				return this.OnError(elm, "<?php echo ew_JsEncode2($t04_pinjamanangsuran->pinjamantitipan_id->FldErrMsg()) ?>");
@@ -111,6 +114,8 @@ ft04_pinjamanangsurangrid.EmptyRow = function(infix) {
 	if (ew_ValueChanged(fobj, infix, "Bayar_Titipan", false)) return false;
 	if (ew_ValueChanged(fobj, infix, "Bayar_Non_Titipan", false)) return false;
 	if (ew_ValueChanged(fobj, infix, "Bayar_Total", false)) return false;
+	if (ew_ValueChanged(fobj, infix, "Keterangan", false)) return false;
+	if (ew_ValueChanged(fobj, infix, "Flag_Edit", false)) return false;
 	if (ew_ValueChanged(fobj, infix, "pinjamantitipan_id", false)) return false;
 	return true;
 }
@@ -327,6 +332,24 @@ $t04_pinjamanangsuran_grid->ListOptions->Render("header", "left");
 	<?php } else { ?>
 		<th data-name="Bayar_Total"><div><div id="elh_t04_pinjamanangsuran_Bayar_Total" class="t04_pinjamanangsuran_Bayar_Total">
 			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t04_pinjamanangsuran->Bayar_Total->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t04_pinjamanangsuran->Bayar_Total->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t04_pinjamanangsuran->Bayar_Total->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
+        </div></div></th>
+	<?php } ?>
+<?php } ?>		
+<?php if ($t04_pinjamanangsuran->Keterangan->Visible) { // Keterangan ?>
+	<?php if ($t04_pinjamanangsuran->SortUrl($t04_pinjamanangsuran->Keterangan) == "") { ?>
+		<th data-name="Keterangan"><div id="elh_t04_pinjamanangsuran_Keterangan" class="t04_pinjamanangsuran_Keterangan"><div class="ewTableHeaderCaption"><?php echo $t04_pinjamanangsuran->Keterangan->FldCaption() ?></div></div></th>
+	<?php } else { ?>
+		<th data-name="Keterangan"><div><div id="elh_t04_pinjamanangsuran_Keterangan" class="t04_pinjamanangsuran_Keterangan">
+			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t04_pinjamanangsuran->Keterangan->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t04_pinjamanangsuran->Keterangan->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t04_pinjamanangsuran->Keterangan->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
+        </div></div></th>
+	<?php } ?>
+<?php } ?>		
+<?php if ($t04_pinjamanangsuran->Flag_Edit->Visible) { // Flag_Edit ?>
+	<?php if ($t04_pinjamanangsuran->SortUrl($t04_pinjamanangsuran->Flag_Edit) == "") { ?>
+		<th data-name="Flag_Edit"><div id="elh_t04_pinjamanangsuran_Flag_Edit" class="t04_pinjamanangsuran_Flag_Edit"><div class="ewTableHeaderCaption"><?php echo $t04_pinjamanangsuran->Flag_Edit->FldCaption() ?></div></div></th>
+	<?php } else { ?>
+		<th data-name="Flag_Edit"><div><div id="elh_t04_pinjamanangsuran_Flag_Edit" class="t04_pinjamanangsuran_Flag_Edit">
+			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t04_pinjamanangsuran->Flag_Edit->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t04_pinjamanangsuran->Flag_Edit->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t04_pinjamanangsuran->Flag_Edit->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
         </div></div></th>
 	<?php } ?>
 <?php } ?>		
@@ -857,6 +880,64 @@ ew_CreateCalendar("ft04_pinjamanangsurangrid", "x<?php echo $t04_pinjamanangsura
 <?php } ?>
 </td>
 	<?php } ?>
+	<?php if ($t04_pinjamanangsuran->Keterangan->Visible) { // Keterangan ?>
+		<td data-name="Keterangan"<?php echo $t04_pinjamanangsuran->Keterangan->CellAttributes() ?>>
+<?php if ($t04_pinjamanangsuran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
+<span id="el<?php echo $t04_pinjamanangsuran_grid->RowCnt ?>_t04_pinjamanangsuran_Keterangan" class="form-group t04_pinjamanangsuran_Keterangan">
+<textarea data-table="t04_pinjamanangsuran" data-field="x_Keterangan" name="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Keterangan" id="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Keterangan" cols="15" rows="4" placeholder="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Keterangan->getPlaceHolder()) ?>"<?php echo $t04_pinjamanangsuran->Keterangan->EditAttributes() ?>><?php echo $t04_pinjamanangsuran->Keterangan->EditValue ?></textarea>
+</span>
+<input type="hidden" data-table="t04_pinjamanangsuran" data-field="x_Keterangan" name="o<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Keterangan" id="o<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Keterangan" value="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Keterangan->OldValue) ?>">
+<?php } ?>
+<?php if ($t04_pinjamanangsuran->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
+<span id="el<?php echo $t04_pinjamanangsuran_grid->RowCnt ?>_t04_pinjamanangsuran_Keterangan" class="form-group t04_pinjamanangsuran_Keterangan">
+<textarea data-table="t04_pinjamanangsuran" data-field="x_Keterangan" name="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Keterangan" id="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Keterangan" cols="15" rows="4" placeholder="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Keterangan->getPlaceHolder()) ?>"<?php echo $t04_pinjamanangsuran->Keterangan->EditAttributes() ?>><?php echo $t04_pinjamanangsuran->Keterangan->EditValue ?></textarea>
+</span>
+<?php } ?>
+<?php if ($t04_pinjamanangsuran->RowType == EW_ROWTYPE_VIEW) { // View record ?>
+<span id="el<?php echo $t04_pinjamanangsuran_grid->RowCnt ?>_t04_pinjamanangsuran_Keterangan" class="t04_pinjamanangsuran_Keterangan">
+<span<?php echo $t04_pinjamanangsuran->Keterangan->ViewAttributes() ?>>
+<?php echo $t04_pinjamanangsuran->Keterangan->ListViewValue() ?></span>
+</span>
+<?php if ($t04_pinjamanangsuran->CurrentAction <> "F") { ?>
+<input type="hidden" data-table="t04_pinjamanangsuran" data-field="x_Keterangan" name="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Keterangan" id="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Keterangan" value="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Keterangan->FormValue) ?>">
+<input type="hidden" data-table="t04_pinjamanangsuran" data-field="x_Keterangan" name="o<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Keterangan" id="o<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Keterangan" value="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Keterangan->OldValue) ?>">
+<?php } else { ?>
+<input type="hidden" data-table="t04_pinjamanangsuran" data-field="x_Keterangan" name="ft04_pinjamanangsurangrid$x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Keterangan" id="ft04_pinjamanangsurangrid$x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Keterangan" value="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Keterangan->FormValue) ?>">
+<input type="hidden" data-table="t04_pinjamanangsuran" data-field="x_Keterangan" name="ft04_pinjamanangsurangrid$o<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Keterangan" id="ft04_pinjamanangsurangrid$o<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Keterangan" value="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Keterangan->OldValue) ?>">
+<?php } ?>
+<?php } ?>
+</td>
+	<?php } ?>
+	<?php if ($t04_pinjamanangsuran->Flag_Edit->Visible) { // Flag_Edit ?>
+		<td data-name="Flag_Edit"<?php echo $t04_pinjamanangsuran->Flag_Edit->CellAttributes() ?>>
+<?php if ($t04_pinjamanangsuran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
+<span id="el<?php echo $t04_pinjamanangsuran_grid->RowCnt ?>_t04_pinjamanangsuran_Flag_Edit" class="form-group t04_pinjamanangsuran_Flag_Edit">
+<input type="text" data-table="t04_pinjamanangsuran" data-field="x_Flag_Edit" name="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Flag_Edit" id="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Flag_Edit" size="30" placeholder="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Flag_Edit->getPlaceHolder()) ?>" value="<?php echo $t04_pinjamanangsuran->Flag_Edit->EditValue ?>"<?php echo $t04_pinjamanangsuran->Flag_Edit->EditAttributes() ?>>
+</span>
+<input type="hidden" data-table="t04_pinjamanangsuran" data-field="x_Flag_Edit" name="o<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Flag_Edit" id="o<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Flag_Edit" value="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Flag_Edit->OldValue) ?>">
+<?php } ?>
+<?php if ($t04_pinjamanangsuran->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
+<span id="el<?php echo $t04_pinjamanangsuran_grid->RowCnt ?>_t04_pinjamanangsuran_Flag_Edit" class="form-group t04_pinjamanangsuran_Flag_Edit">
+<span<?php echo $t04_pinjamanangsuran->Flag_Edit->ViewAttributes() ?>>
+<p class="form-control-static"><?php echo $t04_pinjamanangsuran->Flag_Edit->EditValue ?></p></span>
+</span>
+<input type="hidden" data-table="t04_pinjamanangsuran" data-field="x_Flag_Edit" name="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Flag_Edit" id="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Flag_Edit" value="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Flag_Edit->CurrentValue) ?>">
+<?php } ?>
+<?php if ($t04_pinjamanangsuran->RowType == EW_ROWTYPE_VIEW) { // View record ?>
+<span id="el<?php echo $t04_pinjamanangsuran_grid->RowCnt ?>_t04_pinjamanangsuran_Flag_Edit" class="t04_pinjamanangsuran_Flag_Edit">
+<span<?php echo $t04_pinjamanangsuran->Flag_Edit->ViewAttributes() ?>>
+<?php echo $t04_pinjamanangsuran->Flag_Edit->ListViewValue() ?></span>
+</span>
+<?php if ($t04_pinjamanangsuran->CurrentAction <> "F") { ?>
+<input type="hidden" data-table="t04_pinjamanangsuran" data-field="x_Flag_Edit" name="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Flag_Edit" id="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Flag_Edit" value="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Flag_Edit->FormValue) ?>">
+<input type="hidden" data-table="t04_pinjamanangsuran" data-field="x_Flag_Edit" name="o<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Flag_Edit" id="o<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Flag_Edit" value="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Flag_Edit->OldValue) ?>">
+<?php } else { ?>
+<input type="hidden" data-table="t04_pinjamanangsuran" data-field="x_Flag_Edit" name="ft04_pinjamanangsurangrid$x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Flag_Edit" id="ft04_pinjamanangsurangrid$x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Flag_Edit" value="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Flag_Edit->FormValue) ?>">
+<input type="hidden" data-table="t04_pinjamanangsuran" data-field="x_Flag_Edit" name="ft04_pinjamanangsurangrid$o<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Flag_Edit" id="ft04_pinjamanangsurangrid$o<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Flag_Edit" value="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Flag_Edit->OldValue) ?>">
+<?php } ?>
+<?php } ?>
+</td>
+	<?php } ?>
 	<?php if ($t04_pinjamanangsuran->pinjamantitipan_id->Visible) { // pinjamantitipan_id ?>
 		<td data-name="pinjamantitipan_id"<?php echo $t04_pinjamanangsuran->pinjamantitipan_id->CellAttributes() ?>>
 <?php if ($t04_pinjamanangsuran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
@@ -1146,6 +1227,38 @@ ew_CreateCalendar("ft04_pinjamanangsurangrid", "x<?php echo $t04_pinjamanangsura
 <input type="hidden" data-table="t04_pinjamanangsuran" data-field="x_Bayar_Total" name="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Bayar_Total" id="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Bayar_Total" value="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Bayar_Total->FormValue) ?>">
 <?php } ?>
 <input type="hidden" data-table="t04_pinjamanangsuran" data-field="x_Bayar_Total" name="o<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Bayar_Total" id="o<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Bayar_Total" value="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Bayar_Total->OldValue) ?>">
+</td>
+	<?php } ?>
+	<?php if ($t04_pinjamanangsuran->Keterangan->Visible) { // Keterangan ?>
+		<td data-name="Keterangan">
+<?php if ($t04_pinjamanangsuran->CurrentAction <> "F") { ?>
+<span id="el$rowindex$_t04_pinjamanangsuran_Keterangan" class="form-group t04_pinjamanangsuran_Keterangan">
+<textarea data-table="t04_pinjamanangsuran" data-field="x_Keterangan" name="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Keterangan" id="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Keterangan" cols="15" rows="4" placeholder="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Keterangan->getPlaceHolder()) ?>"<?php echo $t04_pinjamanangsuran->Keterangan->EditAttributes() ?>><?php echo $t04_pinjamanangsuran->Keterangan->EditValue ?></textarea>
+</span>
+<?php } else { ?>
+<span id="el$rowindex$_t04_pinjamanangsuran_Keterangan" class="form-group t04_pinjamanangsuran_Keterangan">
+<span<?php echo $t04_pinjamanangsuran->Keterangan->ViewAttributes() ?>>
+<p class="form-control-static"><?php echo $t04_pinjamanangsuran->Keterangan->ViewValue ?></p></span>
+</span>
+<input type="hidden" data-table="t04_pinjamanangsuran" data-field="x_Keterangan" name="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Keterangan" id="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Keterangan" value="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Keterangan->FormValue) ?>">
+<?php } ?>
+<input type="hidden" data-table="t04_pinjamanangsuran" data-field="x_Keterangan" name="o<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Keterangan" id="o<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Keterangan" value="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Keterangan->OldValue) ?>">
+</td>
+	<?php } ?>
+	<?php if ($t04_pinjamanangsuran->Flag_Edit->Visible) { // Flag_Edit ?>
+		<td data-name="Flag_Edit">
+<?php if ($t04_pinjamanangsuran->CurrentAction <> "F") { ?>
+<span id="el$rowindex$_t04_pinjamanangsuran_Flag_Edit" class="form-group t04_pinjamanangsuran_Flag_Edit">
+<input type="text" data-table="t04_pinjamanangsuran" data-field="x_Flag_Edit" name="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Flag_Edit" id="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Flag_Edit" size="30" placeholder="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Flag_Edit->getPlaceHolder()) ?>" value="<?php echo $t04_pinjamanangsuran->Flag_Edit->EditValue ?>"<?php echo $t04_pinjamanangsuran->Flag_Edit->EditAttributes() ?>>
+</span>
+<?php } else { ?>
+<span id="el$rowindex$_t04_pinjamanangsuran_Flag_Edit" class="form-group t04_pinjamanangsuran_Flag_Edit">
+<span<?php echo $t04_pinjamanangsuran->Flag_Edit->ViewAttributes() ?>>
+<p class="form-control-static"><?php echo $t04_pinjamanangsuran->Flag_Edit->ViewValue ?></p></span>
+</span>
+<input type="hidden" data-table="t04_pinjamanangsuran" data-field="x_Flag_Edit" name="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Flag_Edit" id="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Flag_Edit" value="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Flag_Edit->FormValue) ?>">
+<?php } ?>
+<input type="hidden" data-table="t04_pinjamanangsuran" data-field="x_Flag_Edit" name="o<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Flag_Edit" id="o<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Flag_Edit" value="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Flag_Edit->OldValue) ?>">
 </td>
 	<?php } ?>
 	<?php if ($t04_pinjamanangsuran->pinjamantitipan_id->Visible) { // pinjamantitipan_id ?>

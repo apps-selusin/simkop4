@@ -366,6 +366,11 @@ $db =& DbHelper();
 					<tbody>
 					<?php
 					while (!$r->EOF) {
+						if ($r->fields["date_issued"] == null) {
+							$r->MoveNext();
+							continue;
+							//break;
+						}
 						$index_ = $r->fields["index_"];
 						?>
 						<tr>

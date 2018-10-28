@@ -325,6 +325,8 @@ class ct04_pinjamanangsuran_grid extends ct04_pinjamanangsuran {
 		$this->Bayar_Titipan->SetVisibility();
 		$this->Bayar_Non_Titipan->SetVisibility();
 		$this->Bayar_Total->SetVisibility();
+		$this->Keterangan->SetVisibility();
+		$this->Flag_Edit->SetVisibility();
 		$this->pinjamantitipan_id->SetVisibility();
 
 		// Global Page Loading event (in userfn*.php)
@@ -846,6 +848,10 @@ class ct04_pinjamanangsuran_grid extends ct04_pinjamanangsuran {
 			return FALSE;
 		if ($objForm->HasValue("x_Bayar_Total") && $objForm->HasValue("o_Bayar_Total") && $this->Bayar_Total->CurrentValue <> $this->Bayar_Total->OldValue)
 			return FALSE;
+		if ($objForm->HasValue("x_Keterangan") && $objForm->HasValue("o_Keterangan") && $this->Keterangan->CurrentValue <> $this->Keterangan->OldValue)
+			return FALSE;
+		if ($objForm->HasValue("x_Flag_Edit") && $objForm->HasValue("o_Flag_Edit") && $this->Flag_Edit->CurrentValue <> $this->Flag_Edit->OldValue)
+			return FALSE;
 		if ($objForm->HasValue("x_pinjamantitipan_id") && $objForm->HasValue("o_pinjamantitipan_id") && $this->pinjamantitipan_id->CurrentValue <> $this->pinjamantitipan_id->OldValue)
 			return FALSE;
 		return TRUE;
@@ -1177,6 +1183,10 @@ class ct04_pinjamanangsuran_grid extends ct04_pinjamanangsuran {
 		$this->Bayar_Non_Titipan->OldValue = $this->Bayar_Non_Titipan->CurrentValue;
 		$this->Bayar_Total->CurrentValue = NULL;
 		$this->Bayar_Total->OldValue = $this->Bayar_Total->CurrentValue;
+		$this->Keterangan->CurrentValue = NULL;
+		$this->Keterangan->OldValue = $this->Keterangan->CurrentValue;
+		$this->Flag_Edit->CurrentValue = NULL;
+		$this->Flag_Edit->OldValue = $this->Flag_Edit->CurrentValue;
 		$this->pinjamantitipan_id->CurrentValue = NULL;
 		$this->pinjamantitipan_id->OldValue = $this->pinjamantitipan_id->CurrentValue;
 	}
@@ -1241,6 +1251,14 @@ class ct04_pinjamanangsuran_grid extends ct04_pinjamanangsuran {
 			$this->Bayar_Total->setFormValue($objForm->GetValue("x_Bayar_Total"));
 		}
 		$this->Bayar_Total->setOldValue($objForm->GetValue("o_Bayar_Total"));
+		if (!$this->Keterangan->FldIsDetailKey) {
+			$this->Keterangan->setFormValue($objForm->GetValue("x_Keterangan"));
+		}
+		$this->Keterangan->setOldValue($objForm->GetValue("o_Keterangan"));
+		if (!$this->Flag_Edit->FldIsDetailKey) {
+			$this->Flag_Edit->setFormValue($objForm->GetValue("x_Flag_Edit"));
+		}
+		$this->Flag_Edit->setOldValue($objForm->GetValue("o_Flag_Edit"));
 		if (!$this->pinjamantitipan_id->FldIsDetailKey) {
 			$this->pinjamantitipan_id->setFormValue($objForm->GetValue("x_pinjamantitipan_id"));
 		}
@@ -1269,6 +1287,8 @@ class ct04_pinjamanangsuran_grid extends ct04_pinjamanangsuran {
 		$this->Bayar_Titipan->CurrentValue = $this->Bayar_Titipan->FormValue;
 		$this->Bayar_Non_Titipan->CurrentValue = $this->Bayar_Non_Titipan->FormValue;
 		$this->Bayar_Total->CurrentValue = $this->Bayar_Total->FormValue;
+		$this->Keterangan->CurrentValue = $this->Keterangan->FormValue;
+		$this->Flag_Edit->CurrentValue = $this->Flag_Edit->FormValue;
 		$this->pinjamantitipan_id->CurrentValue = $this->pinjamantitipan_id->FormValue;
 	}
 
@@ -1342,6 +1362,7 @@ class ct04_pinjamanangsuran_grid extends ct04_pinjamanangsuran {
 		$this->Bayar_Non_Titipan->setDbValue($rs->fields('Bayar_Non_Titipan'));
 		$this->Bayar_Total->setDbValue($rs->fields('Bayar_Total'));
 		$this->Keterangan->setDbValue($rs->fields('Keterangan'));
+		$this->Flag_Edit->setDbValue($rs->fields('Flag_Edit'));
 		$this->pinjamantitipan_id->setDbValue($rs->fields('pinjamantitipan_id'));
 	}
 
@@ -1364,6 +1385,7 @@ class ct04_pinjamanangsuran_grid extends ct04_pinjamanangsuran {
 		$this->Bayar_Non_Titipan->DbValue = $row['Bayar_Non_Titipan'];
 		$this->Bayar_Total->DbValue = $row['Bayar_Total'];
 		$this->Keterangan->DbValue = $row['Keterangan'];
+		$this->Flag_Edit->DbValue = $row['Flag_Edit'];
 		$this->pinjamantitipan_id->DbValue = $row['pinjamantitipan_id'];
 	}
 
@@ -1460,6 +1482,7 @@ class ct04_pinjamanangsuran_grid extends ct04_pinjamanangsuran {
 		// Bayar_Non_Titipan
 		// Bayar_Total
 		// Keterangan
+		// Flag_Edit
 		// pinjamantitipan_id
 
 		if ($this->RowType == EW_ROWTYPE_VIEW) { // View row
@@ -1540,6 +1563,14 @@ class ct04_pinjamanangsuran_grid extends ct04_pinjamanangsuran {
 		$this->Bayar_Total->CellCssStyle .= "text-align: right;";
 		$this->Bayar_Total->ViewCustomAttributes = "";
 
+		// Keterangan
+		$this->Keterangan->ViewValue = $this->Keterangan->CurrentValue;
+		$this->Keterangan->ViewCustomAttributes = "";
+
+		// Flag_Edit
+		$this->Flag_Edit->ViewValue = $this->Flag_Edit->CurrentValue;
+		$this->Flag_Edit->ViewCustomAttributes = "";
+
 		// pinjamantitipan_id
 		$this->pinjamantitipan_id->ViewValue = $this->pinjamantitipan_id->CurrentValue;
 		$this->pinjamantitipan_id->ViewValue = ew_FormatNumber($this->pinjamantitipan_id->ViewValue, 2, -2, -2, -2);
@@ -1610,6 +1641,16 @@ class ct04_pinjamanangsuran_grid extends ct04_pinjamanangsuran {
 			$this->Bayar_Total->LinkCustomAttributes = "";
 			$this->Bayar_Total->HrefValue = "";
 			$this->Bayar_Total->TooltipValue = "";
+
+			// Keterangan
+			$this->Keterangan->LinkCustomAttributes = "";
+			$this->Keterangan->HrefValue = "";
+			$this->Keterangan->TooltipValue = "";
+
+			// Flag_Edit
+			$this->Flag_Edit->LinkCustomAttributes = "";
+			$this->Flag_Edit->HrefValue = "";
+			$this->Flag_Edit->TooltipValue = "";
 
 			// pinjamantitipan_id
 			$this->pinjamantitipan_id->LinkCustomAttributes = "";
@@ -1734,6 +1775,18 @@ class ct04_pinjamanangsuran_grid extends ct04_pinjamanangsuran {
 			$this->Bayar_Total->OldValue = $this->Bayar_Total->EditValue;
 			}
 
+			// Keterangan
+			$this->Keterangan->EditAttrs["class"] = "form-control";
+			$this->Keterangan->EditCustomAttributes = "";
+			$this->Keterangan->EditValue = ew_HtmlEncode($this->Keterangan->CurrentValue);
+			$this->Keterangan->PlaceHolder = ew_RemoveHtml($this->Keterangan->FldCaption());
+
+			// Flag_Edit
+			$this->Flag_Edit->EditAttrs["class"] = "form-control";
+			$this->Flag_Edit->EditCustomAttributes = "";
+			$this->Flag_Edit->EditValue = ew_HtmlEncode($this->Flag_Edit->CurrentValue);
+			$this->Flag_Edit->PlaceHolder = ew_RemoveHtml($this->Flag_Edit->FldCaption());
+
 			// pinjamantitipan_id
 			$this->pinjamantitipan_id->EditAttrs["class"] = "form-control";
 			$this->pinjamantitipan_id->EditCustomAttributes = "";
@@ -1793,6 +1846,14 @@ class ct04_pinjamanangsuran_grid extends ct04_pinjamanangsuran {
 			// Bayar_Total
 			$this->Bayar_Total->LinkCustomAttributes = "";
 			$this->Bayar_Total->HrefValue = "";
+
+			// Keterangan
+			$this->Keterangan->LinkCustomAttributes = "";
+			$this->Keterangan->HrefValue = "";
+
+			// Flag_Edit
+			$this->Flag_Edit->LinkCustomAttributes = "";
+			$this->Flag_Edit->HrefValue = "";
 
 			// pinjamantitipan_id
 			$this->pinjamantitipan_id->LinkCustomAttributes = "";
@@ -1909,6 +1970,18 @@ class ct04_pinjamanangsuran_grid extends ct04_pinjamanangsuran {
 			$this->Bayar_Total->OldValue = $this->Bayar_Total->EditValue;
 			}
 
+			// Keterangan
+			$this->Keterangan->EditAttrs["class"] = "form-control";
+			$this->Keterangan->EditCustomAttributes = "";
+			$this->Keterangan->EditValue = ew_HtmlEncode($this->Keterangan->CurrentValue);
+			$this->Keterangan->PlaceHolder = ew_RemoveHtml($this->Keterangan->FldCaption());
+
+			// Flag_Edit
+			$this->Flag_Edit->EditAttrs["class"] = "form-control";
+			$this->Flag_Edit->EditCustomAttributes = "";
+			$this->Flag_Edit->EditValue = $this->Flag_Edit->CurrentValue;
+			$this->Flag_Edit->ViewCustomAttributes = "";
+
 			// pinjamantitipan_id
 			$this->pinjamantitipan_id->EditAttrs["class"] = "form-control";
 			$this->pinjamantitipan_id->EditCustomAttributes = "";
@@ -1975,6 +2048,15 @@ class ct04_pinjamanangsuran_grid extends ct04_pinjamanangsuran {
 			$this->Bayar_Total->LinkCustomAttributes = "";
 			$this->Bayar_Total->HrefValue = "";
 
+			// Keterangan
+			$this->Keterangan->LinkCustomAttributes = "";
+			$this->Keterangan->HrefValue = "";
+
+			// Flag_Edit
+			$this->Flag_Edit->LinkCustomAttributes = "";
+			$this->Flag_Edit->HrefValue = "";
+			$this->Flag_Edit->TooltipValue = "";
+
 			// pinjamantitipan_id
 			$this->pinjamantitipan_id->LinkCustomAttributes = "";
 			$this->pinjamantitipan_id->HrefValue = "";
@@ -2038,6 +2120,9 @@ class ct04_pinjamanangsuran_grid extends ct04_pinjamanangsuran {
 		}
 		if (!ew_CheckNumber($this->Bayar_Total->FormValue)) {
 			ew_AddMessage($gsFormError, $this->Bayar_Total->FldErrMsg());
+		}
+		if (!$this->Flag_Edit->FldIsDetailKey && !is_null($this->Flag_Edit->FormValue) && $this->Flag_Edit->FormValue == "") {
+			ew_AddMessage($gsFormError, str_replace("%s", $this->Flag_Edit->FldCaption(), $this->Flag_Edit->ReqErrMsg));
 		}
 		if (!ew_CheckInteger($this->pinjamantitipan_id->FormValue)) {
 			ew_AddMessage($gsFormError, $this->pinjamantitipan_id->FldErrMsg());
@@ -2181,6 +2266,9 @@ class ct04_pinjamanangsuran_grid extends ct04_pinjamanangsuran {
 			// Bayar_Total
 			$this->Bayar_Total->SetDbValueDef($rsnew, $this->Bayar_Total->CurrentValue, NULL, $this->Bayar_Total->ReadOnly);
 
+			// Keterangan
+			$this->Keterangan->SetDbValueDef($rsnew, $this->Keterangan->CurrentValue, NULL, $this->Keterangan->ReadOnly);
+
 			// pinjamantitipan_id
 			$this->pinjamantitipan_id->SetDbValueDef($rsnew, $this->pinjamantitipan_id->CurrentValue, NULL, $this->pinjamantitipan_id->ReadOnly);
 
@@ -2312,6 +2400,12 @@ class ct04_pinjamanangsuran_grid extends ct04_pinjamanangsuran {
 
 		// Bayar_Total
 		$this->Bayar_Total->SetDbValueDef($rsnew, $this->Bayar_Total->CurrentValue, NULL, FALSE);
+
+		// Keterangan
+		$this->Keterangan->SetDbValueDef($rsnew, $this->Keterangan->CurrentValue, NULL, FALSE);
+
+		// Flag_Edit
+		$this->Flag_Edit->SetDbValueDef($rsnew, $this->Flag_Edit->CurrentValue, 0, FALSE);
 
 		// pinjamantitipan_id
 		$this->pinjamantitipan_id->SetDbValueDef($rsnew, $this->pinjamantitipan_id->CurrentValue, NULL, FALSE);
