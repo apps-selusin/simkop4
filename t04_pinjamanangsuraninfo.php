@@ -1403,7 +1403,7 @@ class ct04_pinjamanangsuran extends cTable {
 
 		$id = $rsold["id"];
 		if ($rsnew["Bayar_Total"] < $rsold["Angsuran_Total"] and ($rsold["Tanggal_Bayar"] != null or $rsnew["Tanggal_Bayar"] != null)) {
-			$this->setFailureMessage("id: ".$rsold["id"].", total pembayaran: ".$rsnew["Bayar_Total"]);
+			$this->setFailureMessage("Angsuran Ke : ".$rsold["Angsuran_Ke"].", jumlah Total Pembayaran harus sama dengan jumlah Total Angsuran !");
 			return false;
 		}
 		return TRUE;
