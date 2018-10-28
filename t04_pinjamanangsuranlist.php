@@ -428,8 +428,6 @@ class ct04_pinjamanangsuran_list extends ct04_pinjamanangsuran {
 		$this->Bayar_Non_Titipan->SetVisibility();
 		$this->Bayar_Total->SetVisibility();
 		$this->Keterangan->SetVisibility();
-		$this->Flag_Edit->SetVisibility();
-		$this->pinjamantitipan_id->SetVisibility();
 
 		// Global Page Loading event (in userfn*.php)
 		Page_Loading();
@@ -818,7 +816,6 @@ class ct04_pinjamanangsuran_list extends ct04_pinjamanangsuran {
 		$sFilterList = ew_Concat($sFilterList, $this->Bayar_Total->AdvancedSearch->ToJSON(), ","); // Field Bayar_Total
 		$sFilterList = ew_Concat($sFilterList, $this->Keterangan->AdvancedSearch->ToJSON(), ","); // Field Keterangan
 		$sFilterList = ew_Concat($sFilterList, $this->Flag_Edit->AdvancedSearch->ToJSON(), ","); // Field Flag_Edit
-		$sFilterList = ew_Concat($sFilterList, $this->pinjamantitipan_id->AdvancedSearch->ToJSON(), ","); // Field pinjamantitipan_id
 		if ($this->BasicSearch->Keyword <> "") {
 			$sWrk = "\"" . EW_TABLE_BASIC_SEARCH . "\":\"" . ew_JsEncode2($this->BasicSearch->Keyword) . "\",\"" . EW_TABLE_BASIC_SEARCH_TYPE . "\":\"" . ew_JsEncode2($this->BasicSearch->Type) . "\"";
 			$sFilterList = ew_Concat($sFilterList, $sWrk, ",");
@@ -990,14 +987,6 @@ class ct04_pinjamanangsuran_list extends ct04_pinjamanangsuran {
 		$this->Flag_Edit->AdvancedSearch->SearchValue2 = @$filter["y_Flag_Edit"];
 		$this->Flag_Edit->AdvancedSearch->SearchOperator2 = @$filter["w_Flag_Edit"];
 		$this->Flag_Edit->AdvancedSearch->Save();
-
-		// Field pinjamantitipan_id
-		$this->pinjamantitipan_id->AdvancedSearch->SearchValue = @$filter["x_pinjamantitipan_id"];
-		$this->pinjamantitipan_id->AdvancedSearch->SearchOperator = @$filter["z_pinjamantitipan_id"];
-		$this->pinjamantitipan_id->AdvancedSearch->SearchCondition = @$filter["v_pinjamantitipan_id"];
-		$this->pinjamantitipan_id->AdvancedSearch->SearchValue2 = @$filter["y_pinjamantitipan_id"];
-		$this->pinjamantitipan_id->AdvancedSearch->SearchOperator2 = @$filter["w_pinjamantitipan_id"];
-		$this->pinjamantitipan_id->AdvancedSearch->Save();
 		$this->BasicSearch->setKeyword(@$filter[EW_TABLE_BASIC_SEARCH]);
 		$this->BasicSearch->setType(@$filter[EW_TABLE_BASIC_SEARCH_TYPE]);
 	}
@@ -1188,8 +1177,6 @@ class ct04_pinjamanangsuran_list extends ct04_pinjamanangsuran {
 			$this->UpdateSort($this->Bayar_Non_Titipan, $bCtrl); // Bayar_Non_Titipan
 			$this->UpdateSort($this->Bayar_Total, $bCtrl); // Bayar_Total
 			$this->UpdateSort($this->Keterangan, $bCtrl); // Keterangan
-			$this->UpdateSort($this->Flag_Edit, $bCtrl); // Flag_Edit
-			$this->UpdateSort($this->pinjamantitipan_id, $bCtrl); // pinjamantitipan_id
 			$this->setStartRecordNumber(1); // Reset start position
 		}
 	}
@@ -1244,8 +1231,6 @@ class ct04_pinjamanangsuran_list extends ct04_pinjamanangsuran {
 				$this->Bayar_Non_Titipan->setSort("");
 				$this->Bayar_Total->setSort("");
 				$this->Keterangan->setSort("");
-				$this->Flag_Edit->setSort("");
-				$this->pinjamantitipan_id->setSort("");
 			}
 
 			// Reset start position
@@ -1656,7 +1641,6 @@ class ct04_pinjamanangsuran_list extends ct04_pinjamanangsuran {
 		$this->Bayar_Total->setDbValue($rs->fields('Bayar_Total'));
 		$this->Keterangan->setDbValue($rs->fields('Keterangan'));
 		$this->Flag_Edit->setDbValue($rs->fields('Flag_Edit'));
-		$this->pinjamantitipan_id->setDbValue($rs->fields('pinjamantitipan_id'));
 	}
 
 	// Load DbValue from recordset
@@ -1679,7 +1663,6 @@ class ct04_pinjamanangsuran_list extends ct04_pinjamanangsuran {
 		$this->Bayar_Total->DbValue = $row['Bayar_Total'];
 		$this->Keterangan->DbValue = $row['Keterangan'];
 		$this->Flag_Edit->DbValue = $row['Flag_Edit'];
-		$this->pinjamantitipan_id->DbValue = $row['pinjamantitipan_id'];
 	}
 
 	// Load old record
@@ -1772,7 +1755,6 @@ class ct04_pinjamanangsuran_list extends ct04_pinjamanangsuran {
 		// Bayar_Total
 		// Keterangan
 		// Flag_Edit
-		// pinjamantitipan_id
 
 		if ($this->RowType == EW_ROWTYPE_VIEW) { // View row
 
@@ -1860,12 +1842,6 @@ class ct04_pinjamanangsuran_list extends ct04_pinjamanangsuran {
 		$this->Flag_Edit->ViewValue = $this->Flag_Edit->CurrentValue;
 		$this->Flag_Edit->ViewCustomAttributes = "";
 
-		// pinjamantitipan_id
-		$this->pinjamantitipan_id->ViewValue = $this->pinjamantitipan_id->CurrentValue;
-		$this->pinjamantitipan_id->ViewValue = ew_FormatNumber($this->pinjamantitipan_id->ViewValue, 2, -2, -2, -2);
-		$this->pinjamantitipan_id->CellCssStyle .= "text-align: right;";
-		$this->pinjamantitipan_id->ViewCustomAttributes = "";
-
 			// pinjaman_id
 			$this->pinjaman_id->LinkCustomAttributes = "";
 			$this->pinjaman_id->HrefValue = "";
@@ -1935,16 +1911,6 @@ class ct04_pinjamanangsuran_list extends ct04_pinjamanangsuran {
 			$this->Keterangan->LinkCustomAttributes = "";
 			$this->Keterangan->HrefValue = "";
 			$this->Keterangan->TooltipValue = "";
-
-			// Flag_Edit
-			$this->Flag_Edit->LinkCustomAttributes = "";
-			$this->Flag_Edit->HrefValue = "";
-			$this->Flag_Edit->TooltipValue = "";
-
-			// pinjamantitipan_id
-			$this->pinjamantitipan_id->LinkCustomAttributes = "";
-			$this->pinjamantitipan_id->HrefValue = "";
-			$this->pinjamantitipan_id->TooltipValue = "";
 		}
 
 		// Call Row Rendered event
@@ -2832,24 +2798,6 @@ $t04_pinjamanangsuran_list->ListOptions->Render("header", "left");
         </div></div></th>
 	<?php } ?>
 <?php } ?>		
-<?php if ($t04_pinjamanangsuran->Flag_Edit->Visible) { // Flag_Edit ?>
-	<?php if ($t04_pinjamanangsuran->SortUrl($t04_pinjamanangsuran->Flag_Edit) == "") { ?>
-		<th data-name="Flag_Edit"><div id="elh_t04_pinjamanangsuran_Flag_Edit" class="t04_pinjamanangsuran_Flag_Edit"><div class="ewTableHeaderCaption"><?php echo $t04_pinjamanangsuran->Flag_Edit->FldCaption() ?></div></div></th>
-	<?php } else { ?>
-		<th data-name="Flag_Edit"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t04_pinjamanangsuran->SortUrl($t04_pinjamanangsuran->Flag_Edit) ?>',2);"><div id="elh_t04_pinjamanangsuran_Flag_Edit" class="t04_pinjamanangsuran_Flag_Edit">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t04_pinjamanangsuran->Flag_Edit->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t04_pinjamanangsuran->Flag_Edit->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t04_pinjamanangsuran->Flag_Edit->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
-        </div></div></th>
-	<?php } ?>
-<?php } ?>		
-<?php if ($t04_pinjamanangsuran->pinjamantitipan_id->Visible) { // pinjamantitipan_id ?>
-	<?php if ($t04_pinjamanangsuran->SortUrl($t04_pinjamanangsuran->pinjamantitipan_id) == "") { ?>
-		<th data-name="pinjamantitipan_id"><div id="elh_t04_pinjamanangsuran_pinjamantitipan_id" class="t04_pinjamanangsuran_pinjamantitipan_id"><div class="ewTableHeaderCaption"><?php echo $t04_pinjamanangsuran->pinjamantitipan_id->FldCaption() ?></div></div></th>
-	<?php } else { ?>
-		<th data-name="pinjamantitipan_id"><div class="ewPointer" onclick="ew_Sort(event,'<?php echo $t04_pinjamanangsuran->SortUrl($t04_pinjamanangsuran->pinjamantitipan_id) ?>',2);"><div id="elh_t04_pinjamanangsuran_pinjamantitipan_id" class="t04_pinjamanangsuran_pinjamantitipan_id">
-			<div class="ewTableHeaderBtn"><span class="ewTableHeaderCaption"><?php echo $t04_pinjamanangsuran->pinjamantitipan_id->FldCaption() ?></span><span class="ewTableHeaderSort"><?php if ($t04_pinjamanangsuran->pinjamantitipan_id->getSort() == "ASC") { ?><span class="caret ewSortUp"></span><?php } elseif ($t04_pinjamanangsuran->pinjamantitipan_id->getSort() == "DESC") { ?><span class="caret"></span><?php } ?></span></div>
-        </div></div></th>
-	<?php } ?>
-<?php } ?>		
 <?php
 
 // Render list options (header, right)
@@ -3024,22 +2972,6 @@ $t04_pinjamanangsuran_list->ListOptions->Render("body", "left", $t04_pinjamanang
 <span id="el<?php echo $t04_pinjamanangsuran_list->RowCnt ?>_t04_pinjamanangsuran_Keterangan" class="t04_pinjamanangsuran_Keterangan">
 <span<?php echo $t04_pinjamanangsuran->Keterangan->ViewAttributes() ?>>
 <?php echo $t04_pinjamanangsuran->Keterangan->ListViewValue() ?></span>
-</span>
-</td>
-	<?php } ?>
-	<?php if ($t04_pinjamanangsuran->Flag_Edit->Visible) { // Flag_Edit ?>
-		<td data-name="Flag_Edit"<?php echo $t04_pinjamanangsuran->Flag_Edit->CellAttributes() ?>>
-<span id="el<?php echo $t04_pinjamanangsuran_list->RowCnt ?>_t04_pinjamanangsuran_Flag_Edit" class="t04_pinjamanangsuran_Flag_Edit">
-<span<?php echo $t04_pinjamanangsuran->Flag_Edit->ViewAttributes() ?>>
-<?php echo $t04_pinjamanangsuran->Flag_Edit->ListViewValue() ?></span>
-</span>
-</td>
-	<?php } ?>
-	<?php if ($t04_pinjamanangsuran->pinjamantitipan_id->Visible) { // pinjamantitipan_id ?>
-		<td data-name="pinjamantitipan_id"<?php echo $t04_pinjamanangsuran->pinjamantitipan_id->CellAttributes() ?>>
-<span id="el<?php echo $t04_pinjamanangsuran_list->RowCnt ?>_t04_pinjamanangsuran_pinjamantitipan_id" class="t04_pinjamanangsuran_pinjamantitipan_id">
-<span<?php echo $t04_pinjamanangsuran->pinjamantitipan_id->ViewAttributes() ?>>
-<?php echo $t04_pinjamanangsuran->pinjamantitipan_id->ListViewValue() ?></span>
 </span>
 </td>
 	<?php } ?>

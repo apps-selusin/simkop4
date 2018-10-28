@@ -140,6 +140,33 @@ jQuery.get("<?php echo $EW_RELATIVE_PATH ?>phpjs/userevt13.js");
 			}
 		}
 	);
+	$('[data-table=t04_pinjamanangsuran][data-field=x_Tanggal_Bayar]').on(
+		{
+			'change': function (e) {
+				var $row = $(this).fields();
+				if ( ($row["Angsuran_Tanggal"].val() != "") && ($row["Tanggal_Bayar"].val() != "")) {
+					var angsuran_tanggal = $row["Angsuran_Tanggal"].val();
+					var angsuran_tanggal2 = angsuran_tanggal.split("-");
+					var angsuran_tanggal3 = angsuran_tanggal2[1]+"/"+angsuran_tanggal2[2]+"/"+angsuran_tanggal2[0];
+					var tanggal_bayar = $row["Tanggal_Bayar"].val();
+					var tanggal_bayar2 = tanggal_bayar.split("-");
+					var tanggal_bayar3 = tanggal_bayar2[1]+"/"+tanggal_bayar2[0]+"/"+tanggal_bayar2[2];
+
+					//alert(angsuran_tanggal3); alert(tanggal_bayar3);
+					var date_diff_indays = function(date1, date2) {
+					dt1 = new Date(date1);
+					dt2 = new Date(date2);
+					return Math.floor((Date.UTC(dt2.getFullYear(), dt2.getMonth(), dt2.getDate()) - Date.UTC(dt1.getFullYear(), dt1.getMonth(), dt1.getDate()) ) /(1000 * 60 * 60 * 24));
+					}
+					$row["Terlambat"].val(date_diff_indays(angsuran_tanggal3, tanggal_bayar3));
+
+					//console.log(date_diff_indays('04/02/2014', '11/04/2014'));
+					//console.log(date_diff_indays('12/02/2014', '11/04/2014'));
+
+				}
+			}
+		}
+	);
 </script>
 <?php } ?>
 </body>

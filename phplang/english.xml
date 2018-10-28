@@ -783,9 +783,6 @@
       <field id="flag_edit">
         <phrase id="fldcaption" value="Flag Edit" />
       </field>
-      <field id="pinjamantitipan_id">
-        <phrase id="fldcaption" value="pinjamantitipan id" />
-      </field>
     </table>
     <table id="t05_pinjamanjaminan">
       <phrase id="tblcaption" value="Jaminan" />
