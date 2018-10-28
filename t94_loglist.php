@@ -1029,6 +1029,7 @@ class ct94_log_list extends ct94_log {
 			if ($this->getSqlOrderBy() <> "") {
 				$sOrderBy = $this->getSqlOrderBy();
 				$this->setSessionOrderBy($sOrderBy);
+				$this->index_->setSort("ASC");
 			}
 		}
 	}
