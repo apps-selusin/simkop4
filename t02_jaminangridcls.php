@@ -2116,6 +2116,9 @@ class ct02_jaminan_grid extends ct02_jaminan {
 	function Page_Load() {
 
 		//echo "Page Load";
+		if (isset($_GET[EW_TABLE_SHOW_MASTER]) == "t01_nasabah") {
+			$this->nasabah_id->Visible = false;
+		}
 	}
 
 	// Page Unload event

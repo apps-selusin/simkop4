@@ -891,6 +891,15 @@ function Row_Updating($rsold, &$rsnew) {
 	return TRUE;
 }
 ]]></CustomScript>
+  <CustomScript ScriptType="Server" ScriptCodeType="Table" ScriptName="Page_Load" ScriptCtrlID="list" ScriptL1Key="t02_jaminan" ScriptL2Key=""><![CDATA[// Page Load event
+function Page_Load() {
+	//echo "Page Load";
+
+	if (isset($_GET[EW_TABLE_SHOW_MASTER]) == "t01_nasabah") {
+		$this->nasabah_id->Visible = false;
+	}
+}
+]]></CustomScript>
   <Menu MenuID="12" MenuText="Home" MenuParentID="-1" MenuGroup="0" MenuSource="" MenuExtUrl="" MenuAnonymous="8" MenuSecurity="" MenuUrl="cf01_home.php" MenuCustomUrl="0" MenuLevel="0" MenuShow="1" MenuDisplayOrder="100" />
   <Menu MenuID="1" MenuText="Nasabah" MenuParentID="-1" MenuGroup="0" MenuSource="" MenuExtUrl="" MenuAnonymous="0" MenuSecurity="" MenuUrl="t01_nasabah" MenuCustomUrl="0" MenuLevel="0" MenuShow="1" MenuDisplayOrder="200" />
   <Menu MenuID="2" MenuText="Jaminan" MenuParentID="1" MenuGroup="0" MenuSource="" MenuExtUrl="" MenuAnonymous="0" MenuSecurity="" MenuUrl="t02_jaminan" MenuCustomUrl="0" MenuLevel="1" MenuShow="0" MenuDisplayOrder="100" />
