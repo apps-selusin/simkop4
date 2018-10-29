@@ -782,7 +782,7 @@ class ct06_pinjamantitipan_view extends ct06_pinjamantitipan {
 
 		// Tanggal
 		$this->Tanggal->ViewValue = $this->Tanggal->CurrentValue;
-		$this->Tanggal->ViewValue = ew_FormatDateTime($this->Tanggal->ViewValue, 0);
+		$this->Tanggal->ViewValue = ew_FormatDateTime($this->Tanggal->ViewValue, 7);
 		$this->Tanggal->ViewCustomAttributes = "";
 
 		// Keterangan
@@ -791,14 +791,20 @@ class ct06_pinjamantitipan_view extends ct06_pinjamantitipan {
 
 		// Masuk
 		$this->Masuk->ViewValue = $this->Masuk->CurrentValue;
+		$this->Masuk->ViewValue = ew_FormatNumber($this->Masuk->ViewValue, 2, -2, -2, -2);
+		$this->Masuk->CellCssStyle .= "text-align: right;";
 		$this->Masuk->ViewCustomAttributes = "";
 
 		// Keluar
 		$this->Keluar->ViewValue = $this->Keluar->CurrentValue;
+		$this->Keluar->ViewValue = ew_FormatNumber($this->Keluar->ViewValue, 2, -2, -2, -2);
+		$this->Keluar->CellCssStyle .= "text-align: right;";
 		$this->Keluar->ViewCustomAttributes = "";
 
 		// Sisa
 		$this->Sisa->ViewValue = $this->Sisa->CurrentValue;
+		$this->Sisa->ViewValue = ew_FormatNumber($this->Sisa->ViewValue, 2, -2, -2, -2);
+		$this->Sisa->CellCssStyle .= "text-align: right;";
 		$this->Sisa->ViewCustomAttributes = "";
 
 			// pinjaman_id

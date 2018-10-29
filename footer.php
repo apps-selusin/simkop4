@@ -140,6 +140,8 @@ jQuery.get("<?php echo $EW_RELATIVE_PATH ?>phpjs/userevt13.js");
 			}
 		}
 	);
+
+	// Table 't04_pinjamanangsuran' Field 'Tanggal_Bayar'
 	$('[data-table=t04_pinjamanangsuran][data-field=x_Tanggal_Bayar]').on(
 		{
 			'change': function (e) {
@@ -159,10 +161,28 @@ jQuery.get("<?php echo $EW_RELATIVE_PATH ?>phpjs/userevt13.js");
 					return Math.floor((Date.UTC(dt2.getFullYear(), dt2.getMonth(), dt2.getDate()) - Date.UTC(dt1.getFullYear(), dt1.getMonth(), dt1.getDate()) ) /(1000 * 60 * 60 * 24));
 					}
 					$row["Terlambat"].val(date_diff_indays(angsuran_tanggal3, tanggal_bayar3));
+					var int_terlambat = parseInt($row["Terlambat"].val());
 
-					//console.log(date_diff_indays('04/02/2014', '11/04/2014'));
-					//console.log(date_diff_indays('12/02/2014', '11/04/2014'));
+					//alert("int_terlambat: "+int_terlambat);
+					var dispensasi_denda = parseInt("<?php echo $GLOBALS['t03_pinjaman']->Dispensasi_Denda->CurrentValue?>");
 
+					//alert("dispensasi_denda: "+dispensasi_denda);
+					var angsuran_denda = parseFloat('<?php echo $GLOBALS["t03_pinjaman"]->Angsuran_Denda->CurrentValue?>');
+
+					//alert("angsuran_denda: "+angsuran_denda);
+					var angsuran_total = $row["Angsuran_Total"].val();
+					var angsuran_total2 = angsuran_total.replace(/,/g, '');
+					var angsuran_total3 = parseFloat(angsuran_total2);
+
+					//alert("angsuran_total: "+angsuran_total3);
+					var total_denda = 0;
+					if (int_terlambat > dispensasi_denda) {
+						total_denda =
+							(angsuran_denda *
+							angsuran_total3 *
+							int_terlambat) / 100;
+					}
+					$row["Total_Denda"].val(total_denda);
 				}
 			}
 		}

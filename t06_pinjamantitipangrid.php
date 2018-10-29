@@ -51,7 +51,7 @@ ft06_pinjamantitipangrid.Validate = function() {
 			if (elm && !ew_IsHidden(elm) && !ew_HasValue(elm))
 				return this.OnError(elm, "<?php echo ew_JsEncode2(str_replace("%s", $t06_pinjamantitipan->Tanggal->FldCaption(), $t06_pinjamantitipan->Tanggal->ReqErrMsg)) ?>");
 			elm = this.GetElements("x" + infix + "_Tanggal");
-			if (elm && !ew_CheckDateDef(elm.value))
+			if (elm && !ew_CheckEuroDate(elm.value))
 				return this.OnError(elm, "<?php echo ew_JsEncode2($t06_pinjamantitipan->Tanggal->FldErrMsg()) ?>");
 			elm = this.GetElements("x" + infix + "_Masuk");
 			if (elm && !ew_IsHidden(elm) && !ew_HasValue(elm))
@@ -408,13 +408,23 @@ $t06_pinjamantitipan_grid->ListOptions->Render("body", "left", $t06_pinjamantiti
 		<td data-name="Tanggal"<?php echo $t06_pinjamantitipan->Tanggal->CellAttributes() ?>>
 <?php if ($t06_pinjamantitipan->RowType == EW_ROWTYPE_ADD) { // Add record ?>
 <span id="el<?php echo $t06_pinjamantitipan_grid->RowCnt ?>_t06_pinjamantitipan_Tanggal" class="form-group t06_pinjamantitipan_Tanggal">
-<input type="text" data-table="t06_pinjamantitipan" data-field="x_Tanggal" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Tanggal" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Tanggal" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Tanggal->getPlaceHolder()) ?>" value="<?php echo $t06_pinjamantitipan->Tanggal->EditValue ?>"<?php echo $t06_pinjamantitipan->Tanggal->EditAttributes() ?>>
+<input type="text" data-table="t06_pinjamantitipan" data-field="x_Tanggal" data-format="7" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Tanggal" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Tanggal" size="10" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Tanggal->getPlaceHolder()) ?>" value="<?php echo $t06_pinjamantitipan->Tanggal->EditValue ?>"<?php echo $t06_pinjamantitipan->Tanggal->EditAttributes() ?>>
+<?php if (!$t06_pinjamantitipan->Tanggal->ReadOnly && !$t06_pinjamantitipan->Tanggal->Disabled && !isset($t06_pinjamantitipan->Tanggal->EditAttrs["readonly"]) && !isset($t06_pinjamantitipan->Tanggal->EditAttrs["disabled"])) { ?>
+<script type="text/javascript">
+ew_CreateCalendar("ft06_pinjamantitipangrid", "x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Tanggal", 7);
+</script>
+<?php } ?>
 </span>
 <input type="hidden" data-table="t06_pinjamantitipan" data-field="x_Tanggal" name="o<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Tanggal" id="o<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Tanggal" value="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Tanggal->OldValue) ?>">
 <?php } ?>
 <?php if ($t06_pinjamantitipan->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t06_pinjamantitipan_grid->RowCnt ?>_t06_pinjamantitipan_Tanggal" class="form-group t06_pinjamantitipan_Tanggal">
-<input type="text" data-table="t06_pinjamantitipan" data-field="x_Tanggal" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Tanggal" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Tanggal" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Tanggal->getPlaceHolder()) ?>" value="<?php echo $t06_pinjamantitipan->Tanggal->EditValue ?>"<?php echo $t06_pinjamantitipan->Tanggal->EditAttributes() ?>>
+<input type="text" data-table="t06_pinjamantitipan" data-field="x_Tanggal" data-format="7" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Tanggal" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Tanggal" size="10" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Tanggal->getPlaceHolder()) ?>" value="<?php echo $t06_pinjamantitipan->Tanggal->EditValue ?>"<?php echo $t06_pinjamantitipan->Tanggal->EditAttributes() ?>>
+<?php if (!$t06_pinjamantitipan->Tanggal->ReadOnly && !$t06_pinjamantitipan->Tanggal->Disabled && !isset($t06_pinjamantitipan->Tanggal->EditAttrs["readonly"]) && !isset($t06_pinjamantitipan->Tanggal->EditAttrs["disabled"])) { ?>
+<script type="text/javascript">
+ew_CreateCalendar("ft06_pinjamantitipangrid", "x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Tanggal", 7);
+</script>
+<?php } ?>
 </span>
 <?php } ?>
 <?php if ($t06_pinjamantitipan->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -436,13 +446,13 @@ $t06_pinjamantitipan_grid->ListOptions->Render("body", "left", $t06_pinjamantiti
 		<td data-name="Keterangan"<?php echo $t06_pinjamantitipan->Keterangan->CellAttributes() ?>>
 <?php if ($t06_pinjamantitipan->RowType == EW_ROWTYPE_ADD) { // Add record ?>
 <span id="el<?php echo $t06_pinjamantitipan_grid->RowCnt ?>_t06_pinjamantitipan_Keterangan" class="form-group t06_pinjamantitipan_Keterangan">
-<textarea data-table="t06_pinjamantitipan" data-field="x_Keterangan" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keterangan" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keterangan" cols="35" rows="4" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Keterangan->getPlaceHolder()) ?>"<?php echo $t06_pinjamantitipan->Keterangan->EditAttributes() ?>><?php echo $t06_pinjamantitipan->Keterangan->EditValue ?></textarea>
+<textarea data-table="t06_pinjamantitipan" data-field="x_Keterangan" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keterangan" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keterangan" cols="15" rows="2" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Keterangan->getPlaceHolder()) ?>"<?php echo $t06_pinjamantitipan->Keterangan->EditAttributes() ?>><?php echo $t06_pinjamantitipan->Keterangan->EditValue ?></textarea>
 </span>
 <input type="hidden" data-table="t06_pinjamantitipan" data-field="x_Keterangan" name="o<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keterangan" id="o<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keterangan" value="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Keterangan->OldValue) ?>">
 <?php } ?>
 <?php if ($t06_pinjamantitipan->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t06_pinjamantitipan_grid->RowCnt ?>_t06_pinjamantitipan_Keterangan" class="form-group t06_pinjamantitipan_Keterangan">
-<textarea data-table="t06_pinjamantitipan" data-field="x_Keterangan" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keterangan" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keterangan" cols="35" rows="4" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Keterangan->getPlaceHolder()) ?>"<?php echo $t06_pinjamantitipan->Keterangan->EditAttributes() ?>><?php echo $t06_pinjamantitipan->Keterangan->EditValue ?></textarea>
+<textarea data-table="t06_pinjamantitipan" data-field="x_Keterangan" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keterangan" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keterangan" cols="15" rows="2" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Keterangan->getPlaceHolder()) ?>"<?php echo $t06_pinjamantitipan->Keterangan->EditAttributes() ?>><?php echo $t06_pinjamantitipan->Keterangan->EditValue ?></textarea>
 </span>
 <?php } ?>
 <?php if ($t06_pinjamantitipan->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -464,13 +474,13 @@ $t06_pinjamantitipan_grid->ListOptions->Render("body", "left", $t06_pinjamantiti
 		<td data-name="Masuk"<?php echo $t06_pinjamantitipan->Masuk->CellAttributes() ?>>
 <?php if ($t06_pinjamantitipan->RowType == EW_ROWTYPE_ADD) { // Add record ?>
 <span id="el<?php echo $t06_pinjamantitipan_grid->RowCnt ?>_t06_pinjamantitipan_Masuk" class="form-group t06_pinjamantitipan_Masuk">
-<input type="text" data-table="t06_pinjamantitipan" data-field="x_Masuk" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Masuk" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Masuk" size="30" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Masuk->getPlaceHolder()) ?>" value="<?php echo $t06_pinjamantitipan->Masuk->EditValue ?>"<?php echo $t06_pinjamantitipan->Masuk->EditAttributes() ?>>
+<input type="text" data-table="t06_pinjamantitipan" data-field="x_Masuk" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Masuk" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Masuk" size="10" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Masuk->getPlaceHolder()) ?>" value="<?php echo $t06_pinjamantitipan->Masuk->EditValue ?>"<?php echo $t06_pinjamantitipan->Masuk->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t06_pinjamantitipan" data-field="x_Masuk" name="o<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Masuk" id="o<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Masuk" value="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Masuk->OldValue) ?>">
 <?php } ?>
 <?php if ($t06_pinjamantitipan->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t06_pinjamantitipan_grid->RowCnt ?>_t06_pinjamantitipan_Masuk" class="form-group t06_pinjamantitipan_Masuk">
-<input type="text" data-table="t06_pinjamantitipan" data-field="x_Masuk" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Masuk" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Masuk" size="30" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Masuk->getPlaceHolder()) ?>" value="<?php echo $t06_pinjamantitipan->Masuk->EditValue ?>"<?php echo $t06_pinjamantitipan->Masuk->EditAttributes() ?>>
+<input type="text" data-table="t06_pinjamantitipan" data-field="x_Masuk" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Masuk" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Masuk" size="10" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Masuk->getPlaceHolder()) ?>" value="<?php echo $t06_pinjamantitipan->Masuk->EditValue ?>"<?php echo $t06_pinjamantitipan->Masuk->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t06_pinjamantitipan->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -492,13 +502,13 @@ $t06_pinjamantitipan_grid->ListOptions->Render("body", "left", $t06_pinjamantiti
 		<td data-name="Keluar"<?php echo $t06_pinjamantitipan->Keluar->CellAttributes() ?>>
 <?php if ($t06_pinjamantitipan->RowType == EW_ROWTYPE_ADD) { // Add record ?>
 <span id="el<?php echo $t06_pinjamantitipan_grid->RowCnt ?>_t06_pinjamantitipan_Keluar" class="form-group t06_pinjamantitipan_Keluar">
-<input type="text" data-table="t06_pinjamantitipan" data-field="x_Keluar" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keluar" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keluar" size="30" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Keluar->getPlaceHolder()) ?>" value="<?php echo $t06_pinjamantitipan->Keluar->EditValue ?>"<?php echo $t06_pinjamantitipan->Keluar->EditAttributes() ?>>
+<input type="text" data-table="t06_pinjamantitipan" data-field="x_Keluar" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keluar" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keluar" size="10" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Keluar->getPlaceHolder()) ?>" value="<?php echo $t06_pinjamantitipan->Keluar->EditValue ?>"<?php echo $t06_pinjamantitipan->Keluar->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t06_pinjamantitipan" data-field="x_Keluar" name="o<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keluar" id="o<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keluar" value="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Keluar->OldValue) ?>">
 <?php } ?>
 <?php if ($t06_pinjamantitipan->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t06_pinjamantitipan_grid->RowCnt ?>_t06_pinjamantitipan_Keluar" class="form-group t06_pinjamantitipan_Keluar">
-<input type="text" data-table="t06_pinjamantitipan" data-field="x_Keluar" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keluar" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keluar" size="30" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Keluar->getPlaceHolder()) ?>" value="<?php echo $t06_pinjamantitipan->Keluar->EditValue ?>"<?php echo $t06_pinjamantitipan->Keluar->EditAttributes() ?>>
+<input type="text" data-table="t06_pinjamantitipan" data-field="x_Keluar" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keluar" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keluar" size="10" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Keluar->getPlaceHolder()) ?>" value="<?php echo $t06_pinjamantitipan->Keluar->EditValue ?>"<?php echo $t06_pinjamantitipan->Keluar->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t06_pinjamantitipan->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -520,13 +530,13 @@ $t06_pinjamantitipan_grid->ListOptions->Render("body", "left", $t06_pinjamantiti
 		<td data-name="Sisa"<?php echo $t06_pinjamantitipan->Sisa->CellAttributes() ?>>
 <?php if ($t06_pinjamantitipan->RowType == EW_ROWTYPE_ADD) { // Add record ?>
 <span id="el<?php echo $t06_pinjamantitipan_grid->RowCnt ?>_t06_pinjamantitipan_Sisa" class="form-group t06_pinjamantitipan_Sisa">
-<input type="text" data-table="t06_pinjamantitipan" data-field="x_Sisa" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Sisa" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Sisa" size="30" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Sisa->getPlaceHolder()) ?>" value="<?php echo $t06_pinjamantitipan->Sisa->EditValue ?>"<?php echo $t06_pinjamantitipan->Sisa->EditAttributes() ?>>
+<input type="text" data-table="t06_pinjamantitipan" data-field="x_Sisa" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Sisa" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Sisa" size="10" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Sisa->getPlaceHolder()) ?>" value="<?php echo $t06_pinjamantitipan->Sisa->EditValue ?>"<?php echo $t06_pinjamantitipan->Sisa->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t06_pinjamantitipan" data-field="x_Sisa" name="o<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Sisa" id="o<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Sisa" value="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Sisa->OldValue) ?>">
 <?php } ?>
 <?php if ($t06_pinjamantitipan->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t06_pinjamantitipan_grid->RowCnt ?>_t06_pinjamantitipan_Sisa" class="form-group t06_pinjamantitipan_Sisa">
-<input type="text" data-table="t06_pinjamantitipan" data-field="x_Sisa" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Sisa" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Sisa" size="30" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Sisa->getPlaceHolder()) ?>" value="<?php echo $t06_pinjamantitipan->Sisa->EditValue ?>"<?php echo $t06_pinjamantitipan->Sisa->EditAttributes() ?>>
+<input type="text" data-table="t06_pinjamantitipan" data-field="x_Sisa" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Sisa" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Sisa" size="10" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Sisa->getPlaceHolder()) ?>" value="<?php echo $t06_pinjamantitipan->Sisa->EditValue ?>"<?php echo $t06_pinjamantitipan->Sisa->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t06_pinjamantitipan->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -614,7 +624,12 @@ $t06_pinjamantitipan_grid->ListOptions->Render("body", "left", $t06_pinjamantiti
 		<td data-name="Tanggal">
 <?php if ($t06_pinjamantitipan->CurrentAction <> "F") { ?>
 <span id="el$rowindex$_t06_pinjamantitipan_Tanggal" class="form-group t06_pinjamantitipan_Tanggal">
-<input type="text" data-table="t06_pinjamantitipan" data-field="x_Tanggal" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Tanggal" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Tanggal" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Tanggal->getPlaceHolder()) ?>" value="<?php echo $t06_pinjamantitipan->Tanggal->EditValue ?>"<?php echo $t06_pinjamantitipan->Tanggal->EditAttributes() ?>>
+<input type="text" data-table="t06_pinjamantitipan" data-field="x_Tanggal" data-format="7" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Tanggal" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Tanggal" size="10" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Tanggal->getPlaceHolder()) ?>" value="<?php echo $t06_pinjamantitipan->Tanggal->EditValue ?>"<?php echo $t06_pinjamantitipan->Tanggal->EditAttributes() ?>>
+<?php if (!$t06_pinjamantitipan->Tanggal->ReadOnly && !$t06_pinjamantitipan->Tanggal->Disabled && !isset($t06_pinjamantitipan->Tanggal->EditAttrs["readonly"]) && !isset($t06_pinjamantitipan->Tanggal->EditAttrs["disabled"])) { ?>
+<script type="text/javascript">
+ew_CreateCalendar("ft06_pinjamantitipangrid", "x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Tanggal", 7);
+</script>
+<?php } ?>
 </span>
 <?php } else { ?>
 <span id="el$rowindex$_t06_pinjamantitipan_Tanggal" class="form-group t06_pinjamantitipan_Tanggal">
@@ -630,7 +645,7 @@ $t06_pinjamantitipan_grid->ListOptions->Render("body", "left", $t06_pinjamantiti
 		<td data-name="Keterangan">
 <?php if ($t06_pinjamantitipan->CurrentAction <> "F") { ?>
 <span id="el$rowindex$_t06_pinjamantitipan_Keterangan" class="form-group t06_pinjamantitipan_Keterangan">
-<textarea data-table="t06_pinjamantitipan" data-field="x_Keterangan" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keterangan" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keterangan" cols="35" rows="4" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Keterangan->getPlaceHolder()) ?>"<?php echo $t06_pinjamantitipan->Keterangan->EditAttributes() ?>><?php echo $t06_pinjamantitipan->Keterangan->EditValue ?></textarea>
+<textarea data-table="t06_pinjamantitipan" data-field="x_Keterangan" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keterangan" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keterangan" cols="15" rows="2" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Keterangan->getPlaceHolder()) ?>"<?php echo $t06_pinjamantitipan->Keterangan->EditAttributes() ?>><?php echo $t06_pinjamantitipan->Keterangan->EditValue ?></textarea>
 </span>
 <?php } else { ?>
 <span id="el$rowindex$_t06_pinjamantitipan_Keterangan" class="form-group t06_pinjamantitipan_Keterangan">
@@ -646,7 +661,7 @@ $t06_pinjamantitipan_grid->ListOptions->Render("body", "left", $t06_pinjamantiti
 		<td data-name="Masuk">
 <?php if ($t06_pinjamantitipan->CurrentAction <> "F") { ?>
 <span id="el$rowindex$_t06_pinjamantitipan_Masuk" class="form-group t06_pinjamantitipan_Masuk">
-<input type="text" data-table="t06_pinjamantitipan" data-field="x_Masuk" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Masuk" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Masuk" size="30" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Masuk->getPlaceHolder()) ?>" value="<?php echo $t06_pinjamantitipan->Masuk->EditValue ?>"<?php echo $t06_pinjamantitipan->Masuk->EditAttributes() ?>>
+<input type="text" data-table="t06_pinjamantitipan" data-field="x_Masuk" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Masuk" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Masuk" size="10" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Masuk->getPlaceHolder()) ?>" value="<?php echo $t06_pinjamantitipan->Masuk->EditValue ?>"<?php echo $t06_pinjamantitipan->Masuk->EditAttributes() ?>>
 </span>
 <?php } else { ?>
 <span id="el$rowindex$_t06_pinjamantitipan_Masuk" class="form-group t06_pinjamantitipan_Masuk">
@@ -662,7 +677,7 @@ $t06_pinjamantitipan_grid->ListOptions->Render("body", "left", $t06_pinjamantiti
 		<td data-name="Keluar">
 <?php if ($t06_pinjamantitipan->CurrentAction <> "F") { ?>
 <span id="el$rowindex$_t06_pinjamantitipan_Keluar" class="form-group t06_pinjamantitipan_Keluar">
-<input type="text" data-table="t06_pinjamantitipan" data-field="x_Keluar" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keluar" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keluar" size="30" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Keluar->getPlaceHolder()) ?>" value="<?php echo $t06_pinjamantitipan->Keluar->EditValue ?>"<?php echo $t06_pinjamantitipan->Keluar->EditAttributes() ?>>
+<input type="text" data-table="t06_pinjamantitipan" data-field="x_Keluar" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keluar" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Keluar" size="10" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Keluar->getPlaceHolder()) ?>" value="<?php echo $t06_pinjamantitipan->Keluar->EditValue ?>"<?php echo $t06_pinjamantitipan->Keluar->EditAttributes() ?>>
 </span>
 <?php } else { ?>
 <span id="el$rowindex$_t06_pinjamantitipan_Keluar" class="form-group t06_pinjamantitipan_Keluar">
@@ -678,7 +693,7 @@ $t06_pinjamantitipan_grid->ListOptions->Render("body", "left", $t06_pinjamantiti
 		<td data-name="Sisa">
 <?php if ($t06_pinjamantitipan->CurrentAction <> "F") { ?>
 <span id="el$rowindex$_t06_pinjamantitipan_Sisa" class="form-group t06_pinjamantitipan_Sisa">
-<input type="text" data-table="t06_pinjamantitipan" data-field="x_Sisa" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Sisa" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Sisa" size="30" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Sisa->getPlaceHolder()) ?>" value="<?php echo $t06_pinjamantitipan->Sisa->EditValue ?>"<?php echo $t06_pinjamantitipan->Sisa->EditAttributes() ?>>
+<input type="text" data-table="t06_pinjamantitipan" data-field="x_Sisa" name="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Sisa" id="x<?php echo $t06_pinjamantitipan_grid->RowIndex ?>_Sisa" size="10" placeholder="<?php echo ew_HtmlEncode($t06_pinjamantitipan->Sisa->getPlaceHolder()) ?>" value="<?php echo $t06_pinjamantitipan->Sisa->EditValue ?>"<?php echo $t06_pinjamantitipan->Sisa->EditAttributes() ?>>
 </span>
 <?php } else { ?>
 <span id="el$rowindex$_t06_pinjamantitipan_Sisa" class="form-group t06_pinjamantitipan_Sisa">

@@ -87,4 +87,15 @@ function f_updatesaldotitipan($pinjaman_id) {
 		$r->MoveNext();
 	}
 }
+
+function f_carisaldotitipan($pinjaman_id) {
+	$saldo_titipan = 0;
+	$q = "select Sisa from t06_pinjamantitipan where pinjaman_id = ".$pinjaman_id."
+		order by id desc";
+	$r = Conn()->Execute($q);
+	if (!$r->EOF) {
+		$saldo_titipan = $r->fields["Sisa"];
+	}
+	return $saldo_titipan;
+}
 ?>

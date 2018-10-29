@@ -1482,7 +1482,7 @@ class ct03_pinjaman extends cTable {
 				)";
 			ew_Execute($q);
 			if ($Flag_Edit == 1) {
-				$Flag_Edit == 0;
+				$Flag_Edit = 0;
 			}
 		}
 		f_updatesaldotitipan($pinjaman_id);

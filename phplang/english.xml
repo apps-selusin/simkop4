@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<ew-language date="2018/10/29" version="13.0.0" id="en" name="English" desc="English" author="e.World Technology Ltd.">
+<ew-language date="2018/10/30" version="13.0.0" id="en" name="English" desc="English" author="e.World Technology Ltd.">
   <!-- 
 	*** Important Notes:
 	1. Language ID should follow: https://developers.google.com/recaptcha/docs/language,
@@ -745,13 +745,13 @@
         <phrase id="fldcaption" value="Angsuran Ke" />
       </field>
       <field id="angsuran_tanggal">
-        <phrase id="fldcaption" value="Tgl. Jatuh Tempo" />
+        <phrase id="fldcaption" value="Tgl. Angsuran" />
       </field>
       <field id="angsuran_pokok">
         <phrase id="fldcaption" value="Angsuran Pokok" />
       </field>
       <field id="angsuran_bunga">
-        <phrase id="fldcaption" value="Bunga" />
+        <phrase id="fldcaption" value="Angsuran Bunga" />
       </field>
       <field id="angsuran_total">
         <phrase id="fldcaption" value="Angsuran Total" />
@@ -766,7 +766,7 @@
         <phrase id="fldcaption" value="Terlambat" />
       </field>
       <field id="total_denda">
-        <phrase id="fldcaption" value="Total Denda" />
+        <phrase id="fldcaption" value="Denda" />
       </field>
       <field id="bayar_titipan">
         <phrase id="fldcaption" value="Bayar Titipan" />
@@ -805,7 +805,7 @@
         <phrase id="fldcaption" value="pinjaman id" />
       </field>
       <field id="tanggal">
-        <phrase id="fldcaption" value="Tanggal" />
+        <phrase id="fldcaption" value="Tgl. Setor" />
       </field>
       <field id="keterangan">
         <phrase id="fldcaption" value="Keterangan" />

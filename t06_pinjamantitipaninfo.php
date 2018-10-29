@@ -64,9 +64,9 @@ class ct06_pinjamantitipan extends cTable {
 		$this->fields['pinjaman_id'] = &$this->pinjaman_id;
 
 		// Tanggal
-		$this->Tanggal = new cField('t06_pinjamantitipan', 't06_pinjamantitipan', 'x_Tanggal', 'Tanggal', '`Tanggal`', ew_CastDateFieldForLike('`Tanggal`', 0, "DB"), 133, 0, FALSE, '`Tanggal`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
+		$this->Tanggal = new cField('t06_pinjamantitipan', 't06_pinjamantitipan', 'x_Tanggal', 'Tanggal', '`Tanggal`', ew_CastDateFieldForLike('`Tanggal`', 7, "DB"), 133, 7, FALSE, '`Tanggal`', FALSE, FALSE, FALSE, 'FORMATTED TEXT', 'TEXT');
 		$this->Tanggal->Sortable = TRUE; // Allow sort
-		$this->Tanggal->FldDefaultErrMsg = str_replace("%s", $GLOBALS["EW_DATE_FORMAT"], $Language->Phrase("IncorrectDate"));
+		$this->Tanggal->FldDefaultErrMsg = str_replace("%s", $GLOBALS["EW_DATE_SEPARATOR"], $Language->Phrase("IncorrectDateDMY"));
 		$this->fields['Tanggal'] = &$this->Tanggal;
 
 		// Keterangan
@@ -689,7 +689,7 @@ class ct06_pinjamantitipan extends cTable {
 
 		// Tanggal
 		$this->Tanggal->ViewValue = $this->Tanggal->CurrentValue;
-		$this->Tanggal->ViewValue = ew_FormatDateTime($this->Tanggal->ViewValue, 0);
+		$this->Tanggal->ViewValue = ew_FormatDateTime($this->Tanggal->ViewValue, 7);
 		$this->Tanggal->ViewCustomAttributes = "";
 
 		// Keterangan
@@ -698,14 +698,20 @@ class ct06_pinjamantitipan extends cTable {
 
 		// Masuk
 		$this->Masuk->ViewValue = $this->Masuk->CurrentValue;
+		$this->Masuk->ViewValue = ew_FormatNumber($this->Masuk->ViewValue, 2, -2, -2, -2);
+		$this->Masuk->CellCssStyle .= "text-align: right;";
 		$this->Masuk->ViewCustomAttributes = "";
 
 		// Keluar
 		$this->Keluar->ViewValue = $this->Keluar->CurrentValue;
+		$this->Keluar->ViewValue = ew_FormatNumber($this->Keluar->ViewValue, 2, -2, -2, -2);
+		$this->Keluar->CellCssStyle .= "text-align: right;";
 		$this->Keluar->ViewCustomAttributes = "";
 
 		// Sisa
 		$this->Sisa->ViewValue = $this->Sisa->CurrentValue;
+		$this->Sisa->ViewValue = ew_FormatNumber($this->Sisa->ViewValue, 2, -2, -2, -2);
+		$this->Sisa->CellCssStyle .= "text-align: right;";
 		$this->Sisa->ViewCustomAttributes = "";
 
 		// id
@@ -774,8 +780,8 @@ class ct06_pinjamantitipan extends cTable {
 
 		// Tanggal
 		$this->Tanggal->EditAttrs["class"] = "form-control";
-		$this->Tanggal->EditCustomAttributes = "";
-		$this->Tanggal->EditValue = ew_FormatDateTime($this->Tanggal->CurrentValue, 8);
+		$this->Tanggal->EditCustomAttributes = "style='width: 115px;'";
+		$this->Tanggal->EditValue = ew_FormatDateTime($this->Tanggal->CurrentValue, 7);
 		$this->Tanggal->PlaceHolder = ew_RemoveHtml($this->Tanggal->FldCaption());
 
 		// Keterangan
@@ -789,21 +795,21 @@ class ct06_pinjamantitipan extends cTable {
 		$this->Masuk->EditCustomAttributes = "";
 		$this->Masuk->EditValue = $this->Masuk->CurrentValue;
 		$this->Masuk->PlaceHolder = ew_RemoveHtml($this->Masuk->FldCaption());
-		if (strval($this->Masuk->EditValue) <> "" && is_numeric($this->Masuk->EditValue)) $this->Masuk->EditValue = ew_FormatNumber($this->Masuk->EditValue, -2, -1, -2, 0);
+		if (strval($this->Masuk->EditValue) <> "" && is_numeric($this->Masuk->EditValue)) $this->Masuk->EditValue = ew_FormatNumber($this->Masuk->EditValue, -2, -2, -2, -2);
 
 		// Keluar
 		$this->Keluar->EditAttrs["class"] = "form-control";
 		$this->Keluar->EditCustomAttributes = "";
 		$this->Keluar->EditValue = $this->Keluar->CurrentValue;
 		$this->Keluar->PlaceHolder = ew_RemoveHtml($this->Keluar->FldCaption());
-		if (strval($this->Keluar->EditValue) <> "" && is_numeric($this->Keluar->EditValue)) $this->Keluar->EditValue = ew_FormatNumber($this->Keluar->EditValue, -2, -1, -2, 0);
+		if (strval($this->Keluar->EditValue) <> "" && is_numeric($this->Keluar->EditValue)) $this->Keluar->EditValue = ew_FormatNumber($this->Keluar->EditValue, -2, -2, -2, -2);
 
 		// Sisa
 		$this->Sisa->EditAttrs["class"] = "form-control";
 		$this->Sisa->EditCustomAttributes = "";
 		$this->Sisa->EditValue = $this->Sisa->CurrentValue;
 		$this->Sisa->PlaceHolder = ew_RemoveHtml($this->Sisa->FldCaption());
-		if (strval($this->Sisa->EditValue) <> "" && is_numeric($this->Sisa->EditValue)) $this->Sisa->EditValue = ew_FormatNumber($this->Sisa->EditValue, -2, -1, -2, 0);
+		if (strval($this->Sisa->EditValue) <> "" && is_numeric($this->Sisa->EditValue)) $this->Sisa->EditValue = ew_FormatNumber($this->Sisa->EditValue, -2, -2, -2, -2);
 
 		// Call Row Rendered event
 		$this->Row_Rendered();
@@ -1203,8 +1209,15 @@ class ct06_pinjamantitipan extends cTable {
 	function Row_Rendered() {
 
 		// To view properties of field class, use:
-		//var_dump($this-><FieldName>); 
+		//var_dump($this-><FieldName>);
 
+		if ($this->Masuk->CurrentValue > 0) {
+			$GLOBALS["saldo_titipan"] = $GLOBALS["saldo_titipan"] + $this->Masuk->CurrentValue;
+		}
+		else {
+			$GLOBALS["saldo_titipan"] = $GLOBALS["saldo_titipan"] - $this->Keluar->CurrentValue;
+		}
+		$this->Sisa->ViewValue = number_format($GLOBALS["saldo_titipan"]);
 	}
 
 	// User ID Filtering event
