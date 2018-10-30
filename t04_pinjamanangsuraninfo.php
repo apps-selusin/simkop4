@@ -1518,13 +1518,13 @@ class ct04_pinjamanangsuran extends cTable {
 			$this->Tanggal_Bayar->EditValue = (is_null($this->Tanggal_Bayar->CurrentValue) ? date("d-m-Y") : date_format(date_create($this->Tanggal_Bayar->CurrentValue), "d-m-Y"));
 
 			//for testing data $this->Tanggal_Bayar->EditValue = date_format(date_create("2018-12-02"), "d-m-Y");
-			//$angsuran_tanggal = date_create($this->Angsuran_Tanggal->CurrentValue); echo $angsuran_tanggal; exit;
-			//$tanggal_bayar = (is_null($this->Tanggal_Bayar->CurrentValue) ? date("Y-m-d") : $this->Tanggal_Bayar->CurrentValue); echo $tanggal_bayar;
-			// for testing data $tanggal_bayar = date_create("2018-12-02");
-			//$terlambat = date_diff($angsuran_tanggal, $tanggal_bayar); echo $terlambat;
-			//$this->Terlambat->EditValue = (is_null($this->Terlambat->CurrentValue) ? $terlambat->format("%r%a") : $this->Terlambat->CurrentValue);
+			$angsuran_tanggal = date_create($this->Angsuran_Tanggal->CurrentValue); //echo $angsuran_tanggal; //exit;
+			$tanggal_bayar = (is_null($this->Tanggal_Bayar->CurrentValue) ? date_create(date("Y-m-d")) : date_create($this->Tanggal_Bayar->CurrentValue)); //echo $tanggal_bayar;
 
-			/*$int_terlambat = $terlambat->format("%r%a");
+			// for testing data $tanggal_bayar = date_create("2018-12-02"); //echo gettype($angsuran_tanggal); echo gettype($tanggal_bayar);
+			$terlambat = date_diff($angsuran_tanggal, $tanggal_bayar); //echo $terlambat;
+			$this->Terlambat->EditValue = (is_null($this->Terlambat->CurrentValue) ? $terlambat->format("%r%a") : $this->Terlambat->CurrentValue);
+			$int_terlambat = $terlambat->format("%r%a");
 			$total_denda = 0;
 			if ($int_terlambat > $GLOBALS["t03_pinjaman"]->Dispensasi_Denda->CurrentValue) {
 				$total_denda =
@@ -1534,13 +1534,18 @@ class ct04_pinjamanangsuran extends cTable {
 			}
 			$this->Total_Denda->EditValue = (is_null($this->Total_Denda->CurrentValue) ? $total_denda : $this->Total_Denda->CurrentValue);
 			$bayar_titipan = f_carisaldotitipan($this->pinjaman_id->CurrentValue);
-			$this->Bayar_Titipan->EditValue = (is_null($this->Bayar_Titipan->CurrentValue) ? $bayar_titipan : $this->Bayar_Titipan->CurrentValue);
+
+			//$this->Bayar_Titipan->EditValue = ($bayar_titipan <> 0 ? $bayar_titipan : $this->Bayar_Titipan->CurrentValue);
+			$this->Bayar_Titipan->EditValue = $bayar_titipan;
 			$bayar_total = $this->Angsuran_Total->CurrentValue;
 			$bayar_non_titipan = $bayar_total - $bayar_titipan;
-			$this->Bayar_Non_Titipan->EditValue = (is_null($this->Bayar_Non_Titipan->CurrentValue) ? $bayar_non_titipan : $this->Bayar_Non_Titipan->CurrentValue);
+
+			//$this->Bayar_Non_Titipan->EditValue = (is_null($this->Bayar_Non_Titipan->CurrentValue) ? $bayar_non_titipan : $this->Bayar_Non_Titipan->CurrentValue);
+			$this->Bayar_Non_Titipan->EditValue = $bayar_non_titipan;
 			$bayar_total = $total_denda + $bayar_titipan + $bayar_non_titipan;
-			$this->Bayar_Total->EditValue = (is_null($this->Bayar_Total->CurrentValue) ? $bayar_total : $this->Bayar_Total->CurrentValue);
-			*/
+
+			//$this->Bayar_Total->EditValue = (is_null($this->Bayar_Total->CurrentValue) ? $bayar_total : $this->Bayar_Total->CurrentValue);
+			$this->Bayar_Total->EditValue = $bayar_total;
 		}
 	}
 

@@ -1538,6 +1538,15 @@ class ct03_pinjaman extends cTable {
 		}
 		else {
 
+			// ambil nilai Flag_Edit yang sedang bernilai 1
+			$Angsuran_Ke_Flag_Edit = 0;
+			$q = "select Angsuran_Ke from t04_pinjamanangsuran where pinjaman_id = ".$rsold["id"]." and
+				Flag_Edit = 1";
+			$r = Conn()->Execute($q);
+			if (!$r->EOF) {
+				$Angsuran_Ke_Flag_Edit = $r->fields["Angsuran_Ke"];
+			}
+
 			// hapus data rincian angsuran yang lama
 			$q = "delete from t04_pinjamanangsuran where pinjaman_id = ".$rsold["id"]."";
 			ew_Execute($q);
@@ -1552,6 +1561,7 @@ class ct03_pinjaman extends cTable {
 			$Angsuran_Pokok_Total = 0;
 			$Angsuran_Bunga_Total = 0;
 			$Angsuran_Total_Grand = 0;
+			$Flag_Edit = 0;
 			for ($Angsuran_Ke = 1; $Angsuran_Ke <= $rsnew["Angsuran_Lama"]; $Angsuran_Ke++) {
 				$Angsuran_Tanggal      = f_TanggalAngsuran($Angsuran_Tanggal, $Angsuran_Tgl);
 				$Angsuran_Pokok_Total += $Angsuran_Pokok;
@@ -1563,6 +1573,10 @@ class ct03_pinjaman extends cTable {
 				$Angsuran_Bunga        = $Angsuran_Total - $Angsuran_Pokok;
 				$Angsuran_Bunga_Total += $Angsuran_Bunga;
 				$Angsuran_Total_Grand += $Angsuran_Total;
+				$Flag_Edit = 0;
+				if ($Angsuran_Ke == $Angsuran_Ke_Flag_Edit) {
+					$Flag_Edit = 1;
+				}
 				$q = "insert into t04_pinjamanangsuran (
 					pinjaman_id,
 					Angsuran_Ke,
@@ -1570,7 +1584,8 @@ class ct03_pinjaman extends cTable {
 					Angsuran_Pokok,
 					Angsuran_Bunga,
 					Angsuran_Total,
-					Sisa_Hutang
+					Sisa_Hutang,
+					Flag_Edit
 					) values (
 					'".$pinjaman_id."',
 					'".$Angsuran_Ke."',
@@ -1578,7 +1593,8 @@ class ct03_pinjaman extends cTable {
 					".$Angsuran_Pokok.",
 					".$Angsuran_Bunga.",
 					".$Angsuran_Total.",
-					".$Sisa_Hutang."
+					".$Sisa_Hutang.",
+					".$Flag_Edit."
 					)";
 				ew_Execute($q); //echo $q; exit;
 			}

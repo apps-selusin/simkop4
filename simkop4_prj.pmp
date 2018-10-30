@@ -458,6 +458,20 @@ $("#x_Kontrak_Tgl").val("<?php echo date('d-m-Y');?>");
 							int_terlambat) / 100;
 					}
 					$row["Total_Denda"].val(total_denda);
+
+					var bayar_titipan = parseFloat($row["Bayar_Titipan"].val());
+					//$bayar_titipan = f_carisaldotitipan($this->pinjaman_id->CurrentValue);
+					//$this->Bayar_Titipan->EditValue = (is_null($this->Bayar_Titipan->CurrentValue) ? $bayar_titipan : $this->Bayar_Titipan->CurrentValue);
+
+					var bayar_non_titipan = parseFloat($row["Bayar_Non_Titipan"].val());
+					//$bayar_non_titipan = $bayar_total - $bayar_titipan;
+					//$this->Bayar_Non_Titipan->EditValue = (is_null($this->Bayar_Non_Titipan->CurrentValue) ? $bayar_non_titipan : $this->Bayar_Non_Titipan->CurrentValue);
+
+					var bayar_total = total_denda + bayar_titipan + bayar_non_titipan;
+					//$bayar_total = $this->Angsuran_Total->CurrentValue;
+					//$bayar_total = $total_denda + $bayar_titipan + $bayar_non_titipan;
+					//$this->Bayar_Total->EditValue = (is_null($this->Bayar_Total->CurrentValue) ? $bayar_total : $this->Bayar_Total->CurrentValue);
+					$row["Bayar_Total"].val(bayar_total);
 				}
 			}
 		}
@@ -661,6 +675,15 @@ function Row_Updated($rsold, &$rsnew) {
 		) {
 	}
 	else {
+
+		// ambil nilai Flag_Edit yang sedang bernilai 1
+		$Angsuran_Ke_Flag_Edit = 0;
+		$q = "select Angsuran_Ke from t04_pinjamanangsuran where pinjaman_id = ".$rsold["id"]." and
+			Flag_Edit = 1";
+		$r = Conn()->Execute($q);
+		if (!$r->EOF) {
+			$Angsuran_Ke_Flag_Edit = $r->fields["Angsuran_Ke"];
+		}
 	
 		// hapus data rincian angsuran yang lama
 		$q = "delete from t04_pinjamanangsuran where pinjaman_id = ".$rsold["id"]."";
@@ -678,6 +701,8 @@ function Row_Updated($rsold, &$rsnew) {
 		$Angsuran_Bunga_Total = 0;
 		$Angsuran_Total_Grand = 0;
 
+		$Flag_Edit = 0;
+
 		for ($Angsuran_Ke = 1; $Angsuran_Ke <= $rsnew["Angsuran_Lama"]; $Angsuran_Ke++) {
 			$Angsuran_Tanggal      = f_TanggalAngsuran($Angsuran_Tanggal, $Angsuran_Tgl);
 			$Angsuran_Pokok_Total += $Angsuran_Pokok;
@@ -691,6 +716,11 @@ function Row_Updated($rsold, &$rsnew) {
 			$Angsuran_Bunga        = $Angsuran_Total - $Angsuran_Pokok;
 			$Angsuran_Bunga_Total += $Angsuran_Bunga;
 			$Angsuran_Total_Grand += $Angsuran_Total;
+
+			$Flag_Edit = 0;
+			if ($Angsuran_Ke == $Angsuran_Ke_Flag_Edit) {
+				$Flag_Edit = 1;
+			}
 		
 			$q = "insert into t04_pinjamanangsuran (
 				pinjaman_id,
@@ -699,7 +729,8 @@ function Row_Updated($rsold, &$rsnew) {
 				Angsuran_Pokok,
 				Angsuran_Bunga,
 				Angsuran_Total,
-				Sisa_Hutang
+				Sisa_Hutang,
+				Flag_Edit
 				) values (
 				'".$pinjaman_id."',
 				'".$Angsuran_Ke."',
@@ -707,7 +738,8 @@ function Row_Updated($rsold, &$rsnew) {
 				".$Angsuran_Pokok.",
 				".$Angsuran_Bunga.",
 				".$Angsuran_Total.",
-				".$Sisa_Hutang."
+				".$Sisa_Hutang.",
+				".$Flag_Edit."
 				)";
 			ew_Execute($q); //echo $q; exit;
 		}
@@ -1037,11 +1069,78 @@ function Row_Rendered() {
 		$this->Tanggal_Bayar->EditValue = (is_null($this->Tanggal_Bayar->CurrentValue) ? date("d-m-Y") : date_format(date_create($this->Tanggal_Bayar->CurrentValue), "d-m-Y"));
 		//for testing data $this->Tanggal_Bayar->EditValue = date_format(date_create("2018-12-02"), "d-m-Y");
 
-		//$angsuran_tanggal = date_create($this->Angsuran_Tanggal->CurrentValue); echo $angsuran_tanggal; exit;
-		//$tanggal_bayar = (is_null($this->Tanggal_Bayar->CurrentValue) ? date("Y-m-d") : $this->Tanggal_Bayar->CurrentValue); echo $tanggal_bayar;
-		// for testing data $tanggal_bayar = date_create("2018-12-02");
-		//$terlambat = date_diff($angsuran_tanggal, $tanggal_bayar); echo $terlambat;
-		//$this->Terlambat->EditValue = (is_null($this->Terlambat->CurrentValue) ? $terlambat->format("%r%a") : $this->Terlambat->CurrentValue);
+		$angsuran_tanggal = date_create($this->Angsuran_Tanggal->CurrentValue); //echo $angsuran_tanggal; //exit;
+		$tanggal_bayar = (is_null($this->Tanggal_Bayar->CurrentValue) ? date_create(date("Y-m-d")) : date_create($this->Tanggal_Bayar->CurrentValue)); //echo $tanggal_bayar;
+		// for testing data $tanggal_bayar = date_create("2018-12-02"); //echo gettype($angsuran_tanggal); echo gettype($tanggal_bayar);
+		$terlambat = date_diff($angsuran_tanggal, $tanggal_bayar); //echo $terlambat;
+		$this->Terlambat->EditValue = (is_null($this->Terlambat->CurrentValue) ? $terlambat->format("%r%a") : $this->Terlambat->CurrentValue);
+
+		$int_terlambat = $terlambat->format("%r%a");
+		$total_denda = 0;
+		if ($int_terlambat > $GLOBALS["t03_pinjaman"]->Dispensasi_Denda->CurrentValue) {
+			$total_denda =
+				($GLOBALS["t03_pinjaman"]->Angsuran_Denda->CurrentValue *
+				$GLOBALS["t03_pinjaman"]->Angsuran_Total->CurrentValue *
+				$int_terlambat) / 100;
+		}
+		$this->Total_Denda->EditValue = (is_null($this->Total_Denda->CurrentValue) ? $total_denda : $this->Total_Denda->CurrentValue);
+
+		$bayar_titipan = f_carisaldotitipan($this->pinjaman_id->CurrentValue);
+		//$this->Bayar_Titipan->EditValue = ($bayar_titipan <> 0 ? $bayar_titipan : $this->Bayar_Titipan->CurrentValue);
+		$this->Bayar_Titipan->EditValue = $bayar_titipan;
+
+		$bayar_total = $this->Angsuran_Total->CurrentValue;
+		$bayar_non_titipan = $bayar_total - $bayar_titipan;
+		//$this->Bayar_Non_Titipan->EditValue = (is_null($this->Bayar_Non_Titipan->CurrentValue) ? $bayar_non_titipan : $this->Bayar_Non_Titipan->CurrentValue);
+		$this->Bayar_Non_Titipan->EditValue = $bayar_non_titipan;
+
+		$bayar_total = $total_denda + $bayar_titipan + $bayar_non_titipan;
+		//$this->Bayar_Total->EditValue = (is_null($this->Bayar_Total->CurrentValue) ? $bayar_total : $this->Bayar_Total->CurrentValue);
+		$this->Bayar_Total->EditValue = $bayar_total;
+	}
+}
+]]></CustomScript>
+  <CustomScript ScriptType="Server" ScriptCodeType="Table" ScriptName="Row_Rendered" ScriptCtrlID="" ScriptL1Key="cf02_cfu.php" ScriptL2Key=""><![CDATA[// Row Rendered event
+function Row_Rendered() {
+	// To view properties of field class, use:
+	//var_dump($this-><FieldName>);
+
+	if ($this->Flag_Edit->CurrentValue == 0) {
+
+		$this->Tanggal_Bayar->EditValue = $this->Tanggal_Bayar->CurrentValue;
+		$this->Tanggal_Bayar->ReadOnly = true;
+
+		$this->Terlambat->EditValue = $this->Terlambat->CurrentValue;
+		$this->Terlambat->ReadOnly = true;
+
+		$this->Total_Denda->EditValue = $this->Total_Denda->CurrentValue;
+		$this->Total_Denda->ReadOnly = true;
+
+		$this->Bayar_Titipan->EditValue = $this->Bayar_Titipan->CurrentValue;
+		$this->Bayar_Titipan->ReadOnly = true;
+
+		$this->Bayar_Non_Titipan->EditValue = $this->Bayar_Non_Titipan->CurrentValue;
+		$this->Bayar_Non_Titipan->ReadOnly = true;
+
+		$this->Bayar_Total->EditValue = $this->Bayar_Total->CurrentValue;
+		$this->Bayar_Total->ReadOnly = true;
+
+		$this->Keterangan->EditValue = $this->Keterangan->CurrentValue;
+		$this->Keterangan->ReadOnly = true;
+
+		//$this->pinjamantitipan_id->EditValue = $this->pinjamantitipan_id->CurrentValue;
+		//$this->pinjamantitipan_id->ReadOnly = true;
+	}
+	else {
+
+		$this->Tanggal_Bayar->EditValue = (is_null($this->Tanggal_Bayar->CurrentValue) ? date("d-m-Y") : date_format(date_create($this->Tanggal_Bayar->CurrentValue), "d-m-Y"));
+		//for testing data $this->Tanggal_Bayar->EditValue = date_format(date_create("2018-12-02"), "d-m-Y");
+
+		$angsuran_tanggal = date_create($this->Angsuran_Tanggal->CurrentValue); //echo $angsuran_tanggal; //exit;
+		$tanggal_bayar = (is_null($this->Tanggal_Bayar->CurrentValue) ? date_create(date("Y-m-d")) : date_create($this->Tanggal_Bayar->CurrentValue)); //echo $tanggal_bayar;
+		// for testing data $tanggal_bayar = date_create("2018-12-02"); //echo gettype($angsuran_tanggal); echo gettype($tanggal_bayar);
+		$terlambat = date_diff($angsuran_tanggal, $tanggal_bayar); //echo $terlambat;
+		$this->Terlambat->EditValue = (is_null($this->Terlambat->CurrentValue) ? $terlambat->format("%r%a") : $this->Terlambat->CurrentValue);
 
 		/*$int_terlambat = $terlambat->format("%r%a");
 		$total_denda = 0;
@@ -1064,6 +1163,100 @@ function Row_Rendered() {
 		$this->Bayar_Total->EditValue = (is_null($this->Bayar_Total->CurrentValue) ? $bayar_total : $this->Bayar_Total->CurrentValue);
 		*/
 	}
+}
+]]></CustomScript>
+  <CustomScript ScriptType="Server" ScriptCodeType="Table" ScriptName="Row_Updated" ScriptCtrlID="" ScriptL1Key="cf02_cfu.php" ScriptL2Key=""><![CDATA[// Row Updated event
+function Row_Updated($rsold, &$rsnew) {
+	//echo "Row Updated";
+
+	// check apakah ada perubahan data pada field
+	// lama angsuran
+	// angs. pokok
+	// angs. bunga
+	// angs. total
+	// jika ada perubahan :: maka detail angsuran diperbarui
+
+	$pinjaman_id = $rsold["id"];
+	
+	if (
+		$rsold["Angsuran_Lama"] == $rsnew["Angsuran_Lama"] and
+		$rsold["Angsuran_Pokok"] == $rsnew["Angsuran_Pokok"] and
+		$rsold["Angsuran_Bunga"] == $rsnew["Angsuran_Bunga"] and
+		$rsold["Angsuran_Total"] == $rsnew["Angsuran_Total"]
+		) {
+	}
+	else {
+
+		// ambil nilai Flag_Edit yang sedang bernilai 1
+		$Angsuran_Ke_Flag_Edit = 0;
+		$q = "select Angsuran_Ke from t04_pinjamanangsuran where pinjaman_id = ".$rsold["id"]." and
+			Flag_Edit = 1";
+		$r = Conn()->Execute($q);
+		if (!$r->EOF) {
+			$Angsuran_Ke_Flag_Edit = $r->fields["Angsuran_Ke"];
+		}
+	
+		// hapus data rincian angsuran yang lama
+		$q = "delete from t04_pinjamanangsuran where pinjaman_id = ".$rsold["id"]."";
+		ew_Execute($q);
+
+		// create data rincian angsuran
+		$Angsuran_Tanggal = $rsnew["Kontrak_Tgl"];
+		$Angsuran_Tgl     = substr($Angsuran_Tanggal, -2);
+		$Angsuran_Pokok   = $rsnew["Angsuran_Pokok"];
+		$Angsuran_Bunga   = $rsnew["Angsuran_Bunga"];
+		$Angsuran_Total   = $Angsuran_Pokok + $Angsuran_Bunga;
+		$Sisa_Hutang      = $rsnew["Pinjaman"];
+
+		$Angsuran_Pokok_Total = 0;
+		$Angsuran_Bunga_Total = 0;
+		$Angsuran_Total_Grand = 0;
+
+		$Flag_Edit = 0;
+
+		for ($Angsuran_Ke = 1; $Angsuran_Ke <= $rsnew["Angsuran_Lama"]; $Angsuran_Ke++) {
+			$Angsuran_Tanggal      = f_TanggalAngsuran($Angsuran_Tanggal, $Angsuran_Tgl);
+			$Angsuran_Pokok_Total += $Angsuran_Pokok;
+		
+			if ($Angsuran_Pokok_Total >= $rsnew["Pinjaman"]) {
+				$Angsuran_Pokok       = $Angsuran_Pokok - ($Angsuran_Pokok_Total - $rsnew["Pinjaman"]);
+				$Angsuran_Pokok_Total = $Angsuran_Pokok_Total - ($Angsuran_Pokok_Total - $rsnew["Pinjaman"]);
+			}
+			$Sisa_Hutang          -= $Angsuran_Pokok;
+
+			$Angsuran_Bunga        = $Angsuran_Total - $Angsuran_Pokok;
+			$Angsuran_Bunga_Total += $Angsuran_Bunga;
+			$Angsuran_Total_Grand += $Angsuran_Total;
+
+			$Flag_Edit = 0;
+			if ($Angsuran_Ke == $Angsuran_Ke_Flag_Edit) {
+				$Flag_Edit = 1;
+			}
+		
+			$q = "insert into t04_pinjamanangsuran (
+				pinjaman_id,
+				Angsuran_Ke,
+				Angsuran_Tanggal,
+				Angsuran_Pokok,
+				Angsuran_Bunga,
+				Angsuran_Total,
+				Sisa_Hutang,
+				Flag_Edit
+				) values (
+				'".$pinjaman_id."',
+				'".$Angsuran_Ke."',
+				'".$Angsuran_Tanggal."',
+				".$Angsuran_Pokok.",
+				".$Angsuran_Bunga.",
+				".$Angsuran_Total.",
+				".$Sisa_Hutang.",
+				".$Flag_Edit."
+				)";
+			ew_Execute($q); //echo $q; exit;
+		}
+	}
+
+	f_updatesaldotitipan($pinjaman_id);
 }
 ]]></CustomScript>
   <Menu MenuID="12" MenuText="Home" MenuParentID="-1" MenuGroup="0" MenuSource="" MenuExtUrl="" MenuAnonymous="8" MenuSecurity="" MenuUrl="cf01_home.php" MenuCustomUrl="0" MenuLevel="0" MenuShow="1" MenuDisplayOrder="100" />

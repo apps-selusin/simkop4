@@ -183,6 +183,23 @@ jQuery.get("<?php echo $EW_RELATIVE_PATH ?>phpjs/userevt13.js");
 							int_terlambat) / 100;
 					}
 					$row["Total_Denda"].val(total_denda);
+					var bayar_titipan = parseFloat($row["Bayar_Titipan"].val());
+
+					//$bayar_titipan = f_carisaldotitipan($this->pinjaman_id->CurrentValue);
+					//$this->Bayar_Titipan->EditValue = (is_null($this->Bayar_Titipan->CurrentValue) ? $bayar_titipan : $this->Bayar_Titipan->CurrentValue);
+
+					var bayar_non_titipan = parseFloat($row["Bayar_Non_Titipan"].val());
+
+					//$bayar_non_titipan = $bayar_total - $bayar_titipan;
+					//$this->Bayar_Non_Titipan->EditValue = (is_null($this->Bayar_Non_Titipan->CurrentValue) ? $bayar_non_titipan : $this->Bayar_Non_Titipan->CurrentValue);
+
+					var bayar_total = total_denda + bayar_titipan + bayar_non_titipan;
+
+					//$bayar_total = $this->Angsuran_Total->CurrentValue;
+					//$bayar_total = $total_denda + $bayar_titipan + $bayar_non_titipan;
+					//$this->Bayar_Total->EditValue = (is_null($this->Bayar_Total->CurrentValue) ? $bayar_total : $this->Bayar_Total->CurrentValue);
+
+					$row["Bayar_Total"].val(bayar_total);
 				}
 			}
 		}
