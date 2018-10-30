@@ -1538,7 +1538,7 @@ class ct03_pinjaman extends cTable {
 		}
 		else {
 
-			// ambil nilai Flag_Edit yang sedang bernilai 1
+			// ambil nilai Flag_Edit yang sedang bernilai 1 (satu)
 			$Angsuran_Ke_Flag_Edit = 0;
 			$q = "select Angsuran_Ke from t04_pinjamanangsuran where pinjaman_id = ".$rsold["id"]." and
 				Flag_Edit = 1";

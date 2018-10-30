@@ -1411,6 +1411,33 @@ class ct04_pinjamanangsuran extends cTable {
 	function Row_Updated($rsold, &$rsnew) {
 
 		//echo "Row Updated";
+		// check nilai bayar titipan
+
+		if ($rsold["Bayar_Titipan"] == $rsnew["Bayar_Titipan"]) {
+
+			// tidak ada perubahan nilai bayar titipan
+		}
+		else {
+
+			// ada perubahan nilai bayar titipan
+			// ambil data tanggal bayar
+
+			$tanggal_bayar = ($rsold["Tanggal_Bayar"] <> "" ? $rsold["Tanggal_Bayar"] : $rsnew["Tanggal_Bayar"]);
+
+			// update ke tabel t06_pinjamantitipan sebagai data keluar
+			$q = "insert into t06_pinjamantitipan (
+				pinjaman_id,
+				Tanggal,
+				Keterangan,
+				Keluar
+				) values (
+				".$rsold["pinjaman_id"].",
+				".$tanggal_bayar.",
+				'Pembayaran Angsuran Ke-".$rsold["Angsuran_Ke"]."',
+				".$rsnew["Bayar_Titipan"].")";
+			ew_Execute($q);
+			f_updatesaldotitipan($rsold["pinjaman_id"]);
+		}
 	}
 
 	// Row Update Conflict event
@@ -1518,11 +1545,11 @@ class ct04_pinjamanangsuran extends cTable {
 			$this->Tanggal_Bayar->EditValue = (is_null($this->Tanggal_Bayar->CurrentValue) ? date("d-m-Y") : date_format(date_create($this->Tanggal_Bayar->CurrentValue), "d-m-Y"));
 
 			//for testing data $this->Tanggal_Bayar->EditValue = date_format(date_create("2018-12-02"), "d-m-Y");
-			$angsuran_tanggal = date_create($this->Angsuran_Tanggal->CurrentValue); //echo $angsuran_tanggal; //exit;
-			$tanggal_bayar = (is_null($this->Tanggal_Bayar->CurrentValue) ? date_create(date("Y-m-d")) : date_create($this->Tanggal_Bayar->CurrentValue)); //echo $tanggal_bayar;
+			$angsuran_tanggal = date_create($this->Angsuran_Tanggal->CurrentValue);
+			$tanggal_bayar = (is_null($this->Tanggal_Bayar->CurrentValue) ? date_create(date("Y-m-d")) : date_create($this->Tanggal_Bayar->CurrentValue));
 
 			// for testing data $tanggal_bayar = date_create("2018-12-02"); //echo gettype($angsuran_tanggal); echo gettype($tanggal_bayar);
-			$terlambat = date_diff($angsuran_tanggal, $tanggal_bayar); //echo $terlambat;
+			$terlambat = date_diff($angsuran_tanggal, $tanggal_bayar);
 			$this->Terlambat->EditValue = (is_null($this->Terlambat->CurrentValue) ? $terlambat->format("%r%a") : $this->Terlambat->CurrentValue);
 			$int_terlambat = $terlambat->format("%r%a");
 			$total_denda = 0;

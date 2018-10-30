@@ -718,13 +718,13 @@ ew_CreateCalendar("ft04_pinjamanangsurangrid", "x<?php echo $t04_pinjamanangsura
 		<td data-name="Terlambat"<?php echo $t04_pinjamanangsuran->Terlambat->CellAttributes() ?>>
 <?php if ($t04_pinjamanangsuran->RowType == EW_ROWTYPE_ADD) { // Add record ?>
 <span id="el<?php echo $t04_pinjamanangsuran_grid->RowCnt ?>_t04_pinjamanangsuran_Terlambat" class="form-group t04_pinjamanangsuran_Terlambat">
-<input type="text" data-table="t04_pinjamanangsuran" data-field="x_Terlambat" name="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Terlambat" id="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Terlambat" size="7" placeholder="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Terlambat->getPlaceHolder()) ?>" value="<?php echo $t04_pinjamanangsuran->Terlambat->EditValue ?>"<?php echo $t04_pinjamanangsuran->Terlambat->EditAttributes() ?>>
+<input type="text" data-table="t04_pinjamanangsuran" data-field="x_Terlambat" name="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Terlambat" id="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Terlambat" size="5" placeholder="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Terlambat->getPlaceHolder()) ?>" value="<?php echo $t04_pinjamanangsuran->Terlambat->EditValue ?>"<?php echo $t04_pinjamanangsuran->Terlambat->EditAttributes() ?>>
 </span>
 <input type="hidden" data-table="t04_pinjamanangsuran" data-field="x_Terlambat" name="o<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Terlambat" id="o<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Terlambat" value="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Terlambat->OldValue) ?>">
 <?php } ?>
 <?php if ($t04_pinjamanangsuran->RowType == EW_ROWTYPE_EDIT) { // Edit record ?>
 <span id="el<?php echo $t04_pinjamanangsuran_grid->RowCnt ?>_t04_pinjamanangsuran_Terlambat" class="form-group t04_pinjamanangsuran_Terlambat">
-<input type="text" data-table="t04_pinjamanangsuran" data-field="x_Terlambat" name="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Terlambat" id="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Terlambat" size="7" placeholder="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Terlambat->getPlaceHolder()) ?>" value="<?php echo $t04_pinjamanangsuran->Terlambat->EditValue ?>"<?php echo $t04_pinjamanangsuran->Terlambat->EditAttributes() ?>>
+<input type="text" data-table="t04_pinjamanangsuran" data-field="x_Terlambat" name="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Terlambat" id="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Terlambat" size="5" placeholder="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Terlambat->getPlaceHolder()) ?>" value="<?php echo $t04_pinjamanangsuran->Terlambat->EditValue ?>"<?php echo $t04_pinjamanangsuran->Terlambat->EditAttributes() ?>>
 </span>
 <?php } ?>
 <?php if ($t04_pinjamanangsuran->RowType == EW_ROWTYPE_VIEW) { // View record ?>
@@ -1069,7 +1069,7 @@ ew_CreateCalendar("ft04_pinjamanangsurangrid", "x<?php echo $t04_pinjamanangsura
 		<td data-name="Terlambat">
 <?php if ($t04_pinjamanangsuran->CurrentAction <> "F") { ?>
 <span id="el$rowindex$_t04_pinjamanangsuran_Terlambat" class="form-group t04_pinjamanangsuran_Terlambat">
-<input type="text" data-table="t04_pinjamanangsuran" data-field="x_Terlambat" name="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Terlambat" id="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Terlambat" size="7" placeholder="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Terlambat->getPlaceHolder()) ?>" value="<?php echo $t04_pinjamanangsuran->Terlambat->EditValue ?>"<?php echo $t04_pinjamanangsuran->Terlambat->EditAttributes() ?>>
+<input type="text" data-table="t04_pinjamanangsuran" data-field="x_Terlambat" name="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Terlambat" id="x<?php echo $t04_pinjamanangsuran_grid->RowIndex ?>_Terlambat" size="5" placeholder="<?php echo ew_HtmlEncode($t04_pinjamanangsuran->Terlambat->getPlaceHolder()) ?>" value="<?php echo $t04_pinjamanangsuran->Terlambat->EditValue ?>"<?php echo $t04_pinjamanangsuran->Terlambat->EditAttributes() ?>>
 </span>
 <?php } else { ?>
 <span id="el$rowindex$_t04_pinjamanangsuran_Terlambat" class="form-group t04_pinjamanangsuran_Terlambat">
