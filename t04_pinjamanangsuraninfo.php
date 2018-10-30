@@ -1420,9 +1420,30 @@ class ct04_pinjamanangsuran extends cTable {
 		else {
 
 			// ada perubahan nilai bayar titipan
-			// ambil data tanggal bayar
+			// check dulu apakah sudah pernah ada data setoran titipan
 
-			$tanggal_bayar = ($rsold["Tanggal_Bayar"] <> "" ? $rsold["Tanggal_Bayar"] : $rsnew["Tanggal_Bayar"]);
+			$q = "select * from t06_pinjamantitipan
+				where
+					pinjaman_id = ".$rsold["pinjaman_id"]."
+					and Sisa <> 0
+				order by
+					id desc
+				";
+			$r = Conn()->Execute($q);
+			if ($r->EOF) {
+			}		
+			else {
+
+			// ambil data tanggal bayar
+			//$tanggal_bayar = ($rsold["Tanggal_Bayar"] == "" or is_null($rsold["Tanggal_Bayar"]) ? $rsnew["Tanggal_Bayar"] : $rsold["Tanggal_Bayar"]);
+			//echo $tanggal_bayar." - ".$rsold["Tanggal_Bayar"]." - ".$rsnew["Tanggal_Bayar"];
+
+			if ($rsnew["Tanggal_Bayar"] == "" or is_null($rsnew["Tanggal_Bayar"])) {
+				$tanggal_bayar = $rsold["Tanggal_Bayar"];
+			}
+			else {
+				$tanggal_bayar = $rsnew["Tanggal_Bayar"];
+			}
 
 			// update ke tabel t06_pinjamantitipan sebagai data keluar
 			$q = "insert into t06_pinjamantitipan (
@@ -1432,11 +1453,12 @@ class ct04_pinjamanangsuran extends cTable {
 				Keluar
 				) values (
 				".$rsold["pinjaman_id"].",
-				".$tanggal_bayar.",
+				'".$tanggal_bayar."',
 				'Pembayaran Angsuran Ke-".$rsold["Angsuran_Ke"]."',
 				".$rsnew["Bayar_Titipan"].")";
 			ew_Execute($q);
 			f_updatesaldotitipan($rsold["pinjaman_id"]);
+			}
 		}
 	}
 
@@ -1560,9 +1582,13 @@ class ct04_pinjamanangsuran extends cTable {
 					$int_terlambat) / 100;
 			}
 			$this->Total_Denda->EditValue = (is_null($this->Total_Denda->CurrentValue) ? $total_denda : $this->Total_Denda->CurrentValue);
-			$bayar_titipan = f_carisaldotitipan($this->pinjaman_id->CurrentValue);
-
-			//$this->Bayar_Titipan->EditValue = ($bayar_titipan <> 0 ? $bayar_titipan : $this->Bayar_Titipan->CurrentValue);
+			$bayar_titipan = 0;
+			if (is_null($this->Bayar_Titipan->CurrentValue) or $this->Bayar_Titipan->CurrentValue == 0) {
+				$bayar_titipan = f_carisaldotitipan($this->pinjaman_id->CurrentValue);
+			}
+			else {
+				$bayar_titipan = $this->Bayar_Titipan->CurrentValue;
+			}
 			$this->Bayar_Titipan->EditValue = $bayar_titipan;
 			$bayar_total = $this->Angsuran_Total->CurrentValue;
 			$bayar_non_titipan = $bayar_total - $bayar_titipan;
