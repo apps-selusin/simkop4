@@ -4987,17 +4987,18 @@ function Database_Connecting(&$info) {
 	//	$info["pass"] = "";
 	//}
 
-	if (ew_CurrentUserIP() == "127.0.0.1" || ew_CurrentUserIP () == ":: 1" || ew_CurrentHost () == "localhost") { // setting koneksi database di komputer localhost
+	if (ew_CurrentUserIP () == "127.0.0.1"  || ew_CurrentUserIP () == ":: 1"  || ew_CurrentHost () == "localhost" ) { // testing on local PC
 		$info["host"] = "localhost";
 		$info["user"] = "root"; // sesuaikan dengan username database di komputer localhost
 		$info["pass"] = "admin"; // sesuaikan dengan password database di komputer localhost
 		$info["db"] = "db_simkop4"; // sesuaikan dengan nama database di komputer localhost
 		$info["port"] = "3307";
-	} else { // setting koneksi database untuk komputer server
-		$info["host"] = "mysql.idhostinger.com";  // sesuaikan dengan ip address atau hostname komputer server
+	} elseif (ew_CurrentHost () == "simkop2.nma-indonesia.com") { // setting koneksi database untuk komputer server
+		$info["host"] = "mysql.hostinger.co.id";  // sesuaikan dengan ip address atau hostname komputer server
 		$info["user"] = "u945388674_kop4"; // sesuaikan dengan username database di komputer server
 		$info["pass"] = "M457r1P 81"; // sesuaikan deengan password database di komputer server
 		$info["db"] = "u945388674_kop4"; // sesuaikan dengan nama database di komputer server
+		$info["port"] = "3306";
 	}
 }
 
