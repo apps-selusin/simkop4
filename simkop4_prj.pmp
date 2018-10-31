@@ -1289,8 +1289,6 @@ function Row_Updated($rsold, &$rsnew) {
 		}
 		else {
 		// ambil data tanggal bayar
-		//$tanggal_bayar = ($rsold["Tanggal_Bayar"] == "" or is_null($rsold["Tanggal_Bayar"]) ? $rsnew["Tanggal_Bayar"] : $rsold["Tanggal_Bayar"]);
-		//echo $tanggal_bayar." - ".$rsold["Tanggal_Bayar"]." - ".$rsnew["Tanggal_Bayar"];
 		if ($rsnew["Tanggal_Bayar"] == "" or is_null($rsnew["Tanggal_Bayar"])) {
 			$tanggal_bayar = $rsold["Tanggal_Bayar"];
 		}
