@@ -819,6 +819,9 @@
       <field id="sisa">
         <phrase id="fldcaption" value="Sisa" />
       </field>
+      <field id="angsuran_ke">
+        <phrase id="fldcaption" value="Angsuran Ke" />
+      </field>
     </table>
     <table id="t93_periode">
       <phrase id="tblcaption" value="Periode" />

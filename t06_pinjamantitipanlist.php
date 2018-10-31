@@ -799,6 +799,7 @@ class ct06_pinjamantitipan_list extends ct06_pinjamantitipan {
 		$sFilterList = ew_Concat($sFilterList, $this->Masuk->AdvancedSearch->ToJSON(), ","); // Field Masuk
 		$sFilterList = ew_Concat($sFilterList, $this->Keluar->AdvancedSearch->ToJSON(), ","); // Field Keluar
 		$sFilterList = ew_Concat($sFilterList, $this->Sisa->AdvancedSearch->ToJSON(), ","); // Field Sisa
+		$sFilterList = ew_Concat($sFilterList, $this->Angsuran_Ke->AdvancedSearch->ToJSON(), ","); // Field Angsuran_Ke
 		if ($this->BasicSearch->Keyword <> "") {
 			$sWrk = "\"" . EW_TABLE_BASIC_SEARCH . "\":\"" . ew_JsEncode2($this->BasicSearch->Keyword) . "\",\"" . EW_TABLE_BASIC_SEARCH_TYPE . "\":\"" . ew_JsEncode2($this->BasicSearch->Type) . "\"";
 			$sFilterList = ew_Concat($sFilterList, $sWrk, ",");
@@ -898,6 +899,14 @@ class ct06_pinjamantitipan_list extends ct06_pinjamantitipan {
 		$this->Sisa->AdvancedSearch->SearchValue2 = @$filter["y_Sisa"];
 		$this->Sisa->AdvancedSearch->SearchOperator2 = @$filter["w_Sisa"];
 		$this->Sisa->AdvancedSearch->Save();
+
+		// Field Angsuran_Ke
+		$this->Angsuran_Ke->AdvancedSearch->SearchValue = @$filter["x_Angsuran_Ke"];
+		$this->Angsuran_Ke->AdvancedSearch->SearchOperator = @$filter["z_Angsuran_Ke"];
+		$this->Angsuran_Ke->AdvancedSearch->SearchCondition = @$filter["v_Angsuran_Ke"];
+		$this->Angsuran_Ke->AdvancedSearch->SearchValue2 = @$filter["y_Angsuran_Ke"];
+		$this->Angsuran_Ke->AdvancedSearch->SearchOperator2 = @$filter["w_Angsuran_Ke"];
+		$this->Angsuran_Ke->AdvancedSearch->Save();
 		$this->BasicSearch->setKeyword(@$filter[EW_TABLE_BASIC_SEARCH]);
 		$this->BasicSearch->setType(@$filter[EW_TABLE_BASIC_SEARCH_TYPE]);
 	}
@@ -1584,6 +1593,7 @@ class ct06_pinjamantitipan_list extends ct06_pinjamantitipan {
 		$this->Masuk->setDbValue($rs->fields('Masuk'));
 		$this->Keluar->setDbValue($rs->fields('Keluar'));
 		$this->Sisa->setDbValue($rs->fields('Sisa'));
+		$this->Angsuran_Ke->setDbValue($rs->fields('Angsuran_Ke'));
 	}
 
 	// Load DbValue from recordset
@@ -1597,6 +1607,7 @@ class ct06_pinjamantitipan_list extends ct06_pinjamantitipan {
 		$this->Masuk->DbValue = $row['Masuk'];
 		$this->Keluar->DbValue = $row['Keluar'];
 		$this->Sisa->DbValue = $row['Sisa'];
+		$this->Angsuran_Ke->DbValue = $row['Angsuran_Ke'];
 	}
 
 	// Load old record
@@ -1657,6 +1668,7 @@ class ct06_pinjamantitipan_list extends ct06_pinjamantitipan {
 		// Masuk
 		// Keluar
 		// Sisa
+		// Angsuran_Ke
 
 		if ($this->RowType == EW_ROWTYPE_VIEW) { // View row
 
@@ -1694,6 +1706,10 @@ class ct06_pinjamantitipan_list extends ct06_pinjamantitipan {
 		$this->Sisa->ViewValue = ew_FormatNumber($this->Sisa->ViewValue, 2, -2, -2, -2);
 		$this->Sisa->CellCssStyle .= "text-align: right;";
 		$this->Sisa->ViewCustomAttributes = "";
+
+		// Angsuran_Ke
+		$this->Angsuran_Ke->ViewValue = $this->Angsuran_Ke->CurrentValue;
+		$this->Angsuran_Ke->ViewCustomAttributes = "";
 
 			// pinjaman_id
 			$this->pinjaman_id->LinkCustomAttributes = "";

@@ -1431,7 +1431,7 @@ class ct04_pinjamanangsuran extends cTable {
 				";
 			$r = Conn()->Execute($q);
 			if ($r->EOF) {
-			}		
+			}
 			else {
 
 			// ambil data tanggal bayar
@@ -1450,12 +1450,14 @@ class ct04_pinjamanangsuran extends cTable {
 				pinjaman_id,
 				Tanggal,
 				Keterangan,
-				Keluar
+				Keluar,
+				Angsuran_Ke
 				) values (
 				".$rsold["pinjaman_id"].",
 				'".$tanggal_bayar."',
 				'Pembayaran Angsuran Ke-".$rsold["Angsuran_Ke"]."',
-				".$rsnew["Bayar_Titipan"].")";
+				".$rsnew["Bayar_Titipan"].",
+				".$rsold["Angsuran_Ke"].")";
 			ew_Execute($q);
 			f_updatesaldotitipan($rsold["pinjaman_id"]);
 			}

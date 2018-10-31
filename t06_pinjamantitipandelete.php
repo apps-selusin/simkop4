@@ -476,6 +476,7 @@ class ct06_pinjamantitipan_delete extends ct06_pinjamantitipan {
 		$this->Masuk->setDbValue($rs->fields('Masuk'));
 		$this->Keluar->setDbValue($rs->fields('Keluar'));
 		$this->Sisa->setDbValue($rs->fields('Sisa'));
+		$this->Angsuran_Ke->setDbValue($rs->fields('Angsuran_Ke'));
 	}
 
 	// Load DbValue from recordset
@@ -489,6 +490,7 @@ class ct06_pinjamantitipan_delete extends ct06_pinjamantitipan {
 		$this->Masuk->DbValue = $row['Masuk'];
 		$this->Keluar->DbValue = $row['Keluar'];
 		$this->Sisa->DbValue = $row['Sisa'];
+		$this->Angsuran_Ke->DbValue = $row['Angsuran_Ke'];
 	}
 
 	// Render row values based on field settings
@@ -520,6 +522,7 @@ class ct06_pinjamantitipan_delete extends ct06_pinjamantitipan {
 		// Masuk
 		// Keluar
 		// Sisa
+		// Angsuran_Ke
 
 		if ($this->RowType == EW_ROWTYPE_VIEW) { // View row
 
@@ -557,6 +560,10 @@ class ct06_pinjamantitipan_delete extends ct06_pinjamantitipan {
 		$this->Sisa->ViewValue = ew_FormatNumber($this->Sisa->ViewValue, 2, -2, -2, -2);
 		$this->Sisa->CellCssStyle .= "text-align: right;";
 		$this->Sisa->ViewCustomAttributes = "";
+
+		// Angsuran_Ke
+		$this->Angsuran_Ke->ViewValue = $this->Angsuran_Ke->CurrentValue;
+		$this->Angsuran_Ke->ViewCustomAttributes = "";
 
 			// pinjaman_id
 			$this->pinjaman_id->LinkCustomAttributes = "";
